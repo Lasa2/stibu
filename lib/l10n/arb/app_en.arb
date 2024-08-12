@@ -1,0 +1,9 @@
+{
+  "actionLogin": "Login",
+  "appName": "Stibu",
+  "constraintsRequired": "This field is required",
+  "helloWorld": "Hello World!",
+  "labelsEmail": "Email",
+  "labelsLogin": "Login",
+  "labelsPassword": "Password"
+}

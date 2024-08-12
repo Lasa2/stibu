@@ -1,0 +1,65 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "stibu",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "stibu (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "stibu (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "multi_instance",
+            "cwd": "multi_instance",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "multi_instance (profile mode)",
+            "cwd": "multi_instance",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "multi_instance (release mode)",
+            "cwd": "multi_instance",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "url_protocol",
+            "cwd": "url_protocol",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "url_protocol (profile mode)",
+            "cwd": "url_protocol",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "url_protocol (release mode)",
+            "cwd": "url_protocol",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

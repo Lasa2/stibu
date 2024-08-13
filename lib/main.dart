@@ -1,16 +1,27 @@
-import 'package:args/args.dart';
+import 'package:appwrite/appwrite.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:june/june.dart';
 import 'package:logging/logging.dart';
-import 'package:multi_instance/multi_instance.dart';
+import 'package:stibu/feature/authentication/auth_state.dart';
 import 'package:stibu/l10n/generated/l10n.dart';
 import 'package:stibu/router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:system_theme/system_theme.dart';
 import 'package:url_protocol/url_protocol.dart';
 
 final log = Logger('Stibu');
+final client = Client()
+    .setEndpoint('https://appwrite.vee.icu/v1')
+    .setProject('66ba8a48000da48dd442');
 
 Future<void> main(List<String> args) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemTheme.fallbackColor = const Color(0xFF865432);
+  await SystemTheme.accentColor.load();
+
+  registerProtocolHandler("stibu");
+
   Logger.root.level = Level.ALL; // defaults to Level.INFO
 
   if (kDebugMode) {
@@ -20,46 +31,31 @@ Future<void> main(List<String> args) async {
     });
   }
 
-  registerProtocolHandler("test-protocol", arguments: ["--url", "%s"]);
-
-
-  var parser = ArgParser();
-  parser.addOption('url');
-
-  var results = parser.parse(args);
-  log.info('URL: ${results.option('url')}');
-
-  if (await isFirstInstance(args)) {
-    log.info('First instance');
-    onSecondInstance((List<String> args) {
-      log.info('Second instance args: $args');
-    });
-  } else {
-    log.info('Second instance');
-  }
-
-  await Supabase.initialize(
-    url: 'https://supabase.vee.icu',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzIzMzI3MjAwLAogICJleHAiOiAxODgxMDkzNjAwCn0.-C14qzvWh73503HrP_L-_WJT9aAkrGvRzFTc-BUJu6I',
-  );
-
-  runApp(StibuApp());
+  runApp(const StibuApp());
 }
 
-class StibuApp extends StatelessWidget {
-  StibuApp({super.key});
+final appRouter = AppRouter();
 
-  final _appRouter = AppRouter();
+class StibuApp extends StatefulWidget {
+
+  const StibuApp({super.key});
+
+  @override
+  State<StibuApp> createState() => _StibuAppState();
+}
+
+class _StibuAppState extends State<StibuApp> {
+  final auth = June.getState(() => Auth());
 
   @override
   Widget build(BuildContext context) {
 
-    return MaterialApp.router(
+    return FluentApp.router(
         title: 'Stibu',
-        routerConfig: _appRouter.config(),
+        routerConfig: appRouter.config(
+          reevaluateListenable: ReevaluateListenable.stream(auth.authStream),
+        ),
         localizationsDelegates: Lang.localizationsDelegates,
-        supportedLocales: Lang.supportedLocales
-    );
+        supportedLocales: Lang.supportedLocales);
   }
 }

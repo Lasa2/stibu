@@ -1,10 +1,41 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:june/june.dart';
+import 'package:stibu/feature/authentication/auth_state.dart';
 import 'package:stibu/router.gr.dart';
 
 @AutoRouterConfig(replaceInRouteName: "Page,Route")
 class AppRouter extends RootStackRouter {
   @override
   List<AutoRoute> get routes => [
-        AutoRoute(page: LoginRoute.page, initial: true),
+        AutoRoute(path: "/login", page: LoginRoute.page),
+        AutoRoute(path: "/sign-up", page: CreateAccountRoute.page),
+        AutoRoute(
+          path: "/",
+          page: NavigationScaffoldRoute.page,
+          guards: [AuthGuard()],
+          children: [
+            AutoRoute(
+              path: "dashboard",
+              page: DashboardRoute.page,
+              initial: true,
+            ),
+            AutoRoute(path: "settings", page: SettingsRoute.page),
+          ],
+        ),
       ];
+}
+
+class AuthGuard extends AutoRouteGuard {
+  @override
+  void onNavigation(NavigationResolver resolver, StackRouter router) {
+    final auth = June.getState(() => Auth());
+
+    if (auth.isAuthenticated) {
+      resolver.next(true);
+    } else {
+      resolver.redirect(LoginRoute(
+        onResult: resolver.next,
+      ));
+    }
+  }
 }

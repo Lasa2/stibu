@@ -1,0 +1,8 @@
+{
+  "actionLogin": "Einloggen",
+  "constraintsRequired": "Dieses Feld ist erforderlich",
+  "helloWorld": "Hallo Welt!",
+  "labelsEmail": "Email",
+  "labelsLogin": "Einloggen",
+  "labelsPassword": "Passwort"
+}

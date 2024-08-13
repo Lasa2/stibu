@@ -98,11 +98,6 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
         items: items,
         footerItems: footerItems,
       ),
-      transitionBuilder: (child, animation) {
-        return SuppressPageTransition(
-          child: child,
-        );
-      },
     );
   }
 }

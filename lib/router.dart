@@ -16,12 +16,26 @@ class AppRouter extends RootStackRouter {
           page: NavigationScaffoldRoute.page,
           guards: [AuthGuard()],
           children: [
-            AutoRoute(
+            CustomRoute(
               path: "dashboard",
               page: DashboardRoute.page,
+              initial: true,
+              transitionsBuilder: TransitionsBuilders.noTransition,
+              durationInMilliseconds: 0,
+              reverseDurationInMilliseconds: 0,
             ),
-            AutoRoute(path: "customers", page: CustomersListRoute.page),
-            AutoRoute(path: "settings", page: SettingsRoute.page),
+            CustomRoute(
+                path: "customers",
+                page: CustomersListRoute.page,
+                transitionsBuilder: TransitionsBuilders.noTransition,
+                durationInMilliseconds: 0,
+                reverseDurationInMilliseconds: 0),
+            CustomRoute(
+                path: "settings",
+                page: SettingsRoute.page,
+                transitionsBuilder: TransitionsBuilders.noTransition,
+                durationInMilliseconds: 0,
+                reverseDurationInMilliseconds: 0),
           ],
         ),
       ];

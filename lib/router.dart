@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/widgets.dart';
 import 'package:june/june.dart';
 import 'package:stibu/feature/authentication/auth_state.dart';
+import 'package:stibu/main.dart';
 import 'package:stibu/router.gr.dart';
 
 @AutoRouterConfig(replaceInRouteName: "Page,Route")
@@ -17,8 +19,8 @@ class AppRouter extends RootStackRouter {
             AutoRoute(
               path: "dashboard",
               page: DashboardRoute.page,
-              initial: true,
             ),
+            AutoRoute(path: "customers", page: CustomersListRoute.page),
             AutoRoute(path: "settings", page: SettingsRoute.page),
           ],
         ),
@@ -30,6 +32,8 @@ class AuthGuard extends AutoRouteGuard {
   void onNavigation(NavigationResolver resolver, StackRouter router) {
     final auth = June.getState(() => Auth());
 
+    log.info('Auth guard: ${auth.isAuthenticated}');
+
     if (auth.isAuthenticated) {
       resolver.next(true);
     } else {
@@ -37,5 +41,23 @@ class AuthGuard extends AutoRouteGuard {
         onResult: resolver.next,
       ));
     }
+  }
+}
+
+class RouteLogger extends AutoRouteObserver {
+  @override
+  void didPush(Route route, Route? previousRoute) {
+    log.info('Pushed: ${route.settings.name}');
+  }
+
+  @override
+  void didPop(Route route, Route? previousRoute) {
+    log.info('Popped: ${route.settings.name}');
+  }
+
+  @override
+  void didReplace({Route? newRoute, Route? oldRoute}) {
+    log.info(
+        'Replaced: ${oldRoute?.settings.name} with ${newRoute?.settings.name}');
   }
 }

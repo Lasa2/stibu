@@ -45,7 +45,14 @@ class StibuApp extends StatefulWidget {
 }
 
 class _StibuAppState extends State<StibuApp> {
-  final auth = June.getState(() => Auth());
+  final auth = June.getState(() => Auth(), permanent: true);
+
+  @override
+  void initState() {
+    super.initState();
+    auth.authStream
+        .listen((isAuthenticated) => log.info('Auth state: $isAuthenticated'));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +61,7 @@ class _StibuAppState extends State<StibuApp> {
         title: 'Stibu',
         routerConfig: appRouter.config(
           reevaluateListenable: ReevaluateListenable.stream(auth.authStream),
+          navigatorObservers: () => [RouteLogger()],
         ),
         localizationsDelegates: Lang.localizationsDelegates,
         supportedLocales: Lang.supportedLocales);

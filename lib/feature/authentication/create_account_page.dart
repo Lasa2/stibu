@@ -1,7 +1,10 @@
-import 'package:appwrite/appwrite.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:june/june.dart';
+import 'package:stibu/feature/authentication/auth_state.dart';
 import 'package:stibu/main.dart';
+import 'package:stibu/router.gr.dart';
+import 'package:stibu/widgets/text_box_form.dart';
 
 @RoutePage()
 class CreateAccountPage extends StatefulWidget {
@@ -12,9 +15,9 @@ class CreateAccountPage extends StatefulWidget {
 }
 
 class _CreateAccountPageState extends State<CreateAccountPage> {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
   @override
@@ -34,7 +37,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     padding: EdgeInsets.all(8), child: Text('Create Account')),
                 Padding(
                   padding: const EdgeInsets.only(top: 8, left: 8, right: 8),
-                  child: TextBox(
+                  child: TextBoxForm(
                     controller: nameController,
                     placeholder: 'Name',
                     decoration: BoxDecoration(
@@ -43,11 +46,17 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     autofocus: true,
                     keyboardType: TextInputType.name,
                     textInputAction: TextInputAction.next,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your name';
+                      }
+                      return null;
+                    },
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 4, left: 8, right: 8),
-                  child: TextBox(
+                  child: TextBoxForm(
                     controller: emailController,
                     placeholder: 'Email',
                     decoration: BoxDecoration(
@@ -56,11 +65,17 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     autofocus: true,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      return null;
+                    },
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 4, left: 8, right: 8),
-                  child: TextBox(
+                  child: TextBoxForm(
                     controller: passwordController,
                     placeholder: 'Password',
                     decoration: BoxDecoration(
@@ -69,56 +84,70 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     obscureText: true,
                     keyboardType: TextInputType.visiblePassword,
                     textInputAction: TextInputAction.done,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      return null;
+                    },
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: Button(
                     onPressed: () async {
-                      final account = Account(client);
+                      if (!(formKey.currentState?.validate() ?? false)) {
+                        log.info('Form is invalid');
+                        return;
+                      }
 
-                      try {
-                        final result = await account.create(
-                          userId: ID.unique(),
-                          name: nameController.text,
-                          email: emailController.text,
-                          password: passwordController.text,
-                        );
-                        log.info('Account created: $result');
-                        if (context.mounted) {
-                          await displayInfoBar(context,
-                              duration: const Duration(seconds: 5),
-                              builder: (context, close) {
-                            return InfoBar(
-                              title: const Text('Success'),
-                              content:
-                                  const Text('Account created successfully'),
-                              action: IconButton(
-                                icon: const Icon(FluentIcons.clear),
-                                onPressed: close,
-                              ),
-                              severity: InfoBarSeverity.success,
-                            );
-                          });
-                          if (context.mounted) context.router.maybePop();
-                        }
-                      } on AppwriteException catch (e) {
-                        log.severe(e.message);
+                      final name = nameController.text;
+                      final email = emailController.text;
+                      final password = passwordController.text;
 
-                        if (context.mounted && e.message != null) {
-                          await displayInfoBar(context,
-                              duration: const Duration(seconds: 5),
-                              builder: (context, close) {
-                            return InfoBar(
-                              title: const Text('Error'),
-                              content: Text(e.message!),
-                              action: IconButton(
-                                icon: const Icon(FluentIcons.clear),
-                                onPressed: close,
-                              ),
-                              severity: InfoBarSeverity.error,
-                            );
-                          });
+                      final auth = June.getState(() => Auth());
+                      final result =
+                          await auth.createAccount(name, email, password);
+
+                      if (context.mounted) {
+                        await displayInfoBar(context,
+                            builder: (context, close) => InfoBar(
+                                  title: Text(result.isSuccess
+                                      ? 'Account created successfully'
+                                      : 'Failed to create account'),
+                                  content:
+                                      result.isSuccess
+                                      ? null
+                                      : Text(result.failure ?? ''),
+                                  action: IconButton(
+                                    icon: const Icon(FluentIcons.clear),
+                                    onPressed: close,
+                                  ),
+                                  severity: result.isSuccess
+                                      ? InfoBarSeverity.success
+                                      : InfoBarSeverity.error,
+                                ));
+
+                        if (result.isSuccess) {
+                          final result = await auth.login(email, password);
+                          if (result.isSuccess) {
+                            if (context.mounted) {
+                              context.router
+                                  .replaceAll([const DashboardRoute()]);
+                            }
+                          } else if (context.mounted) {
+                            await displayInfoBar(context,
+                                builder: (context, close) => InfoBar(
+                                      title: const Text('Failed to login'),
+                                      content: Text(result.failure ?? ''),
+                                      action: IconButton(
+                                        icon: const Icon(FluentIcons.clear),
+                                        onPressed: close,
+                                      ),
+                                      severity: InfoBarSeverity.error,
+                                    ));
+                            if (context.mounted) context.router.maybePop();
+                          }
                         }
                       }
                     },

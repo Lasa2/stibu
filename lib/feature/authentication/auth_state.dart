@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:june/june.dart';
+import 'package:result_type/result_type.dart';
 import 'package:stibu/main.dart';
 import 'package:stibu/router.gr.dart';
 
@@ -33,7 +34,7 @@ class Auth extends JuneService {
     });
   }
 
-  Future<void> login(String email, String password) async {
+  Future<Result<void, String?>> login(String email, String password) async {
     try {
       final response = await account.createEmailPasswordSession(
         email: email,
@@ -43,18 +44,44 @@ class Auth extends JuneService {
       isAuthenticated = true;
       authStreamController.add(isAuthenticated);
       log.info('Logged in: $response');
+      return Success(null);
     } on AppwriteException catch (e) {
       log.severe('Failed to login: ${e.message}', e.message);
+      return Failure(e.message);
     }
   }
 
   Future<void> logout() async {
-    account.deleteSession(
-      sessionId: session!.$id,
-    );
+    if (session == null) {
+      log.severe('Session is null when logging out');
+    } else {
+      account.deleteSession(
+        sessionId: session!.$id,
+      );
+    }
 
     isAuthenticated = false;
     session = null;
     authStreamController.add(isAuthenticated);
+  }
+
+  Future<Result<void, String?>> createAccount(
+    String name,
+    String email,
+    String password,
+  ) async {
+    try {
+      final result = await account.create(
+        userId: ID.unique(),
+        name: name,
+        email: email,
+        password: password,
+      );
+      log.info('Account created: $result');
+      return Success(null);
+    } on AppwriteException catch (e) {
+      log.severe(e.message);
+      return Failure(e.message);
+    }
   }
 }

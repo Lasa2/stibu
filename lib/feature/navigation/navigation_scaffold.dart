@@ -1,8 +1,9 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:june/june.dart';
 import 'package:stibu/feature/authentication/auth_state.dart';
-import 'package:stibu/main.dart';
 import 'package:stibu/router.gr.dart';
 
 @RoutePage()
@@ -40,13 +41,6 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
       body: autoRouter,
     ),
     PaneItemAction(
-      icon: const Icon(FluentIcons.back),
-      title: const Text('Back'),
-      onTap: () async {
-        await appRouter.maybePop();
-      },
-    ),
-    PaneItemAction(
       icon: const Icon(FluentIcons.sign_out),
       title: const Text('Sign Out'),
       onTap: () async {
@@ -66,6 +60,8 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
       (items + footerItems).whereType<PaneItem>().toList();
 
   void onChanged(BuildContext context, int index) {
+    if (index == selectedIndex) return;
+
     setState(() {
       selectedIndex = index;
     });
@@ -77,18 +73,44 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
   Widget build(BuildContext context) {
     return NavigationView(
       appBar: NavigationAppBar(
-        title: const Text('Stibu'),
-        leading: Builder(
-          builder: (context) => PaneItem(
-            icon: const Icon(FluentIcons.back, size: 14.0),
-            title: const Text("Back"),
-            body: const SizedBox.shrink(),
-          ).build(
-            context,
-            false,
-            context.router.maybePop,
-            displayMode: PaneDisplayMode.compact,
-          ),
+        title: defaultTargetPlatform == TargetPlatform.windows
+            ? MoveWindow(
+                child: SizedBox.expand(
+                  child: Container(
+                    color: Colors.transparent,
+                    child: const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Stibu'),
+                    ),
+                  ),
+                ),
+              )
+            : const Text('Stibu'),
+        actions: defaultTargetPlatform == TargetPlatform.windows
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  MinimizeWindowButton(),
+                  MaximizeWindowButton(),
+                  CloseWindowButton(),
+                ],
+              )
+            : null,
+        leading: AutoLeadingButton(
+          builder: (context, leadingType, onPressed) {
+            return Builder(
+                builder: (context) => PaneItem(
+                      icon: const Icon(FluentIcons.back, size: 14.0),
+                      title: const Text("Back"),
+                      body: const SizedBox.shrink(),
+                      enabled: leadingType != LeadingType.noLeading,
+                    ).build(
+                      context,
+                      false,
+                      onPressed,
+                      displayMode: PaneDisplayMode.compact,
+                    ));
+          },
         ),
       ),
       pane: NavigationPane(

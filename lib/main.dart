@@ -17,6 +17,7 @@ final client = Client()
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+
   SystemTheme.fallbackColor = const Color(0xFF865432);
   await SystemTheme.accentColor.load();
 

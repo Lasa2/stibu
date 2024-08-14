@@ -7,6 +7,9 @@
 
 #include "app_links/app_links_plugin_c_api.h"
 
+#include <bitsdojo_window_windows/bitsdojo_window_plugin.h>
+auto bdw = bitsdojo_window_configure(BDW_CUSTOM_FRAME);
+
 bool SendAppLinkToInstance(const std::wstring& title) {
   // Find our exact window
   HWND hwnd = ::FindWindow(L"FLUTTER_RUNNER_WIN32_WINDOW", title.c_str());

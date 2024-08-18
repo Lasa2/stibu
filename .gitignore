@@ -33,7 +33,8 @@ migrate_working_dir/
 **.freezed.dart
 **.g.dart
 **.gr.dart
-lib/l10n/generated/**
+/lib/l10n/generated
+/lib/l10n/generated/**
 
 # Symbolication related
 app.*.symbols

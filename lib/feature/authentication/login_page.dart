@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:stibu/feature/authentication/repository.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
+import 'package:stibu_api/stibu_api.dart';
 
 @RoutePage()
 class LoginPage extends StatefulWidget {
@@ -87,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                       final email = emailController.text;
                       final password = passwordController.text;
 
-                      final auth = getIt<AuthState>();
+                      final auth = getIt<AccountsRepository>();
                       await auth.login(email, password);
 
                       widget.onResult?.call(auth.isAuthenticated);

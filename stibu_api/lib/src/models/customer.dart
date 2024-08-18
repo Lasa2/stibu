@@ -1,23 +1,23 @@
 import 'package:appwrite/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:stibu/common/model.dart';
+import 'package:stibu_api/src/models/common.dart';
 
-part 'model.freezed.dart';
-part 'model.g.dart';
+part 'customer.freezed.dart';
+part 'customer.g.dart';
 
 @freezed
-class Customer extends RefModel with _$Customer {
+abstract class Customer extends RefModel with _$Customer {
+  const Customer._();
+
+  @override
+  String get ref => id;
   String get zipWithCityFormatted => zip != null && city != null
       ? '$zip $city'
       : zip != null
           ? zip.toString()
           : city ?? '';
-
-  @override
-  String get ref => id;
-
-  const Customer._();
+  String get address => '$street, $zip $city';
 
   factory Customer({
     required String id,
@@ -34,15 +34,11 @@ class Customer extends RefModel with _$Customer {
 
   factory Customer.fromAppwrite(Document doc) {
     final data = doc.data;
-    return Customer(
-      id: doc.$id,
-      name: data['name'],
-      email: data['email'],
-      phone: data['phone'],
-      street: data['street'],
-      zip: data['zip'],
-      city: data['city'],
-    );
+    final id = doc.$id.split("-").last;
+    return Customer.fromJson({
+      ...data,
+      'id': id,
+    });
   }
 
   Map<String, dynamic> toAppwrite() => {
@@ -53,6 +49,4 @@ class Customer extends RefModel with _$Customer {
         'zip': zip,
         'city': city,
       };
-
-  String get address => '$street, $zip $city';
 }

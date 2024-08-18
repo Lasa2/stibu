@@ -2,9 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:stibu/feature/authentication/repository.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
+import 'package:stibu_api/stibu_api.dart';
 
 class RouteDestination {
   final String title;
@@ -53,7 +53,7 @@ var footerItems = <Object>[
   PaneItemAction(
     icon: const Icon(FluentIcons.sign_out),
     title: const Text('Sign Out'),
-    onTap: () => getIt<AuthState>().logout(),
+    onTap: () => getIt<AccountsRepository>().logout(),
   ),
 ];
 

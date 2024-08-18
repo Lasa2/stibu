@@ -1,9 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:june/june.dart';
-import 'package:stibu/feature/authentication/auth_state.dart';
-import 'package:stibu/router.gr.dart';
-import 'package:stibu/widgets/text_box_form.dart';
+import 'package:stibu/feature/authentication/repository.dart';
+import 'package:stibu/feature/router/router.gr.dart';
+import 'package:stibu/main.dart';
 
 @RoutePage()
 class LoginPage extends StatefulWidget {
@@ -40,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 8, left: 8, right: 8),
-                  child: TextBoxForm(
+                  child: TextFormBox(
                     controller: emailController,
                     placeholder: 'Email',
                     decoration: BoxDecoration(
@@ -59,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 4, left: 8, right: 8),
-                  child: TextBoxForm(
+                  child: TextFormBox(
                     controller: passwordController,
                     placeholder: 'Password',
                     decoration: BoxDecoration(
@@ -88,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                       final email = emailController.text;
                       final password = passwordController.text;
 
-                      final auth = June.getState(() => Auth());
+                      final auth = getIt<AuthState>();
                       await auth.login(email, password);
 
                       widget.onResult?.call(auth.isAuthenticated);

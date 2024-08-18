@@ -1,5 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:stibu/feature/customers/model.dart';
+import 'package:stibu_api/stibu_api.dart';
 
 class CustomerInputDialog extends StatefulWidget {
   final String title;

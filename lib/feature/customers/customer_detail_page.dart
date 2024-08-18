@@ -2,10 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:stibu/feature/customers/customer_info_card.dart';
 import 'package:stibu/feature/customers/customer_input.dart';
-import 'package:stibu/feature/customers/model.dart';
-import 'package:stibu/feature/customers/repository.dart';
 import 'package:stibu/main.dart';
 import 'package:stibu/widgets/custom_page_header.dart';
+import 'package:stibu_api/stibu_api.dart';
 
 @RoutePage()
 class CustomerDetailPage extends StatefulWidget {

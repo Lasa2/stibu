@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stibu/feature/authentication/repository.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
+import 'package:stibu_api/stibu_api.dart';
 
 class NoTransitionRoute extends CustomRoute {
   NoTransitionRoute({
@@ -71,7 +71,7 @@ class AppRouter extends RootStackRouter {
 class AuthGuard extends AutoRouteGuard {
   @override
   void onNavigation(NavigationResolver resolver, StackRouter router) async {
-    final auth = await getIt.getAsync<AuthState>();
+    final auth = await getIt.getAsync<AccountsRepository>();
 
     log.info('Auth guard: ${auth.isAuthenticated}');
 

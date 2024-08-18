@@ -810,6 +810,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.11.1"
+  stibu_api:
+    dependency: "direct main"
+    description:
+      path: stibu_api
+      relative: true
+    source: path
+    version: "0.0.1"
   stream_channel:
     dependency: transitive
     description:

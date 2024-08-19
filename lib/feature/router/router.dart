@@ -56,7 +56,7 @@ class AppRouter extends RootStackRouter {
               page: CustomerListRoute.page,
             ),
             NoTransitionRoute(
-              path: "customers/:customerId",
+              path: "customers/:id",
               page: CustomerDetailRoute.page,
             ),
             NoTransitionRoute(
@@ -71,13 +71,15 @@ class AppRouter extends RootStackRouter {
 class AuthGuard extends AutoRouteGuard {
   @override
   void onNavigation(NavigationResolver resolver, StackRouter router) async {
-    final auth = await getIt.getAsync<AccountsRepository>();
+    final auth = getIt<AccountsRepository>();
 
-    log.info('Auth guard: ${auth.isAuthenticated}');
+    log.info('Auth guard: ${auth.isAuthenticated.value}');
 
-    if (auth.isAuthenticated) {
+    if (auth.isAuthenticated.value != null) {
+      log.info("Authenticated, continuing");
       resolver.next(true);
     } else {
+      log.info("Not authenticated, redirecting to login");
       resolver.redirect(LoginRoute(
         onResult: resolver.next,
       ));

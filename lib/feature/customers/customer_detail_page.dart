@@ -10,10 +10,10 @@ import 'package:stibu_api/stibu_api.dart';
 class CustomerDetailPage extends StatefulWidget {
   const CustomerDetailPage({
     super.key,
-    @PathParam("customerId") required this.customerId,
+    @PathParam("id") required this.id,
   });
 
-  final String customerId;
+  final String id;
 
   @override
   State<CustomerDetailPage> createState() => _CustomerDetailPageState();
@@ -23,7 +23,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
   @override
   Widget build(BuildContext context) {
     final customerFuture =
-        getIt<CustomerRepository>().getCustomer(widget.customerId);
+        getIt<CustomerRepository>().getCustomer(widget.id);
 
     return FutureBuilder(
         future: customerFuture,
@@ -39,7 +39,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
           if (snapshot.data!.isFailure) {
             return Center(child: Text('Error: ${snapshot.data!.failure}'));
           }
-          final customer = snapshot.data!.success;
+          final customer = snapshot.data!.success as CustomerAppwrite;
 
           return ScaffoldPage(
             header: CustomPageHeader(
@@ -106,7 +106,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                       label: const Text("Delete"),
                       onPressed: () async {
                         final result = await getIt<CustomerRepository>()
-                            .deleteCustomer(customer.id);
+                            .deleteCustomer(customer.$id);
 
                         if (!context.mounted) return;
 

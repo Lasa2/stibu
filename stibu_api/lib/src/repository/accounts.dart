@@ -3,16 +3,16 @@ import 'dart:async';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:result_type/result_type.dart';
+import 'package:rxdart/rxdart.dart';
 
 abstract class AccountsRepository {
-  Session? get session;
-  Stream<bool> get isAuthenticatedStream;
-  bool get isAuthenticated;
-  Future<User> get user;
-  Future<Preferences> get preferences;
+  ValueStream<Session?> get isAuthenticated;
+  Future<Result<User, String>> get user;
+  Future<Result<Preferences, String>> get preferences;
+  Future<Result<Session, String>> get session;
 
   Future<Result<Session, String?>> login(String email, String password);
-  Future<void> logout();
+  Future<Result<void, String>> logout();
   Future<Result<User, String?>> createAccount(
     String name,
     String email,
@@ -22,41 +22,44 @@ abstract class AccountsRepository {
 
 class AccountsRepositoryAppwrite implements AccountsRepository {
   final Account _account;
-  final StreamController<bool> _isAuthenticatedController =
-      StreamController<bool>.broadcast();
+  final _isAuthenticated = BehaviorSubject<Session?>.seeded(null);
 
   @override
-  Stream<bool> get isAuthenticatedStream => _isAuthenticatedController.stream;
+  late ValueStream<Session?> isAuthenticated = _isAuthenticated.stream;
 
   @override
-  bool get isAuthenticated => session != null;
-
-  @override
-  Future<User> get user async {
-    if (session == null) {
-      throw Exception('Session is null');
+  Future<Result<User, String>> get user async {
+    try {
+      return Success(await _account.get());
+    } on AppwriteException catch (e) {
+      return Failure(e.message ?? "Failed to get user");
     }
-
-    return _account.get();
   }
 
   @override
-  Future<Preferences> get preferences async {
-    if (session == null) {
-      throw Exception('Session is null');
+  Future<Result<Preferences, String>> get preferences async {
+    try {
+      return Success(await _account.getPrefs());
+    } on AppwriteException catch (e) {
+      return Failure(e.message ?? "Failed to get preferences");
     }
-
-    return _account.getPrefs();
   }
-
-  @override
-  Session? session;
 
   AccountsRepositoryAppwrite(this._account) {
-    _account.getSession(sessionId: "current").then((value) {
-      _isAuthenticatedController.add(true);
-      return session = value;
+    session.then((result) {
+      if (result.isSuccess) {
+        _isAuthenticated.add(result.success);
+      }
     });
+  }
+
+  @override
+  Future<Result<Session, String>> get session async {
+    try {
+      return Success(await _account.getSession(sessionId: "current"));
+    } on AppwriteException catch (e) {
+      return Failure(e.message ?? "Failed to get session");
+    }
   }
 
   @override
@@ -64,7 +67,7 @@ class AccountsRepositoryAppwrite implements AccountsRepository {
     try {
       final session = await _account.createEmailPasswordSession(
           email: email, password: password);
-      _isAuthenticatedController.add(true);
+      _isAuthenticated.add(session);
       return Success(session);
     } on AppwriteException catch (e) {
       return Failure(e.message);
@@ -72,9 +75,14 @@ class AccountsRepositoryAppwrite implements AccountsRepository {
   }
 
   @override
-  Future<void> logout() async {
-    await _account.deleteSession(sessionId: "current");
-    _isAuthenticatedController.add(false);
+  Future<Result<void, String>> logout() async {
+    try {
+      await _account.deleteSession(sessionId: "current");
+      _isAuthenticated.add(null);
+      return Success(null);
+    } on AppwriteException catch (e) {
+      return Failure(e.message ?? "Failed to logout");
+    }
   }
 
   @override
@@ -84,14 +92,15 @@ class AccountsRepositoryAppwrite implements AccountsRepository {
     String password,
   ) async {
     try {
-      final session = await _account.create(
+      final user = await _account.create(
         userId: ID.unique(),
         email: email,
         password: password,
         name: name,
       );
-      _isAuthenticatedController.add(true);
-      return Success(session);
+      final session = await _account.getSession(sessionId: "current");
+      _isAuthenticated.add(session);
+      return Success(user);
     } on AppwriteException catch (e) {
       return Failure(e.message);
     }

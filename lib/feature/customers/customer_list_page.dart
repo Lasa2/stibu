@@ -14,10 +14,20 @@ Future<Customer?> _showCustomerCreateDialog(BuildContext context) async {
   final newId = await getIt<CustomerRepository>().newID();
   if (!context.mounted) return null;
 
+  if (newId.isFailure) {
+    await displayInfoBar(context,
+        builder: (context, close) => InfoBar(
+              title: const Text("Error"),
+              content: Text(newId.failure),
+              severity: InfoBarSeverity.error,
+            ));
+    return null;
+  }
+
   final customer = await showDialog<Customer>(
       context: context,
       builder: (context) => CustomerInputDialog(
-            id: newId,
+            id: newId.success,
             title: "Create Customer",
           ));
 
@@ -46,7 +56,7 @@ Future<Customer?> _showCustomerCreateDialog(BuildContext context) async {
 }
 
 Future<Customer?> _showCustomerEditDialog(
-    BuildContext context, Customer customer) async {
+    BuildContext context, CustomerAppwrite customer) async {
   final updatedCustomer = await showDialog<Customer>(
       context: context,
       builder: (context) => CustomerInputDialog(
@@ -62,7 +72,8 @@ Future<Customer?> _showCustomerEditDialog(
 
   if (updatedCustomer != null) {
     final result =
-        await getIt<CustomerRepository>().updateCustomer(updatedCustomer);
+        await getIt<CustomerRepository>()
+        .updateCustomer(customer.copyFromCustomer(updatedCustomer));
     if (!context.mounted) return null;
 
     if (result.isFailure) {
@@ -106,7 +117,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
       stream: getIt<CustomerRepository>().customers,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final customers = snapshot.data as List<Customer>;
+          final customers = snapshot.data as List<CustomerAppwrite>;
 
           if (selectCustomer != null) {
             final index = customers.indexWhere((element) =>
@@ -179,7 +190,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
                           label: const Text('Delete'),
                           onPressed: () async {
                             final result = await getIt<CustomerRepository>()
-                                .deleteCustomer(customers[selectedIndex!].ref);
+                                .deleteCustomer(customers[selectedIndex!].$id);
                             if (!context.mounted) return;
 
                             if (result.isFailure) {
@@ -221,7 +232,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
                             onPressed: () {
                               if (!isLargeScreen) {
                                 AutoRouter.of(context).push(CustomerDetailRoute(
-                                    customerId: customer.id));
+                                    id: customer.$id));
                                 return;
                               }
                               if (selectedIndex == index) return;
@@ -288,7 +299,7 @@ class CustomerListDetail extends StatelessWidget {
 }
 
 class CustomerListEntry extends StatelessWidget {
-  final String customerId;
+  final int customerId;
   final String customerName;
   final String customerAddress;
   final VoidCallback? onPressed;

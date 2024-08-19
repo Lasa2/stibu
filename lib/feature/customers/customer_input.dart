@@ -3,7 +3,7 @@ import 'package:stibu_api/stibu_api.dart';
 
 class CustomerInputDialog extends StatefulWidget {
   final String title;
-  final String id;
+  final int id;
   final String? name;
   final String? email;
   final String? phone;
@@ -29,7 +29,7 @@ class CustomerInputDialog extends StatefulWidget {
 
 class _CustomerInputDialogState extends State<CustomerInputDialog> {
   final _formKey = GlobalKey<FormState>();
-  late final String _id = widget.id;
+  late final int _id = widget.id;
   late String? _name = widget.name;
   late String? _email = widget.email;
   late String? _phone = widget.phone;
@@ -77,7 +77,7 @@ class _CustomerInputDialogState extends State<CustomerInputDialog> {
               InfoLabel(
                 label: 'Customer ID',
                 child: TextFormBox(
-                  initialValue: _id,
+                  initialValue: _id.toString(),
                   decoration: const BoxDecoration(
                     border: Border(bottom: BorderSide(color: Colors.grey)),
                   ),

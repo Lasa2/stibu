@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -28,14 +30,15 @@ Future<void> main(List<String> args) async {
   final backend = GetIt.I.registerSingleton<AppwriteBackend>(AppwriteBackend(
     'https://appwrite.vee.icu/v1',
     '66ba8a48000da48dd442',
-    'wss://realtime.vee.icu',
+    'wss://appwrite.vee.icu/v1/realtime',
   ));
   final account = GetIt.I.registerSingleton<AccountsRepository>(
       AccountsRepositoryAppwrite(backend.account));
   GetIt.I.registerSingleton<CustomerRepository>(CustomerRepositoryAppwrite(
-      backend.databases,
-      backend.realtime,
-      account as AccountsRepositoryAppwrite));
+    backend.databases,
+    backend.realtime,
+    account as AccountsRepositoryAppwrite,
+  ));
 
   registerProtocolHandler("stibu");
 
@@ -51,48 +54,22 @@ Future<void> main(List<String> args) async {
   runApp(const StibuApp());
 }
 
-class StibuApp extends StatefulWidget {
+class StibuApp extends StatelessWidget {
   const StibuApp({super.key});
 
   @override
-  State<StibuApp> createState() => _StibuAppState();
-}
-
-class _StibuAppState extends State<StibuApp> {
-  @override
   Widget build(BuildContext context) {
+    final auth = getIt<AccountsRepository>();
     final router = getIt<AppRouter>();
-    final authFuture = getIt.getAsync<AccountsRepository>();
 
-    return FutureBuilder(
-        future: authFuture,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final auth = snapshot.data as AccountsRepository;
-
-            return FluentApp.router(
-                title: 'Stibu',
-                routerConfig: router.config(
-                  reevaluateListenable:
-                      ReevaluateListenable.stream(auth.isAuthenticatedStream),
-                  navigatorObservers: () => [RouteLogger()],
-                ),
-                localizationsDelegates: Lang.localizationsDelegates,
-                supportedLocales: Lang.supportedLocales);
-          } else {
-            return const FluentApp(
-              title: 'Stibu',
-              localizationsDelegates: Lang.localizationsDelegates,
-              supportedLocales: Lang.supportedLocales,
-              home: NavigationView(
-                content: ScaffoldPage(
-                  content: Center(
-                    child: ProgressRing(),
-                  ),
-                ),
-              ),
-            );
-          }
-        });
+    return FluentApp.router(
+        title: 'Stibu',
+        routerConfig: router.config(
+          reevaluateListenable:
+              ReevaluateListenable.stream(auth.isAuthenticated),
+          navigatorObservers: () => [RouteLogger()],
+        ),
+        localizationsDelegates: Lang.localizationsDelegates,
+        supportedLocales: Lang.supportedLocales);
   }
 }

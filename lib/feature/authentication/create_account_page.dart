@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:stibu/feature/navigation/windows_appbar.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
 import 'package:stibu_api/stibu_api.dart';
@@ -21,7 +22,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   @override
   Widget build(BuildContext context) {
     return NavigationView(
-      appBar: const NavigationAppBar(),
+      appBar: buildNavigationAppBar(context),
       content: ScaffoldPage(
         content: Form(
           key: formKey,

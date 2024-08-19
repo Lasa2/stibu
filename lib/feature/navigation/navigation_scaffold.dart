@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
+import 'package:stibu/feature/navigation/windows_appbar.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
 import 'package:stibu_api/stibu_api.dart';
@@ -119,6 +118,8 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    // TODO: selected index not always correct
     final topRouteName = context
         .router.childControllers.firstOrNull?.currentSegments.firstOrNull?.name;
     final index = routeDestinations.indexWhere(
@@ -127,47 +128,7 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
     final selectedIndex = index == -1 ? 0 : index;
 
     return NavigationView(
-      appBar: NavigationAppBar(
-        title: defaultTargetPlatform == TargetPlatform.windows
-            ? MoveWindow(
-                child: SizedBox.expand(
-                  child: Container(
-                    color: Colors.transparent,
-                    child: const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('Stibu'),
-                    ),
-                  ),
-                ),
-              )
-            : const Text('Stibu'),
-        actions: defaultTargetPlatform == TargetPlatform.windows
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MinimizeWindowButton(),
-                  MaximizeWindowButton(),
-                  CloseWindowButton(),
-                ],
-              )
-            : null,
-        automaticallyImplyLeading: false,
-        // leading: AutoLeadingButton(
-
-        //   builder: (context, leadingType, back) => Builder(
-        //       builder: (context) => PaneItem(
-        //                   icon: const Icon(FluentIcons.back, size: 14.0),
-        //                   title: const Text("Back"),
-        //                   body: const SizedBox.shrink(),
-        //                   enabled: context.router.canPop())
-        //               .build(
-        //             context,
-        //             false,
-        //             back,
-        //             displayMode: PaneDisplayMode.compact,
-        //           )),
-        // ),
-      ),
+      appBar: buildNavigationAppBar(context),
       pane: NavigationPane(
         selected: selectedIndex,
         // onChanged: (index) => onChanged(context, index),

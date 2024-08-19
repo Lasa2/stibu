@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:stibu/feature/navigation/windows_appbar.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
 import 'package:stibu_api/stibu_api.dart';
@@ -21,9 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return NavigationView(
-      appBar: const NavigationAppBar(
-        automaticallyImplyLeading: false,
-      ),
+      appBar: buildNavigationAppBar(context),
       content: ScaffoldPage(
         content: ConstrainedBox(
           constraints: const BoxConstraints(
@@ -90,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                       final auth = getIt<AccountsRepository>();
                       await auth.login(email, password);
 
-                      widget.onResult?.call(auth.isAuthenticated);
+                      widget.onResult?.call(auth.isAuthenticated.value != null);
                     },
                     child: const Text('Login'),
                   ),

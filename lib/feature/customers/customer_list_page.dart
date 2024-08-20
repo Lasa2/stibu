@@ -56,7 +56,7 @@ Future<Customer?> _showCustomerCreateDialog(BuildContext context) async {
 }
 
 Future<Customer?> _showCustomerEditDialog(
-    BuildContext context, CustomerAppwrite customer) async {
+    BuildContext context, Customer customer) async {
   final updatedCustomer = await showDialog<Customer>(
       context: context,
       builder: (context) => CustomerInputDialog(
@@ -73,7 +73,7 @@ Future<Customer?> _showCustomerEditDialog(
   if (updatedCustomer != null) {
     final result =
         await getIt<CustomerRepository>()
-        .updateCustomer(customer.copyFromCustomer(updatedCustomer));
+        .updateCustomer(updatedCustomer);
     if (!context.mounted) return null;
 
     if (result.isFailure) {
@@ -117,7 +117,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
       stream: getIt<CustomerRepository>().customers,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final customers = snapshot.data as List<CustomerAppwrite>;
+          final customers = snapshot.data as List<Customer>;
 
           if (selectCustomer != null) {
             final index = customers.indexWhere((element) =>

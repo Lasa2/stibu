@@ -39,7 +39,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
           if (snapshot.data!.isFailure) {
             return Center(child: Text('Error: ${snapshot.data!.failure}'));
           }
-          final customer = snapshot.data!.success as CustomerAppwrite;
+          final customer = snapshot.data!.success;
 
           return ScaffoldPage(
             header: CustomPageHeader(

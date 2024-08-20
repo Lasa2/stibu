@@ -5,6 +5,7 @@ class AppwriteBackend {
   late final Account account = Account(client);
   late final Databases databases = Databases(client);
   late final Realtime realtime = Realtime(client);
+  late final Functions functions = Functions(client);
 
   AppwriteBackend._(this.client);
 

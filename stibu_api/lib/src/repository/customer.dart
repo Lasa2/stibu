@@ -8,23 +8,23 @@ import 'package:stibu_api/src/common.dart';
 import 'package:stibu_api/src/models/customer.dart';
 import 'package:stibu_api/src/repository/accounts.dart';
 
-abstract class CustomerRepository<T extends Customer> {
-  ValueStream<List<T>> get customers;
+abstract class CustomerRepository {
+  ValueStream<List<Customer>> get customers;
 
   Future<List<Customer>> getCustomers();
-  Future<Result<T, String>> getCustomer(String id);
+  Future<Result<Customer, String>> getCustomer(String id);
   Future<Result<int, String>> newID();
-  Future<Result<Customer, String>> createCustomer(T customer);
-  Future<Result<T, String>> updateCustomer(T customer);
+  Future<Result<Customer, String>> createCustomer(Customer customer);
+  Future<Result<Customer, String>> updateCustomer(Customer customer);
   Future<Result<void, String>> deleteCustomer(String id);
 }
 
-class CustomerRepositoryAppwrite extends CustomerRepository<CustomerAppwrite> {
-  var _customers = BehaviorSubject<List<CustomerAppwrite>>.seeded([]);
-  final _collector = Collector<CustomerAppwrite>();
+class CustomerRepositoryAppwrite implements CustomerRepository {
+  var _customers = BehaviorSubject<List<Customer>>.seeded([]);
+  final _collector = Collector<Customer>();
 
   @override
-  ValueStream<List<CustomerAppwrite>> get customers => _customers.stream;
+  ValueStream<List<Customer>> get customers => _customers.stream;
 
   final Databases _database;
   final Realtime _realtime;
@@ -46,7 +46,7 @@ class CustomerRepositoryAppwrite extends CustomerRepository<CustomerAppwrite> {
   }
 
   Future<void> _subscribeCustomers() async {
-    _customers = BehaviorSubject<List<CustomerAppwrite>>.seeded([]);
+    _customers = BehaviorSubject<List<Customer>>.seeded([]);
 
     final customers = await getCustomers();
     _collector.addItems(customers);
@@ -61,14 +61,13 @@ class CustomerRepositoryAppwrite extends CustomerRepository<CustomerAppwrite> {
         case "create":
         case "update":
           final doc = Document.fromMap(data.payload);
-          final customer = CustomerAppwrite.fromAppwrite(doc);
+          final customer = Customer.fromAppwrite(doc);
           _collector.addItem(customer);
           _customers.add(_collector.items);
           break;
         case "delete":
-          final doc = Document.fromMap(data.payload);
-          final customer = CustomerAppwrite.fromAppwrite(doc);
-          _collector.removeItem(customer.$id);
+          final id = data.payload["\$id"];
+          _collector.removeItem(id);
           _customers.add(_collector.items);
           break;
       }
@@ -81,19 +80,19 @@ class CustomerRepositoryAppwrite extends CustomerRepository<CustomerAppwrite> {
   }
 
   @override
-  Future<List<CustomerAppwrite>> getCustomers() async {
+  Future<List<Customer>> getCustomers() async {
     final response = await _database.listDocuments(
       databaseId: "default",
       collectionId: 'customers',
     );
 
     return response.documents
-        .map((doc) => CustomerAppwrite.fromAppwrite(doc))
+        .map((doc) => Customer.fromAppwrite(doc))
         .toList();
   }
 
   @override
-  Future<Result<CustomerAppwrite, String>> getCustomer(String id) async {
+  Future<Result<Customer, String>> getCustomer(String id) async {
     try {
       final doc = await _database.getDocument(
         databaseId: "default",
@@ -101,7 +100,7 @@ class CustomerRepositoryAppwrite extends CustomerRepository<CustomerAppwrite> {
         documentId: id,
       );
 
-      return Success(CustomerAppwrite.fromAppwrite(doc));
+      return Success(Customer.fromAppwrite(doc));
     } on AppwriteException catch (e) {
       return Failure(e.message ?? "Failed to get customer");
     }
@@ -132,7 +131,7 @@ class CustomerRepositoryAppwrite extends CustomerRepository<CustomerAppwrite> {
   }
 
   @override
-  Future<Result<CustomerAppwrite, String>> createCustomer(
+  Future<Result<Customer, String>> createCustomer(
       Customer customer) async {
     try {
       final result = await (_accountsRepository.user);
@@ -148,15 +147,14 @@ class CustomerRepositoryAppwrite extends CustomerRepository<CustomerAppwrite> {
         data: customer.toJson(),
       );
 
-      return Success(CustomerAppwrite.fromAppwrite(response));
+      return Success(Customer.fromAppwrite(response));
     } on AppwriteException catch (e) {
       return Failure(e.message ?? "Failed to create customer");
     }
   }
 
   @override
-  Future<Result<CustomerAppwrite, String>> updateCustomer(
-      CustomerAppwrite customer) async {
+  Future<Result<Customer, String>> updateCustomer(Customer customer) async {
     try {
       final response = await _database.updateDocument(
         databaseId: "default",
@@ -165,7 +163,7 @@ class CustomerRepositoryAppwrite extends CustomerRepository<CustomerAppwrite> {
         data: customer.toJson(),
       );
 
-      return Success(CustomerAppwrite.fromAppwrite(response));
+      return Success(Customer.fromAppwrite(response));
     } on AppwriteException catch (e) {
       return Failure(e.message ?? "Failed to update customer");
     }

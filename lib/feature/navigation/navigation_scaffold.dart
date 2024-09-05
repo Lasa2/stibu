@@ -1,9 +1,11 @@
+import 'package:appwrite/models.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:stibu/api/accounts.dart';
+import 'package:stibu/api/avatars.dart';
 import 'package:stibu/feature/navigation/windows_appbar.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
-import 'package:stibu_api/stibu_api.dart';
 
 class RouteDestination {
   final String title;
@@ -15,6 +17,7 @@ class RouteDestination {
   final WidgetStateColor? tileColor;
   final WidgetStateColor? selectedTileColor;
   final bool enabled;
+  final List<RouteDestination>? items;
 
   const RouteDestination({
     required this.title,
@@ -26,6 +29,7 @@ class RouteDestination {
     this.tileColor,
     this.selectedTileColor,
     this.enabled = true,
+    this.items,
   });
 }
 
@@ -41,6 +45,26 @@ var items = <Object>[
     icon: FluentIcons.people,
     route: CustomerListRoute(),
   ),
+  const RouteDestination(
+    title: "Orders",
+    icon: FluentIcons.invoice,
+    route: OrderListRoute(),
+  ),
+  const RouteDestination(
+    title: 'Invoices',
+    icon: FluentIcons.invoice,
+    route: InvoiceListRoute(),
+  ),
+  const RouteDestination(
+    title: 'Expenses',
+    icon: FluentIcons.money,
+    route: ExpensesListRoute(),
+  ),
+  const RouteDestination(
+    title: 'Calendar',
+    icon: FluentIcons.calendar,
+    route: CalendarRoute(),
+  ),
 ];
 
 var footerItems = <Object>[
@@ -55,6 +79,15 @@ var footerItems = <Object>[
     onTap: () => getIt<AccountsRepository>().logout(),
   ),
 ];
+
+List<RouteDestination> flatten(List<Object> items) {
+  return items.whereType<RouteDestination>().expand((element) {
+    if (element.items != null) {
+      return [element, ...element.items!];
+    }
+    return [element];
+  }).toList();
+}
 
 @RoutePage()
 class NavigationScaffoldPage extends StatefulWidget {
@@ -72,9 +105,8 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
     key: autoRouterKey,
   );
 
-  List<RouteDestination> get routeDestinations => (items + footerItems)
-      .whereType<RouteDestination>()
-      .toList(growable: false);
+  List<RouteDestination> get routeDestinations =>
+      (flatten(items) + flatten(footerItems)).toList(growable: false);
 
   void onChanged(BuildContext context, int index) {
     context.router.push(routeDestinations[index].route);
@@ -97,18 +129,33 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
   List<NavigationPaneItem> buildItems(List<Object> items, int selectedIndex) {
     return items.map<NavigationPaneItem>((element) {
       if (element is RouteDestination) {
-        return PaneItem(
-          icon: Icon(element.icon),
-          title: Text(element.title),
-          body: autoRouter,
-          onTap: () => onTap(context, element, selectedIndex),
-          trailing: element.trailing,
-          infoBadge: element.infoBadge,
-          mouseCursor: element.mouseCursor,
-          tileColor: element.tileColor,
-          selectedTileColor: element.selectedTileColor,
-          enabled: element.enabled,
-        );
+        if (element.items == null) {
+          return PaneItem(
+            icon: Icon(element.icon),
+            title: Text(element.title),
+            body: autoRouter,
+            onTap: () => onTap(context, element, selectedIndex),
+            trailing: element.trailing,
+            infoBadge: element.infoBadge,
+            mouseCursor: element.mouseCursor,
+            tileColor: element.tileColor,
+            selectedTileColor: element.selectedTileColor,
+            enabled: element.enabled,
+          );
+        } else {
+          return PaneItemExpander(
+            icon: Icon(element.icon),
+            title: Text(element.title),
+            body: autoRouter,
+            items: buildItems(element.items!, selectedIndex),
+            onTap: () => onTap(context, element, selectedIndex),
+            trailing: element.trailing ?? PaneItemExpander.kDefaultTrailing,
+            infoBadge: element.infoBadge,
+            mouseCursor: element.mouseCursor,
+            tileColor: element.tileColor,
+            selectedTileColor: element.selectedTileColor,
+          );
+        }
       } else if (element is NavigationPaneItem) {
         return element;
       }
@@ -116,9 +163,39 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
     }).toList();
   }
 
+  User? user;
+  Image? avatar;
+
+  @override
+  void initState() {
+    super.initState();
+    getIt<AccountsRepository>().sessionStream.listen((session) async {
+      if (session != null) {
+        final user = await getIt<AccountsRepository>().user;
+        if (user.isSuccess) {
+          final avatar = await getIt<AvatarsRepository>().getAvatar(
+            name: user.success.name,
+            width: 32,
+            height: 32,
+          );
+          if (avatar.isSuccess) {
+            setState(() {
+              this.user = user.success;
+              this.avatar = avatar.success;
+            });
+          }
+        }
+      } else {
+        setState(() {
+          user = null;
+          avatar = null;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-
     // TODO: selected index not always correct
     final topRouteName = context
         .router.childControllers.firstOrNull?.currentSegments.firstOrNull?.name;
@@ -133,12 +210,12 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
         selected: selectedIndex,
         // onChanged: (index) => onChanged(context, index),
         displayMode: PaneDisplayMode.auto,
-        header: const SizedBox(
+        header: SizedBox(
           height: 78,
           child: ListTile(
-            leading: Icon(FluentIcons.contact),
-            title: Text('User Name'),
-            subtitle: Text("Some Text"),
+            leading: avatar,
+            title: Text(user?.name ?? "User"),
+            subtitle: Text(user?.email ?? ""),
           ),
         ),
         items: buildItems(items, selectedIndex),

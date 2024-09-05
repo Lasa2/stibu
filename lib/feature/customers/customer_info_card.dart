@@ -1,8 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:stibu_api/stibu_api.dart';
+import 'package:stibu/appwrite.models.dart';
+import 'package:stibu/common/models_extensions.dart';
 
 class CustomerInfoCard extends StatelessWidget {
-  final Customer customer;
+  final Customers customer;
 
   const CustomerInfoCard({super.key, required this.customer});
 

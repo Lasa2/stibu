@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:stibu/api/accounts.dart';
 import 'package:stibu/feature/navigation/windows_appbar.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
-import 'package:stibu_api/stibu_api.dart';
 
 @RoutePage()
 class CreateAccountPage extends StatefulWidget {

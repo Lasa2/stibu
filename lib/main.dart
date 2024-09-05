@@ -1,44 +1,53 @@
 import 'dart:async';
 
 import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/models.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:stibu/api/accounts.dart';
+import 'package:stibu/api/avatars.dart';
+import 'package:stibu/appwrite.models.dart';
+import 'package:stibu/feature/app_state/app_state.dart';
 import 'package:stibu/feature/router/router.dart';
+import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/l10n/generated/l10n.dart';
-import 'package:stibu_api/stibu_api.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:url_protocol/url_protocol.dart';
 
 final log = Logger('Stibu');
-final client = Client()
-    .setEndpoint('https://appwrite.vee.icu/v1')
-    .setProject('66ba8a48000da48dd442')
-    .setEndPointRealtime('wss://realtime.vee.icu');
-
 final getIt = GetIt.instance;
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  final deviceLocale = PlatformDispatcher.instance.locale;
+  Intl.defaultLocale = deviceLocale.toLanguageTag();
+  initializeDateFormatting(deviceLocale.toLanguageTag());
+
+  await initializeDateFormatting();
+
   SystemTheme.fallbackColor = const Color(0xFF865432);
   await SystemTheme.accentColor.load();
 
   GetIt.I.registerSingleton<AppRouter>(AppRouter());
-  final backend = GetIt.I.registerSingleton<AppwriteBackend>(AppwriteBackend(
-    'https://appwrite.vee.icu/v1',
-    '66ba8a48000da48dd442',
-    'wss://appwrite.vee.icu/v1/realtime',
+  final client = GetIt.I.registerSingleton<AppwriteClient>(AppwriteClient(
+    Client()
+        .setEndpoint('https://appwrite.vee.icu/v1')
+        .setProject('66ba8a48000da48dd442')
+        .setEndPointRealtime('wss://appwrite.vee.icu/v1/realtime'),
   ));
-  final account = GetIt.I.registerSingleton<AccountsRepository>(
-      AccountsRepositoryAppwrite(backend.account));
-  GetIt.I.registerSingleton<CustomerRepository>(CustomerRepositoryAppwrite(
-    backend.databases,
-    backend.realtime,
-    account as AccountsRepositoryAppwrite,
-  ));
+
+  final accounts = GetIt.I.registerSingleton<AccountsRepository>(
+      AccountsRepositoryAppwrite(client.account));
+  GetIt.I.registerLazySingleton<AppState>(
+      () => AppState(client.realtime, accounts));
+  GetIt.I.registerLazySingleton<AvatarsRepository>(
+      () => AvatarsRepository(client.avatars));
 
   registerProtocolHandler("stibu");
 
@@ -62,11 +71,19 @@ class StibuApp extends StatelessWidget {
     final auth = getIt<AccountsRepository>();
     final router = getIt<AppRouter>();
 
+    late final StreamSubscription<Session?> sub;
+    sub = auth.sessionStream.listen((session) {
+      if (session != null) {
+        router.root.push(const DashboardRoute());
+        sub.cancel();
+      }
+    });
+
     return FluentApp.router(
         title: 'Stibu',
         routerConfig: router.config(
           reevaluateListenable:
-              ReevaluateListenable.stream(auth.isAuthenticated),
+              ReevaluateListenable.stream(auth.sessionStream),
           navigatorObservers: () => [RouteLogger()],
         ),
         localizationsDelegates: Lang.localizationsDelegates,

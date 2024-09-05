@@ -1,10 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/feature/customers/customer_info_card.dart';
 import 'package:stibu/feature/customers/customer_input.dart';
-import 'package:stibu/main.dart';
 import 'package:stibu/widgets/custom_page_header.dart';
-import 'package:stibu_api/stibu_api.dart';
 
 @RoutePage()
 class CustomerDetailPage extends StatefulWidget {
@@ -22,11 +21,8 @@ class CustomerDetailPage extends StatefulWidget {
 class _CustomerDetailPageState extends State<CustomerDetailPage> {
   @override
   Widget build(BuildContext context) {
-    final customerFuture =
-        getIt<CustomerRepository>().getCustomer(widget.id);
-
     return FutureBuilder(
-        future: customerFuture,
+        future: Customers.get(widget.id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: ProgressBar());
@@ -63,7 +59,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                       icon: const Icon(FluentIcons.edit),
                       label: const Text("Edit"),
                       onPressed: () async {
-                        final updatedCustomer = await showDialog<Customer>(
+                        final updatedCustomer = await showDialog<Customers>(
                             context: context,
                             builder: (context) => CustomerInputDialog(
                                   title: 'Edit Customer',
@@ -74,11 +70,11 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                                   street: customer.street,
                                   zip: customer.zip,
                                   city: customer.city,
+                                  customer: customer,
                                 ));
 
                         if (updatedCustomer != null) {
-                          final result = await getIt<CustomerRepository>()
-                              .updateCustomer(updatedCustomer);
+                          final result = await updatedCustomer.update();
 
                           if (!context.mounted) return;
 
@@ -105,8 +101,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                       icon: const Icon(FluentIcons.delete),
                       label: const Text("Delete"),
                       onPressed: () async {
-                        final result = await getIt<CustomerRepository>()
-                            .deleteCustomer(customer.$id);
+                        final result = await customer.delete();
 
                         if (!context.mounted) return;
 

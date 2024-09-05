@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/widgets.dart';
+import 'package:stibu/api/accounts.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
-import 'package:stibu_api/stibu_api.dart';
 
 class NoTransitionRoute extends CustomRoute {
   NoTransitionRoute({
@@ -60,6 +60,19 @@ class AppRouter extends RootStackRouter {
               page: CustomerDetailRoute.page,
             ),
             NoTransitionRoute(
+              path: "invoices",
+              page: InvoiceListRoute.page,
+            ),
+            NoTransitionRoute(
+              page: ExpensesListRoute.page,
+            ),
+            NoTransitionRoute(
+              page: OrderListRoute.page,
+            ),
+            NoTransitionRoute(
+              page: CalendarRoute.page,
+            ),
+            NoTransitionRoute(
               path: "settings",
               page: SettingsRoute.page,
             ),
@@ -73,9 +86,9 @@ class AuthGuard extends AutoRouteGuard {
   void onNavigation(NavigationResolver resolver, StackRouter router) async {
     final auth = getIt<AccountsRepository>();
 
-    log.info('Auth guard: ${auth.isAuthenticated.value}');
+    log.info('Auth guard: ${auth.sessionStream.value}');
 
-    if (auth.isAuthenticated.value != null) {
+    if (auth.sessionStream.value != null) {
       log.info("Authenticated, continuing");
       resolver.next(true);
     } else {

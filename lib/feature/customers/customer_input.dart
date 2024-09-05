@@ -1,5 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:stibu_api/stibu_api.dart';
+import 'package:stibu/appwrite.models.dart';
 
 class CustomerInputDialog extends StatefulWidget {
   final String title;
@@ -8,8 +8,10 @@ class CustomerInputDialog extends StatefulWidget {
   final String? email;
   final String? phone;
   final String? street;
-  final int? zip;
+  final String? zip;
   final String? city;
+
+  final Customers? customer;
 
   const CustomerInputDialog({
     super.key,
@@ -21,6 +23,7 @@ class CustomerInputDialog extends StatefulWidget {
     this.street,
     this.zip,
     this.city,
+    this.customer,
   });
 
   @override
@@ -34,7 +37,7 @@ class _CustomerInputDialogState extends State<CustomerInputDialog> {
   late String? _email = widget.email;
   late String? _phone = widget.phone;
   late String? _street = widget.street;
-  late int? _zip = widget.zip;
+  late String? _zip = widget.zip;
   late String? _city = widget.city;
 
   @override
@@ -47,17 +50,32 @@ class _CustomerInputDialogState extends State<CustomerInputDialog> {
             if (_formKey.currentState?.validate() ?? false) {
               _formKey.currentState?.save();
 
-              final customer = Customer(
-                id: _id,
-                name: _name!,
-                email: _email?.isNotEmpty == true ? _email : null,
-                phone: _phone?.isNotEmpty == true ? _phone : null,
-                street: _street?.isNotEmpty == true ? _street : null,
-                zip: _zip,
-                city: _city?.isNotEmpty == true ? _city : null,
-              );
+              if (widget.customer != null) {
+                final customer = widget.customer!.copyWith(
+                  name: _name,
+                  email: _email?.isNotEmpty == true ? _email : null,
+                  phone: _phone?.isNotEmpty == true ? _phone : null,
+                  street: _street?.isNotEmpty == true ? _street : null,
+                  zip: _zip,
+                  city: _city?.isNotEmpty == true ? _city : null,
+                );
 
-              Navigator.of(context).pop(customer);
+                Navigator.of(context).pop(customer);
+              } else {
+                final customer = Customers(
+                  id: _id,
+                  name: _name!,
+                  email: _email?.isNotEmpty == true ? _email : null,
+                  phone: _phone?.isNotEmpty == true ? _phone : null,
+                  street: _street?.isNotEmpty == true ? _street : null,
+                  zip: _zip?.isNotEmpty == true ? _zip : null,
+                  city: _city?.isNotEmpty == true ? _city : null,
+                );
+
+                Navigator.of(context).pop(customer);
+
+              }
+
             }
           },
           child: const Text('Save'),
@@ -94,7 +112,7 @@ class _CustomerInputDialogState extends State<CustomerInputDialog> {
                   ),
                   placeholder: 'Name',
                   validator: (value) {
-                    if (value?.isEmpty ?? true) {
+                    if (value == null || value.isEmpty) {
                       return 'Please enter a name';
                     }
                     return null;
@@ -138,14 +156,12 @@ class _CustomerInputDialogState extends State<CustomerInputDialog> {
               ),
               InfoLabel(
                 label: 'ZIP',
-                child: NumberFormBox(
-                    value: _zip,
+                child: TextFormBox(
+                  initialValue: _zip,
                     placeholder: 'ZIP',
                     showCursor: false,
-                    clearButton: false,
-                    mode: SpinButtonPlacementMode.none,
-                    onChanged: (value) {},
-                    onSaved: (value) => _zip = int.tryParse(value ?? '')),
+                  onSaved: (value) => _zip = value,
+                ),
               ),
               InfoLabel(
                 label: 'City',

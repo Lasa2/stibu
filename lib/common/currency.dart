@@ -1,10 +1,11 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:intl/intl.dart';
 
 class Currency implements Comparable<Currency> {
   final int _value;
 
   Currency(this._value);
+
+  static Currency get zero => Currency(0);
 
   double get asDouble => _value / 100;
   int get asInt => _value;
@@ -36,14 +37,4 @@ class Currency implements Comparable<Currency> {
         double() => asDouble.compareTo(other),
         _ => throw ArgumentError('Cannot compare Currency with $other'),
       };
-}
-
-class CurrencyJsonConverter extends JsonConverter<Currency, int> {
-  const CurrencyJsonConverter();
-
-  @override
-  Currency fromJson(int json) => Currency(json);
-
-  @override
-  int toJson(Currency object) => object._value;
 }

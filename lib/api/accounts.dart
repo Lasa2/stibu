@@ -6,7 +6,8 @@ import 'package:result_type/result_type.dart';
 import 'package:rxdart/rxdart.dart';
 
 abstract class AccountsRepository {
-  ValueStream<Session?> get isAuthenticated;
+  ValueStream<Session?> get sessionStream;
+  ValueStream<User?> get userStream;
   Future<Result<User, String>> get user;
   Future<Result<Preferences, String>> get preferences;
   Future<Result<Session, String>> get session;
@@ -22,10 +23,14 @@ abstract class AccountsRepository {
 
 class AccountsRepositoryAppwrite implements AccountsRepository {
   final Account _account;
-  final _isAuthenticated = BehaviorSubject<Session?>.seeded(null);
+  final _sessionStream = BehaviorSubject<Session?>.seeded(null);
 
   @override
-  late ValueStream<Session?> isAuthenticated = _isAuthenticated.stream;
+  late ValueStream<Session?> sessionStream = _sessionStream.stream;
+
+  final _userStream = BehaviorSubject<User?>.seeded(null);
+  @override
+  late ValueStream<User?> userStream = _userStream.stream;
 
   @override
   Future<Result<User, String>> get user async {
@@ -48,7 +53,7 @@ class AccountsRepositoryAppwrite implements AccountsRepository {
   AccountsRepositoryAppwrite(this._account) {
     session.then((result) {
       if (result.isSuccess) {
-        _isAuthenticated.add(result.success);
+        _sessionStream.add(result.success);
       }
     });
   }
@@ -67,7 +72,10 @@ class AccountsRepositoryAppwrite implements AccountsRepository {
     try {
       final session = await _account.createEmailPasswordSession(
           email: email, password: password);
-      _isAuthenticated.add(session);
+      _sessionStream.add(session);
+
+      final user = await _account.get();
+      _userStream.add(user);
       return Success(session);
     } on AppwriteException catch (e) {
       return Failure(e.message);
@@ -78,7 +86,8 @@ class AccountsRepositoryAppwrite implements AccountsRepository {
   Future<Result<void, String>> logout() async {
     try {
       await _account.deleteSession(sessionId: "current");
-      _isAuthenticated.add(null);
+      _sessionStream.add(null);
+      _userStream.add(null);
       return Success(null);
     } on AppwriteException catch (e) {
       return Failure(e.message ?? "Failed to logout");
@@ -99,7 +108,8 @@ class AccountsRepositoryAppwrite implements AccountsRepository {
         name: name,
       );
       final session = await _account.getSession(sessionId: "current");
-      _isAuthenticated.add(session);
+      _sessionStream.add(session);
+      _userStream.add(user);
       return Success(user);
     } on AppwriteException catch (e) {
       return Failure(e.message);

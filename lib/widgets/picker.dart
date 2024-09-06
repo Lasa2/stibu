@@ -67,16 +67,16 @@ class _FormTimePickerState extends State<FormTimePicker> {
 
 class FormDatePicker extends StatefulWidget {
   final String header;
-  final DateTime? selected;
-  final void Function(DateTime?)? onChanged;
-  final void Function(DateTime?)? onSaved;
-  final String? Function(DateTime?)? validator;
+  final DateTime? initialValue;
+  final void Function(DateTime)? onChanged;
+  final void Function(DateTime)? onSaved;
+  final String? Function(DateTime)? validator;
   final AutovalidateMode? autovalidateMode;
 
   const FormDatePicker({
     super.key,
     required this.header,
-    required this.selected,
+    this.initialValue,
     this.onChanged,
     this.onSaved,
     this.validator,
@@ -88,28 +88,32 @@ class FormDatePicker extends StatefulWidget {
 }
 
 class _FormDatePickerState extends State<FormDatePicker> {
-  late DateTime? _selected = widget.selected;
 
   @override
   Widget build(BuildContext context) {
     return FormField<DateTime>(
-      initialValue: _selected,
+      initialValue: widget.initialValue ?? DateTime.now(),
       autovalidateMode: widget.autovalidateMode,
       onSaved: (value) {
-        widget.onSaved?.call(_selected);
+        if (value != null) {
+          widget.onSaved?.call(value);
+        }
       },
-      validator: widget.validator,
+      validator: (value) {
+        if (value == null) {
+          return 'Please select a date';
+        }
+        return widget.validator?.call(value);
+      },
       builder: (formState) {
         return Column(
           children: [
             DatePicker(
               header: widget.header,
-              selected: _selected,
+              selected: formState.value,
               onChanged: (date) {
                 date = date.stripTime();
-                setState(() {
-                  _selected = date;
-                });
+                formState.didChange(date);
                 widget.onChanged?.call(date);
               },
             ),

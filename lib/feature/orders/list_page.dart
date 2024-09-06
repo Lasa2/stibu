@@ -232,7 +232,7 @@ class _NewOrderDialogState extends State<NewOrderDialog> {
               final order = Orders(
                 customerId: selectedCustomer!.id,
                 customerName: selectedCustomer!.name,
-                date: selectedDate,
+                date: selectedDate.toUtc(),
               );
 
               order.create().then((value) {

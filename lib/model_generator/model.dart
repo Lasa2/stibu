@@ -70,6 +70,13 @@ class $className extends AppwriteModel<$className> {
   }
 
   @override
+  Map<String, dynamic> toAppwrite() {
+    return {
+      ${attributeInfos.map(generateToAppwriteField).join(',\n\t\t\t')}
+    };
+  }
+
+  @override
   $className copyWith({
     ${attributeInfos.map(generateCopyWithField).join(',\n\t\t')},
     String? \$id,

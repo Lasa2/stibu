@@ -42,6 +42,8 @@ abstract class AppwriteModel<T> {
   String toString() {
     return toJson().toString();
   }
+
+  Map<String, dynamic> toAppwrite();
 }
 
 class AppwriteClient {
@@ -107,7 +109,7 @@ class AppwriteClient {
         databaseId: overrideDatabaseId ?? databaseId,
         collectionId: collectionId,
         documentId: model.$id,
-        data: model.toJson(),
+        data: model.toAppwrite(),
       );
 
       return Success(fromAppwrite(response));
@@ -123,7 +125,7 @@ class AppwriteClient {
         databaseId: overrideDatabaseId ?? databaseId,
         collectionId: collectionId,
         documentId: model.$id,
-        data: model.toJson(),
+        data: model.toAppwrite(),
       );
 
       return Success(fromAppwrite(response));
@@ -292,6 +294,20 @@ class Customers extends AppwriteModel<Customers> {
   Map<String, dynamic> toJson() {
     return {
       'calendarEvents': calendarEvents?.map((e) => e.toJson()).toList(),
+			'city': city,
+			'email': email,
+			'id': id,
+			'name': name,
+			'phone': phone,
+			'street': street,
+			'zip': zip
+    };
+  }
+
+  @override
+  Map<String, dynamic> toAppwrite() {
+    return {
+      'calendarEvents': calendarEvents?.map((e) => e.toAppwrite()).toList(),
 			'city': city,
 			'email': email,
 			'id': id,
@@ -531,6 +547,18 @@ class Invoices extends AppwriteModel<Invoices> {
 			'name': name,
 			'notes': notes,
 			'order': order?.toJson()
+    };
+  }
+
+  @override
+  Map<String, dynamic> toAppwrite() {
+    return {
+      'amount': amount,
+			'date': date.toIso8601String(),
+			'invoiceNumber': invoiceNumber,
+			'name': name,
+			'notes': notes,
+			'order': order?.toAppwrite()
     };
   }
 
@@ -776,6 +804,20 @@ class Orders extends AppwriteModel<Orders> {
   }
 
   @override
+  Map<String, dynamic> toAppwrite() {
+    return {
+      'city': city,
+			'customerId': customerId,
+			'customerName': customerName,
+			'date': date.toIso8601String(),
+			'invoice': invoice?.toAppwrite(),
+			'products': products?.map((e) => e.toAppwrite()).toList(),
+			'street': street,
+			'zip': zip
+    };
+  }
+
+  @override
   Orders copyWith({
     String? city,
 		int? customerId,
@@ -996,6 +1038,17 @@ class OrderProducts extends AppwriteModel<OrderProducts> {
     return {
       'id': id,
 			'order': order?.toJson(),
+			'price': price,
+			'quantity': quantity,
+			'title': title
+    };
+  }
+
+  @override
+  Map<String, dynamic> toAppwrite() {
+    return {
+      'id': id,
+			'order': order?.toAppwrite(),
 			'price': price,
 			'quantity': quantity,
 			'title': title
@@ -1367,6 +1420,43 @@ class Products extends AppwriteModel<Products> {
   }
 
   @override
+  Map<String, dynamic> toAppwrite() {
+    return {
+      'alternateId': alternateId,
+			'beginSaleDate': beginSaleDate.toIso8601String(),
+			'canBePurchased': canBePurchased,
+			'categorySlugs': categorySlugs,
+			'color': color,
+			'culture': culture,
+			'description': description,
+			'endSaleDate': endSaleDate.toIso8601String(),
+			'excludeFrom': excludeFrom,
+			'exclusiveTo': exclusiveTo,
+			'formattedItemPrice': formattedItemPrice,
+			'formattedOriginalItemPrice': formattedOriginalItemPrice,
+			'hasSalePrice': hasSalePrice,
+			'hoverImage': hoverImage,
+			'id': id,
+			'images': images,
+			'inventoryStatus': inventoryStatus,
+			'isCommissionable': isCommissionable,
+			'itemPrice': itemPrice,
+			'languages': languages,
+			'launchDate': launchDate.toIso8601String(),
+			'lifeCycleStates': lifeCycleStates,
+			'metaDescription': metaDescription,
+			'metaTitle': metaTitle,
+			'offeringType': offeringType,
+			'originalItemPrice': originalItemPrice,
+			'qtyLimit': qtyLimit,
+			'qualifier': qualifier,
+			'replacementForItemId': replacementForItemId,
+			'slug': slug,
+			'title': title
+    };
+  }
+
+  @override
   Products copyWith({
     String? alternateId,
 		DateTime? beginSaleDate,
@@ -1699,6 +1789,17 @@ class Expenses extends AppwriteModel<Expenses> {
   }
 
   @override
+  Map<String, dynamic> toAppwrite() {
+    return {
+      'amount': amount,
+			'date': date.toIso8601String(),
+			'expenseNumber': expenseNumber,
+			'name': name,
+			'notes': notes
+    };
+  }
+
+  @override
   Expenses copyWith({
     int? amount,
 		DateTime? date,
@@ -1923,6 +2024,19 @@ class CalendarEvents extends AppwriteModel<CalendarEvents> {
   }
 
   @override
+  Map<String, dynamic> toAppwrite() {
+    return {
+      'amount': amount,
+			'description': description,
+			'end': end.toIso8601String(),
+			'participants': participants?.map((e) => e.toAppwrite()).toList(),
+			'start': start.toIso8601String(),
+			'title': title,
+			'type': type.name
+    };
+  }
+
+  @override
   CalendarEvents copyWith({
     int? amount,
 		String? description,
@@ -2138,6 +2252,15 @@ class CalendarEventParticipants extends AppwriteModel<CalendarEventParticipants>
     return {
       'customer': customer?.toJson(),
 			'event': event?.toJson(),
+			'status': status.name
+    };
+  }
+
+  @override
+  Map<String, dynamic> toAppwrite() {
+    return {
+      'customer': customer?.toAppwrite(),
+			'event': event?.toAppwrite(),
 			'status': status.name
     };
   }

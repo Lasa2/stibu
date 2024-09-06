@@ -44,6 +44,8 @@ abstract class AppwriteModel<T> {
   String toString() {
     return toJson().toString();
   }
+
+  Map<String, dynamic> toAppwrite();
 }
 
 class AppwriteClient {
@@ -109,7 +111,7 @@ class AppwriteClient {
         databaseId: overrideDatabaseId ?? databaseId,
         collectionId: collectionId,
         documentId: model.\$id,
-        data: model.toJson(),
+        data: model.toAppwrite(),
       );
 
       return Success(fromAppwrite(response));
@@ -125,7 +127,7 @@ class AppwriteClient {
         databaseId: overrideDatabaseId ?? databaseId,
         collectionId: collectionId,
         documentId: model.\$id,
-        data: model.toJson(),
+        data: model.toAppwrite(),
       );
 
       return Success(fromAppwrite(response));

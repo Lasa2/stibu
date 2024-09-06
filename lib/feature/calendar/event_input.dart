@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:result_type/result_type.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/currency.dart';
 import 'package:stibu/common/datetime_formatter.dart';
@@ -106,6 +107,7 @@ class _EventInputDialogState extends State<EventInputDialog> {
               padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
               child: TextFormBox(
                 placeholder: 'Title',
+                initialValue: _title,
                 onSaved: (value) => _title = value,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -302,6 +304,10 @@ class _EventInputDialogState extends State<EventInputDialog> {
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
               child: CustomerAutoSuggest(
+                filteredCustomers: _participants
+                    .map((e) => e.customer)
+                    .whereType<Customers>()
+                    .toList(),
                 onSelected: (customer) {
                   setState(() {
                     _participants.add(CalendarEventParticipants(
@@ -357,11 +363,13 @@ class _EventInputDialogState extends State<EventInputDialog> {
 }
 
 class CustomerAutoSuggest extends StatefulWidget {
+  final List<Customers> filteredCustomers;
   final void Function(Customers)? onSelected;
 
   const CustomerAutoSuggest({
     super.key,
     this.onSelected,
+    this.filteredCustomers = const [],
   });
 
   @override
@@ -370,7 +378,6 @@ class CustomerAutoSuggest extends StatefulWidget {
 
 class _CustomerAutoSuggestState extends State<CustomerAutoSuggest> {
   final List<Customers> _customers = [];
-  final List<Customers> _filteredCustomers = [];
   final TextEditingController _controller = TextEditingController();
   Timer? _debounce;
 
@@ -388,7 +395,7 @@ class _CustomerAutoSuggestState extends State<CustomerAutoSuggest> {
           ]).then((result) {
         final items = result.documents.map((e) => Customers.fromAppwrite(e));
         final newItems = items.where((element) {
-          return !_filteredCustomers.any((e) => e.$id == element.$id) &&
+          return !widget.filteredCustomers.any((e) => e.$id == element.$id) &&
               !_customers.any((e) => e.$id == element.$id);
         });
 
@@ -414,7 +421,7 @@ class _CustomerAutoSuggestState extends State<CustomerAutoSuggest> {
       textInputAction: TextInputAction.search,
       onSelected: (item) {
         setState(() {
-          _filteredCustomers.add(item.value as Customers);
+          widget.filteredCustomers.add(item.value as Customers);
           _customers.remove(item.value);
         });
         widget.onSelected?.call(item.value as Customers);
@@ -443,12 +450,30 @@ void displayNewEventDialog(BuildContext context) {
     builder: (context) => const EventInputDialog(
       title: 'New Event',
     ),
-  ).then((value) {
+  ).then((value) async {
     if (value != null) {
       // save event
-      value.create().then((response) {
-        showResultInfo(context, response);
-      });
+      final appwrite = getIt<AppwriteClient>();
+
+      try {
+        final data = value.toAppwrite(includeRelations: false);
+        data['participants'] = value.participants?.map((e) {
+              final item = e.toAppwrite(includeRelations: false, isChild: true);
+              item['customer'] = e.customer?.$id;
+              return item;
+            }).toList() ??
+            [];
+
+        await appwrite.databases.createDocument(
+          databaseId: CalendarEvents.databaseId,
+          collectionId: CalendarEvents.collectionInfo.$id,
+          documentId: value.$id,
+          data: data,
+        );
+      } on AppwriteException catch (e) {
+        if (!context.mounted) return;
+        showResultInfo(context, Failure(e.message ?? 'Failed to create event'));
+      }
     }
   });
 }

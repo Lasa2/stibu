@@ -49,7 +49,7 @@ class $className extends AppwriteModel<$className> {
   })${asserts.isNotEmpty ? '  : $asserts' : ''};
 
   factory $className({
-    ${attributeInfos.map(generateNamedConstructorField).join(',\n\t\t')}
+    ${attributeInfos.map(generateNamedConstructorField).join(',\n\t\t')},
   }) {
     return $className._(
       ${attributeInfos.map(generateNamedConstructorFieldAssignment).join(',\n\t\t\t')},
@@ -70,10 +70,13 @@ class $className extends AppwriteModel<$className> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite({bool isChild = false}) {
+  Map<String, dynamic> toAppwrite({
+    bool isChild = false,
+    bool includeRelations = true,
+  }) {
     return {
       ${attributeInfos.map(generateToAppwriteField).join(',\n\t\t\t')},
-      if (!isChild) '\\\$id': \$id,
+      if (isChild) '\\\$id': \$id,
     };
   }
 

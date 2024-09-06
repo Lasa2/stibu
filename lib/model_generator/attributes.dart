@@ -524,3 +524,41 @@ String generateHashCodeField(AttributeInfo attribute) {
 
   return name;
 }
+
+String generateToAppwriteField(AttributeInfo attribute) {
+  final name = attribute.name;
+
+  switch (attribute.type.toString()) {
+    case 'DateTime':
+      return "'$name': ${attribute.array ? '$name.map((e) => e.toIso8601String()).toList()' : '$name.toIso8601String()'}";
+    case 'Enum':
+      return "'$name': ${attribute.array ? '$name.map((e) => e.name).toList()' : '$name.name'}";
+    case 'Relationship':
+      return generateRelationshipToAppwriteField(
+          attribute as AttributeInfoRelationship);
+    default:
+      return "'$name': $name";
+  }
+}
+
+String generateRelationshipToAppwriteField(AttributeInfoRelationship attribute) {
+  final name = attribute.name;
+
+  if (attribute.relationType == RelationshipType.oneToOne ||
+      attribute.relationType == RelationshipType.oneToMany &&
+          attribute.side == Side.child ||
+      attribute.relationType == RelationshipType.manyToOne &&
+          attribute.side == Side.parent) {
+    return "'$name': $name?.toAppwrite()";
+  }
+
+  if (attribute.relationType == RelationshipType.manyToMany ||
+      attribute.relationType == RelationshipType.oneToMany &&
+          attribute.side == Side.parent ||
+      attribute.relationType == RelationshipType.manyToOne &&
+          attribute.side == Side.child) {
+    return "'$name': $name?.map((e) => e.toAppwrite()).toList()";
+  }
+
+  throw Exception('Invalid relationship type');
+}

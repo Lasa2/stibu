@@ -270,7 +270,7 @@ class Customers extends AppwriteModel<Customers> {
 		required String name,
 		String? phone,
 		String? street,
-		String? zip
+		String? zip,
   }) {
     return Customers._(
       calendarEvents: calendarEvents,
@@ -305,9 +305,12 @@ class Customers extends AppwriteModel<Customers> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite({bool isChild = false}) {
+  Map<String, dynamic> toAppwrite({
+    bool isChild = false,
+    bool includeRelations = true,
+  }) {
     return {
-      'calendarEvents': calendarEvents?.map((e) => e.toAppwrite(isChild: true)).toList(),
+      if (includeRelations) 'calendarEvents': calendarEvents?.map((e) => e.toAppwrite(isChild: true)).toList(),
 			'city': city,
 			'email': email,
 			'id': id,
@@ -315,7 +318,7 @@ class Customers extends AppwriteModel<Customers> {
 			'phone': phone,
 			'street': street,
 			'zip': zip,
-      if (!isChild) '\$id': $id,
+      if (isChild) '\$id': $id,
     };
   }
 
@@ -521,7 +524,7 @@ class Invoices extends AppwriteModel<Invoices> {
 		required String invoiceNumber,
 		required String name,
 		String? notes,
-		Orders? order
+		Orders? order,
   }) {
     return Invoices._(
       amount: amount,
@@ -552,15 +555,18 @@ class Invoices extends AppwriteModel<Invoices> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite({bool isChild = false}) {
+  Map<String, dynamic> toAppwrite({
+    bool isChild = false,
+    bool includeRelations = true,
+  }) {
     return {
       'amount': amount,
 			'date': date.toIso8601String(),
 			'invoiceNumber': invoiceNumber,
 			'name': name,
 			'notes': notes,
-			'order': order?.toAppwrite(isChild: true),
-      if (!isChild) '\$id': $id,
+			if (includeRelations) 'order': order?.toAppwrite(isChild: true),
+      if (isChild) '\$id': $id,
     };
   }
 
@@ -771,7 +777,7 @@ class Orders extends AppwriteModel<Orders> {
 		Invoices? invoice,
 		List<OrderProducts>? products,
 		String? street,
-		String? zip
+		String? zip,
   }) {
     return Orders._(
       city: city,
@@ -806,17 +812,20 @@ class Orders extends AppwriteModel<Orders> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite({bool isChild = false}) {
+  Map<String, dynamic> toAppwrite({
+    bool isChild = false,
+    bool includeRelations = true,
+  }) {
     return {
       'city': city,
 			'customerId': customerId,
 			'customerName': customerName,
 			'date': date.toIso8601String(),
-			'invoice': invoice?.toAppwrite(isChild: true),
-			'products': products?.map((e) => e.toAppwrite(isChild: true)).toList(),
+			if (includeRelations) 'invoice': invoice?.toAppwrite(isChild: true),
+			if (includeRelations) 'products': products?.map((e) => e.toAppwrite(isChild: true)).toList(),
 			'street': street,
 			'zip': zip,
-      if (!isChild) '\$id': $id,
+      if (isChild) '\$id': $id,
     };
   }
 
@@ -1019,7 +1028,7 @@ class OrderProducts extends AppwriteModel<OrderProducts> {
 		Orders? order,
 		required int price,
 		required int quantity,
-		required String title
+		required String title,
   }) {
     return OrderProducts._(
       id: id,
@@ -1048,14 +1057,17 @@ class OrderProducts extends AppwriteModel<OrderProducts> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite({bool isChild = false}) {
+  Map<String, dynamic> toAppwrite({
+    bool isChild = false,
+    bool includeRelations = true,
+  }) {
     return {
       'id': id,
-			'order': order?.toAppwrite(isChild: true),
+			if (includeRelations) 'order': order?.toAppwrite(isChild: true),
 			'price': price,
 			'quantity': quantity,
 			'title': title,
-      if (!isChild) '\$id': $id,
+      if (isChild) '\$id': $id,
     };
   }
 
@@ -1343,7 +1355,7 @@ class Products extends AppwriteModel<Products> {
 		required List<String> qualifier,
 		int? replacementForItemId,
 		required String slug,
-		required String title
+		required String title,
   }) {
     return Products._(
       alternateId: alternateId,
@@ -1424,7 +1436,10 @@ class Products extends AppwriteModel<Products> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite({bool isChild = false}) {
+  Map<String, dynamic> toAppwrite({
+    bool isChild = false,
+    bool includeRelations = true,
+  }) {
     return {
       'alternateId': alternateId,
 			'beginSaleDate': beginSaleDate.toIso8601String(),
@@ -1457,7 +1472,7 @@ class Products extends AppwriteModel<Products> {
 			'replacementForItemId': replacementForItemId,
 			'slug': slug,
 			'title': title,
-      if (!isChild) '\$id': $id,
+      if (isChild) '\$id': $id,
     };
   }
 
@@ -1765,7 +1780,7 @@ class Expenses extends AppwriteModel<Expenses> {
 		required DateTime date,
 		required String expenseNumber,
 		required String name,
-		String? notes
+		String? notes,
   }) {
     return Expenses._(
       amount: amount,
@@ -1794,14 +1809,17 @@ class Expenses extends AppwriteModel<Expenses> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite({bool isChild = false}) {
+  Map<String, dynamic> toAppwrite({
+    bool isChild = false,
+    bool includeRelations = true,
+  }) {
     return {
       'amount': amount,
 			'date': date.toIso8601String(),
 			'expenseNumber': expenseNumber,
 			'name': name,
 			'notes': notes,
-      if (!isChild) '\$id': $id,
+      if (isChild) '\$id': $id,
     };
   }
 
@@ -1997,7 +2015,7 @@ class CalendarEvents extends AppwriteModel<CalendarEvents> {
 		List<CalendarEventParticipants>? participants,
 		required DateTime start,
 		required String title,
-		required Type type
+		required Type type,
   }) {
     return CalendarEvents._(
       amount: amount,
@@ -2030,16 +2048,19 @@ class CalendarEvents extends AppwriteModel<CalendarEvents> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite({bool isChild = false}) {
+  Map<String, dynamic> toAppwrite({
+    bool isChild = false,
+    bool includeRelations = true,
+  }) {
     return {
       'amount': amount,
 			'description': description,
 			'end': end.toIso8601String(),
-			'participants': participants?.map((e) => e.toAppwrite(isChild: true)).toList(),
+			if (includeRelations) 'participants': participants?.map((e) => e.toAppwrite(isChild: true)).toList(),
 			'start': start.toIso8601String(),
 			'title': title,
 			'type': type.name,
-      if (!isChild) '\$id': $id,
+      if (isChild) '\$id': $id,
     };
   }
 
@@ -2239,7 +2260,7 @@ class CalendarEventParticipants extends AppwriteModel<CalendarEventParticipants>
   factory CalendarEventParticipants({
     Customers? customer,
 		CalendarEvents? event,
-		required Status status
+		required Status status,
   }) {
     return CalendarEventParticipants._(
       customer: customer,
@@ -2264,12 +2285,15 @@ class CalendarEventParticipants extends AppwriteModel<CalendarEventParticipants>
   }
 
   @override
-  Map<String, dynamic> toAppwrite({bool isChild = false}) {
+  Map<String, dynamic> toAppwrite({
+    bool isChild = false,
+    bool includeRelations = true,
+  }) {
     return {
-      'customer': customer?.toAppwrite(isChild: true),
-			'event': event?.toAppwrite(isChild: true),
+      if (includeRelations) 'customer': customer?.toAppwrite(isChild: true),
+			if (includeRelations) 'event': event?.toAppwrite(isChild: true),
 			'status': status.name,
-      if (!isChild) '\$id': $id,
+      if (isChild) '\$id': $id,
     };
   }
 

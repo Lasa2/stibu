@@ -549,7 +549,7 @@ String generateRelationshipToAppwriteField(AttributeInfoRelationship attribute) 
           attribute.side == Side.child ||
       attribute.relationType == RelationshipType.manyToOne &&
           attribute.side == Side.parent) {
-    return "'$name': $name?.toAppwrite()";
+    return "'$name': $name?.toAppwrite(isChild: true)";
   }
 
   if (attribute.relationType == RelationshipType.manyToMany ||
@@ -557,7 +557,7 @@ String generateRelationshipToAppwriteField(AttributeInfoRelationship attribute) 
           attribute.side == Side.parent ||
       attribute.relationType == RelationshipType.manyToOne &&
           attribute.side == Side.child) {
-    return "'$name': $name?.map((e) => e.toAppwrite()).toList()";
+    return "'$name': $name?.map((e) => e.toAppwrite(isChild: true)).toList()";
   }
 
   throw Exception('Invalid relationship type');

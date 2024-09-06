@@ -70,9 +70,10 @@ class $className extends AppwriteModel<$className> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite() {
+  Map<String, dynamic> toAppwrite({bool isChild = false}) {
     return {
-      ${attributeInfos.map(generateToAppwriteField).join(',\n\t\t\t')}
+      ${attributeInfos.map(generateToAppwriteField).join(',\n\t\t\t')},
+      if (!isChild) '\\\$id': \$id,
     };
   }
 

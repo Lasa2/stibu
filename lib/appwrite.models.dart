@@ -305,16 +305,17 @@ class Customers extends AppwriteModel<Customers> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite() {
+  Map<String, dynamic> toAppwrite({bool isChild = false}) {
     return {
-      'calendarEvents': calendarEvents?.map((e) => e.toAppwrite()).toList(),
+      'calendarEvents': calendarEvents?.map((e) => e.toAppwrite(isChild: true)).toList(),
 			'city': city,
 			'email': email,
 			'id': id,
 			'name': name,
 			'phone': phone,
 			'street': street,
-			'zip': zip
+			'zip': zip,
+      if (!isChild) '\$id': $id,
     };
   }
 
@@ -551,14 +552,15 @@ class Invoices extends AppwriteModel<Invoices> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite() {
+  Map<String, dynamic> toAppwrite({bool isChild = false}) {
     return {
       'amount': amount,
 			'date': date.toIso8601String(),
 			'invoiceNumber': invoiceNumber,
 			'name': name,
 			'notes': notes,
-			'order': order?.toAppwrite()
+			'order': order?.toAppwrite(isChild: true),
+      if (!isChild) '\$id': $id,
     };
   }
 
@@ -804,16 +806,17 @@ class Orders extends AppwriteModel<Orders> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite() {
+  Map<String, dynamic> toAppwrite({bool isChild = false}) {
     return {
       'city': city,
 			'customerId': customerId,
 			'customerName': customerName,
 			'date': date.toIso8601String(),
-			'invoice': invoice?.toAppwrite(),
-			'products': products?.map((e) => e.toAppwrite()).toList(),
+			'invoice': invoice?.toAppwrite(isChild: true),
+			'products': products?.map((e) => e.toAppwrite(isChild: true)).toList(),
 			'street': street,
-			'zip': zip
+			'zip': zip,
+      if (!isChild) '\$id': $id,
     };
   }
 
@@ -1045,13 +1048,14 @@ class OrderProducts extends AppwriteModel<OrderProducts> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite() {
+  Map<String, dynamic> toAppwrite({bool isChild = false}) {
     return {
       'id': id,
-			'order': order?.toAppwrite(),
+			'order': order?.toAppwrite(isChild: true),
 			'price': price,
 			'quantity': quantity,
-			'title': title
+			'title': title,
+      if (!isChild) '\$id': $id,
     };
   }
 
@@ -1420,7 +1424,7 @@ class Products extends AppwriteModel<Products> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite() {
+  Map<String, dynamic> toAppwrite({bool isChild = false}) {
     return {
       'alternateId': alternateId,
 			'beginSaleDate': beginSaleDate.toIso8601String(),
@@ -1452,7 +1456,8 @@ class Products extends AppwriteModel<Products> {
 			'qualifier': qualifier,
 			'replacementForItemId': replacementForItemId,
 			'slug': slug,
-			'title': title
+			'title': title,
+      if (!isChild) '\$id': $id,
     };
   }
 
@@ -1789,13 +1794,14 @@ class Expenses extends AppwriteModel<Expenses> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite() {
+  Map<String, dynamic> toAppwrite({bool isChild = false}) {
     return {
       'amount': amount,
 			'date': date.toIso8601String(),
 			'expenseNumber': expenseNumber,
 			'name': name,
-			'notes': notes
+			'notes': notes,
+      if (!isChild) '\$id': $id,
     };
   }
 
@@ -2024,15 +2030,16 @@ class CalendarEvents extends AppwriteModel<CalendarEvents> {
   }
 
   @override
-  Map<String, dynamic> toAppwrite() {
+  Map<String, dynamic> toAppwrite({bool isChild = false}) {
     return {
       'amount': amount,
 			'description': description,
 			'end': end.toIso8601String(),
-			'participants': participants?.map((e) => e.toAppwrite()).toList(),
+			'participants': participants?.map((e) => e.toAppwrite(isChild: true)).toList(),
 			'start': start.toIso8601String(),
 			'title': title,
-			'type': type.name
+			'type': type.name,
+      if (!isChild) '\$id': $id,
     };
   }
 
@@ -2257,11 +2264,12 @@ class CalendarEventParticipants extends AppwriteModel<CalendarEventParticipants>
   }
 
   @override
-  Map<String, dynamic> toAppwrite() {
+  Map<String, dynamic> toAppwrite({bool isChild = false}) {
     return {
-      'customer': customer?.toAppwrite(),
-			'event': event?.toAppwrite(),
-			'status': status.name
+      'customer': customer?.toAppwrite(isChild: true),
+			'event': event?.toAppwrite(isChild: true),
+			'status': status.name,
+      if (!isChild) '\$id': $id,
     };
   }
 

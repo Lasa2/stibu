@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:result_type/result_type.dart';
@@ -341,6 +342,36 @@ class Customers extends AppwriteModel<Customers> {
     return toJson().toString();
   }
 
+  @override
+  bool operator ==(Object other) {
+		final eq = const ListEquality().equals;
+    return other is Customers &&
+      eq(calendarEvents, other.calendarEvents) &&
+			city == other.city &&
+			email == other.email &&
+			id == other.id &&
+			name == other.name &&
+			phone == other.phone &&
+			street == other.street &&
+			zip == other.zip &&
+      other.$id == $id;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAllUnordered([
+      ...(calendarEvents ?? []),
+			city,
+			email,
+			id,
+			name,
+			phone,
+			street,
+			zip,
+      $id,
+    ]);
+  }
+
   factory Customers.fromAppwrite(Document doc) {
     return Customers._(
       calendarEvents: List<CalendarEventParticipants>.unmodifiable(doc.data['calendarEvents'] == null ? [] : doc.data['calendarEvents'].map((e) => CalendarEventParticipants.fromAppwrite(Document.fromMap(e)))),
@@ -537,6 +568,31 @@ class Invoices extends AppwriteModel<Invoices> {
   @override
   String toString() {
     return toJson().toString();
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is Invoices &&
+      amount == other.amount &&
+			date == other.date &&
+			invoiceNumber == other.invoiceNumber &&
+			name == other.name &&
+			notes == other.notes &&
+			order == other.order &&
+      other.$id == $id;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAllUnordered([
+      amount,
+			date,
+			invoiceNumber,
+			name,
+			notes,
+			order,
+      $id,
+    ]);
   }
 
   factory Invoices.fromAppwrite(Document doc) {
@@ -759,6 +815,36 @@ class Orders extends AppwriteModel<Orders> {
     return toJson().toString();
   }
 
+  @override
+  bool operator ==(Object other) {
+		final eq = const ListEquality().equals;
+    return other is Orders &&
+      city == other.city &&
+			customerId == other.customerId &&
+			customerName == other.customerName &&
+			date == other.date &&
+			invoice == other.invoice &&
+			eq(products, other.products) &&
+			street == other.street &&
+			zip == other.zip &&
+      other.$id == $id;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAllUnordered([
+      city,
+			customerId,
+			customerName,
+			date,
+			invoice,
+			...(products ?? []),
+			street,
+			zip,
+      $id,
+    ]);
+  }
+
   factory Orders.fromAppwrite(Document doc) {
     return Orders._(
       city: doc.data['city'],
@@ -948,6 +1034,29 @@ class OrderProducts extends AppwriteModel<OrderProducts> {
   @override
   String toString() {
     return toJson().toString();
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is OrderProducts &&
+      id == other.id &&
+			order == other.order &&
+			price == other.price &&
+			quantity == other.quantity &&
+			title == other.title &&
+      other.$id == $id;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAllUnordered([
+      id,
+			order,
+			price,
+			quantity,
+			title,
+      $id,
+    ]);
   }
 
   factory OrderProducts.fromAppwrite(Document doc) {
@@ -1343,6 +1452,82 @@ class Products extends AppwriteModel<Products> {
     return toJson().toString();
   }
 
+  @override
+  bool operator ==(Object other) {
+		final eq = const ListEquality().equals;
+    return other is Products &&
+      alternateId == other.alternateId &&
+			beginSaleDate == other.beginSaleDate &&
+			canBePurchased == other.canBePurchased &&
+			eq(categorySlugs, other.categorySlugs) &&
+			eq(color, other.color) &&
+			culture == other.culture &&
+			description == other.description &&
+			endSaleDate == other.endSaleDate &&
+			eq(excludeFrom, other.excludeFrom) &&
+			eq(exclusiveTo, other.exclusiveTo) &&
+			formattedItemPrice == other.formattedItemPrice &&
+			formattedOriginalItemPrice == other.formattedOriginalItemPrice &&
+			hasSalePrice == other.hasSalePrice &&
+			hoverImage == other.hoverImage &&
+			id == other.id &&
+			eq(images, other.images) &&
+			inventoryStatus == other.inventoryStatus &&
+			isCommissionable == other.isCommissionable &&
+			itemPrice == other.itemPrice &&
+			eq(languages, other.languages) &&
+			launchDate == other.launchDate &&
+			eq(lifeCycleStates, other.lifeCycleStates) &&
+			metaDescription == other.metaDescription &&
+			metaTitle == other.metaTitle &&
+			offeringType == other.offeringType &&
+			originalItemPrice == other.originalItemPrice &&
+			qtyLimit == other.qtyLimit &&
+			eq(qualifier, other.qualifier) &&
+			replacementForItemId == other.replacementForItemId &&
+			slug == other.slug &&
+			title == other.title &&
+      other.$id == $id;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAllUnordered([
+      alternateId,
+			beginSaleDate,
+			canBePurchased,
+			...categorySlugs,
+			...color,
+			culture,
+			description,
+			endSaleDate,
+			...excludeFrom,
+			...exclusiveTo,
+			formattedItemPrice,
+			formattedOriginalItemPrice,
+			hasSalePrice,
+			hoverImage,
+			id,
+			...images,
+			inventoryStatus,
+			isCommissionable,
+			itemPrice,
+			...languages,
+			launchDate,
+			...lifeCycleStates,
+			metaDescription,
+			metaTitle,
+			offeringType,
+			originalItemPrice,
+			qtyLimit,
+			...qualifier,
+			replacementForItemId,
+			slug,
+			title,
+      $id,
+    ]);
+  }
+
   factory Products.fromAppwrite(Document doc) {
     return Products._(
       alternateId: doc.data['alternateId'],
@@ -1545,6 +1730,29 @@ class Expenses extends AppwriteModel<Expenses> {
   @override
   String toString() {
     return toJson().toString();
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is Expenses &&
+      amount == other.amount &&
+			date == other.date &&
+			expenseNumber == other.expenseNumber &&
+			name == other.name &&
+			notes == other.notes &&
+      other.$id == $id;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAllUnordered([
+      amount,
+			date,
+			expenseNumber,
+			name,
+			notes,
+      $id,
+    ]);
   }
 
   factory Expenses.fromAppwrite(Document doc) {
@@ -1752,6 +1960,34 @@ class CalendarEvents extends AppwriteModel<CalendarEvents> {
     return toJson().toString();
   }
 
+  @override
+  bool operator ==(Object other) {
+		final eq = const ListEquality().equals;
+    return other is CalendarEvents &&
+      amount == other.amount &&
+			description == other.description &&
+			end == other.end &&
+			eq(participants, other.participants) &&
+			start == other.start &&
+			title == other.title &&
+			type == other.type &&
+      other.$id == $id;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAllUnordered([
+      amount,
+			description,
+			end,
+			...(participants ?? []),
+			start,
+			title,
+			type,
+      $id,
+    ]);
+  }
+
   factory CalendarEvents.fromAppwrite(Document doc) {
     return CalendarEvents._(
       amount: doc.data['amount'],
@@ -1934,6 +2170,25 @@ class CalendarEventParticipants extends AppwriteModel<CalendarEventParticipants>
   @override
   String toString() {
     return toJson().toString();
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CalendarEventParticipants &&
+      customer == other.customer &&
+			event == other.event &&
+			status == other.status &&
+      other.$id == $id;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAllUnordered([
+      customer,
+			event,
+			status,
+      $id,
+    ]);
   }
 
   factory CalendarEventParticipants.fromAppwrite(Document doc) {

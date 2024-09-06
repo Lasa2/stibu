@@ -1,5 +1,6 @@
 String generateCommon() {
   return '''
+import 'package:collection/collection.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:result_type/result_type.dart';

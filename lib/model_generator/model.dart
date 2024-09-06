@@ -95,6 +95,21 @@ class $className extends AppwriteModel<$className> {
     return toJson().toString();
   }
 
+  @override
+  bool operator ==(Object other) {${containsList(attributeInfos) ? '\n\t\tfinal eq = const ListEquality().equals;' : ''}
+    return other is $className &&
+      ${attributeInfos.map(generateEqualsFields).join(' &&\n\t\t\t')} &&
+      other.\$id == \$id;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAllUnordered([
+      ${attributeInfos.map(generateHashCodeField).join(',\n\t\t\t')},
+      \$id,
+    ]);
+  }
+
   factory $className.fromAppwrite(Document doc) {
     return $className._(
       ${attributeInfos.map(generateFromAppwriteField).join(',\n\t\t\t')},

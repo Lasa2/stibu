@@ -1,15 +1,16 @@
 import 'dart:async';
 
+import 'package:appwrite/appwrite.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/is_large_screen.dart';
 import 'package:stibu/common/show_result_info.dart';
 import 'package:stibu/feature/app_state/app_state.dart';
-import 'package:stibu/feature/orders/create_order.dart';
 import 'package:stibu/feature/orders/list_detail.dart';
 import 'package:stibu/feature/orders/list_entry.dart';
 import 'package:stibu/main.dart';
+import 'package:stibu/widgets/picker.dart';
 
 @RoutePage()
 class OrderListPage extends StatefulWidget {
@@ -87,27 +88,12 @@ class _OrderListPageState extends State<OrderListPage> {
               icon: const Icon(FluentIcons.add),
               label: const Text('New'),
               onPressed: () async {
-                final customers = <Customers>[];
-                // final customers = await Customers.all();
-
-                // if (customers.isFailure && context.mounted) {
-                //   await showResultInfo(context, customers);
-                //   return;
-                // }
-
-                if (!context.mounted) return;
-                return showDialog<Orders>(
-                  context: context,
-                  builder: (context) => CreateOrder(
-                    customers: customers,
-                  ),
-                ).then((value) {
-                  if (value != null) {
-                    setState(() {
-                      selectOrder = value;
-                    });
-                  }
-                });
+                final order = await displayNewOrderDialog(context);
+                if (order != null) {
+                  setState(() {
+                    selectOrder = order;
+                  });
+                }
               },
             ),
             if (selectedIndex != null && _orders[selectedIndex!].canDelete) ...[
@@ -178,6 +164,131 @@ class _OrderListPageState extends State<OrderListPage> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+Future<Orders?> displayNewOrderDialog(BuildContext context) async {
+  return await showDialog(
+      context: context,
+      builder: (context) {
+        return const NewOrderDialog();
+      });
+}
+
+class NewOrderDialog extends StatefulWidget {
+  const NewOrderDialog({
+    super.key,
+  });
+
+  @override
+  State<NewOrderDialog> createState() => _NewOrderDialogState();
+}
+
+class _NewOrderDialogState extends State<NewOrderDialog> {
+  DateTime selectedDate = DateTime.now();
+  Customers? selectedCustomer;
+  final List<Customers> _customers = [];
+  Timer? _debounce;
+  final _formKey = GlobalKey<FormState>();
+
+  void _loadCustomers(String query) {
+    if (_debounce?.isActive ?? false) {
+      _debounce?.cancel();
+    }
+
+    _debounce = Timer(const Duration(milliseconds: 50), () {
+      final appwrite = getIt<AppwriteClient>();
+
+      appwrite.databases.listDocuments(
+          databaseId: Customers.databaseId,
+          collectionId: Customers.collectionInfo.$id,
+          queries: [
+            Query.search('name', query),
+          ]).then((result) {
+        final items = result.documents.map((e) => Customers.fromAppwrite(e));
+        print(items);
+        final newItems =
+            items.where((e) => !_customers.any((c) => c.$id == e.$id));
+        print(newItems);
+        setState(() {
+          _customers.addAll(newItems);
+        });
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ContentDialog(
+      title: const Text('New Order'),
+      actions: [
+        Button(
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              _formKey.currentState!.save();
+
+              final order = Orders(
+                customerId: selectedCustomer!.id,
+                customerName: selectedCustomer!.name,
+                date: selectedDate.toUtc(),
+              );
+
+              order.create().then((value) {
+                showResultInfo(context, value).then((_) {
+                  if (value.isSuccess) {
+                    Navigator.of(context).pop(order);
+                  }
+                });
+              });
+            }
+          },
+          child: const Text('Save'),
+        ),
+        Button(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+      ],
+      content: Form(
+        key: _formKey,
+        child: ListView(
+          children: [
+            FormDatePicker(
+              header: 'Select Order Date',
+              initialValue: selectedDate,
+              onSaved: (value) => selectedDate = value,
+            ),
+            const SizedBox(height: 16),
+            AutoSuggestBox<Customers>.form(
+              placeholder: 'Select Customer',
+              textInputAction: TextInputAction.search,
+              onSelected: (item) {
+                selectedCustomer = item.value;
+              },
+              onChanged: (text, reason) {
+                if (reason == TextChangedReason.userInput) {
+                  _loadCustomers(text);
+                }
+              },
+              items: _customers
+                  .map((e) => AutoSuggestBoxItem(
+                        label: e.name,
+                        value: e,
+                      ))
+                  .toList(),
+              validator: (value) {
+                if (value == null) {
+                  return 'Please select a customer';
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

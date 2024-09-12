@@ -1,8 +1,7 @@
 import 'package:appwrite/models.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:stibu/api/accounts.dart';
-import 'package:stibu/api/avatars.dart';
+import 'package:stibu/feature/app_state/app_state.dart';
 import 'package:stibu/feature/navigation/windows_appbar.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
@@ -76,7 +75,7 @@ var footerItems = <Object>[
   PaneItemAction(
     icon: const Icon(FluentIcons.sign_out),
     title: const Text('Sign Out'),
-    onTap: () => getIt<AccountsRepository>().logout(),
+    onTap: () => getIt<AppState>().logout(),
   ),
 ];
 
@@ -169,29 +168,29 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
   @override
   void initState() {
     super.initState();
-    getIt<AccountsRepository>().sessionStream.listen((session) async {
-      if (session != null) {
-        final user = await getIt<AccountsRepository>().user;
-        if (user.isSuccess) {
-          final avatar = await getIt<AvatarsRepository>().getAvatar(
-            name: user.success.name,
-            width: 32,
-            height: 32,
-          );
-          if (avatar.isSuccess) {
-            setState(() {
-              this.user = user.success;
-              this.avatar = avatar.success;
-            });
-          }
-        }
-      } else {
-        setState(() {
-          user = null;
-          avatar = null;
-        });
-      }
-    });
+    // getIt<AccountsRepository>().sessionStream.listen((session) async {
+    //   if (session != null) {
+    //     final user = await getIt<AccountsRepository>().user;
+    //     if (user.isSuccess) {
+    //       final avatar = await getIt<AvatarsRepository>().getAvatar(
+    //         name: user.success.name,
+    //         width: 32,
+    //         height: 32,
+    //       );
+    //       if (avatar.isSuccess) {
+    //         setState(() {
+    //           this.user = user.success;
+    //           this.avatar = avatar.success;
+    //         });
+    //       }
+    //     }
+    //   } else {
+    //     setState(() {
+    //       user = null;
+    //       avatar = null;
+    //     });
+    //   }
+    // });
   }
 
   @override

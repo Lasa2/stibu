@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:appwrite/appwrite.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stibu/feature/app_state/app_state.dart';
+import 'package:stibu/appwrite.models.dart';
+import 'package:stibu/feature/app_state/account.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
 
@@ -45,9 +47,17 @@ class AppRouter extends RootStackRouter {
           page: AuthenticationRoute.page,
         ),
         NoTransitionRoute(
+          page: ProductKeyRoute.page,
+          guards: [AuthGuard()],
+        ),
+        NoTransitionRoute(
+          page: OnboardingRoute.page,
+          guards: [AuthGuard()],
+        ),
+        NoTransitionRoute(
           path: "/",
           page: NavigationScaffoldRoute.page,
-          guards: [AuthGuard()],
+          guards: [AuthGuard(), OnboardingGuard(), ValidProductKeyGuard()],
           children: [
             NoTransitionRoute(
               path: "dashboard",
@@ -84,22 +94,72 @@ class AppRouter extends RootStackRouter {
       ];
 }
 
+class ValidProductKeyGuard extends AutoRouteGuard {
+  @override
+  void onNavigation(NavigationResolver resolver, StackRouter router) async {
+    final appwrite = getIt<AppwriteClient>();
+
+    try {
+      final user = await appwrite.account.get();
+      final validProductKey = user.labels.contains("validProductKey");
+
+      log.info('ValidProductKeyGuard: validProductKey=$validProductKey');
+      if (validProductKey) {
+        resolver.next(true);
+      } else {
+        resolver.redirect(ProductKeyRoute(
+          onFinish: () {
+            resolver.next(true);
+          },
+        ));
+      }
+    } on AppwriteException catch (e) {
+      log.warning(e.message);
+      resolver.next(false);
+    }
+  }
+}
+
+class OnboardingGuard extends AutoRouteGuard {
+  @override
+  void onNavigation(NavigationResolver resolver, StackRouter router) async {
+    final appwrite = getIt<AppwriteClient>();
+
+    try {
+      final user = await appwrite.account.get();
+      final onboardingCompleted =
+          user.prefs.data['onboardingCompleted'] ?? false;
+
+      log.info('OnboardingGuard: hasOnboarded=$onboardingCompleted');
+      if (onboardingCompleted) {
+        resolver.next(true);
+      } else {
+        resolver.redirect(OnboardingRoute(
+          onFinish: () {
+            resolver.next(true);
+          },
+        ));
+      }
+    } on AppwriteException catch (e) {
+      log.warning(e.message);
+      resolver.next(false);
+    }
+  }
+}
+
 class AuthGuard extends AutoRouteGuard {
   @override
   void onNavigation(NavigationResolver resolver, StackRouter router) async {
-    final appstate = getIt<AppState>();
+    final auth = getIt<Authentication>();
 
-    log.info("AuthGuard: isAuthenticated=${appstate.isAuthenticated.value}");
+    log.info("AuthGuard: isAuthenticated=${auth.isAuthenticated.value}");
 
-    if (appstate.isAuthenticated.value) {
-      log.info("Authenticated, continuing");
+    if (auth.isAuthenticated.value) {
       resolver.next(true);
     } else {
-      log.info("Not authenticated, redirecting to login");
       late final StreamSubscription sub;
-      sub = appstate.isAuthenticated.listen((isAuthenticated) {
+      sub = auth.isAuthenticated.listen((isAuthenticated) {
         if (isAuthenticated) {
-          log.info("Authenticated, continuing");
           resolver.next(true);
           sub.cancel();
         }
@@ -107,7 +167,6 @@ class AuthGuard extends AutoRouteGuard {
 
       resolver.redirect(AuthenticationRoute(
         onAuthenticated: () {
-          log.info("Authenticated, continuing");
           resolver.next(true);
           sub.cancel();
         },

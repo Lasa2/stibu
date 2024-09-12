@@ -8,7 +8,7 @@ import 'package:stibu/common/is_large_screen.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/new_ids.dart';
 import 'package:stibu/common/show_result_info.dart';
-import 'package:stibu/feature/app_state/app_state.dart';
+import 'package:stibu/feature/app_state/realtime_subscriptions.dart';
 import 'package:stibu/feature/customers/customer_info_card.dart';
 import 'package:stibu/feature/customers/customer_input.dart';
 import 'package:stibu/feature/router/router.gr.dart';
@@ -101,7 +101,8 @@ class _CustomerListPageState extends State<CustomerListPage> {
   void initState() {
     super.initState();
     _loadCustomers();
-    _subscription = getIt<AppState>().customerUpdates.listen((event) {
+    _subscription =
+        getIt<RealtimeSubscriptions>().customerUpdates.listen((event) {
       switch (event.type) {
         case RealtimeUpdateType.create:
           setState(() {

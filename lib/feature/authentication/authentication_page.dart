@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:stibu/common/show_result_info.dart';
-import 'package:stibu/feature/app_state/app_state.dart';
+import 'package:stibu/feature/app_state/account.dart';
 import 'package:stibu/feature/navigation/windows_appbar.dart';
 import 'package:stibu/main.dart';
 
@@ -111,7 +111,7 @@ class _CreateAccountTabState extends State<CreateAccountTab> {
       formKey.currentState!.save();
 
       final result =
-          await getIt<AppState>().createAccount(email!, password!, name!);
+          await getIt<Authentication>().createAccount(email!, password!, name!);
 
       if (!context.mounted) return;
       showResultInfo(context, result);
@@ -220,7 +220,7 @@ class _LoginTabState extends State<LoginTab> {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
 
-      final result = await getIt<AppState>().login(email!, password!);
+      final result = await getIt<Authentication>().login(email!, password!);
 
       if (!context.mounted) return;
       showResultInfo(context, result);

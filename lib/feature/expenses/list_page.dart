@@ -7,7 +7,7 @@ import 'package:stibu/common/datetime_formatter.dart';
 import 'package:stibu/common/is_large_screen.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/new_ids.dart';
-import 'package:stibu/feature/app_state/app_state.dart';
+import 'package:stibu/feature/app_state/realtime_subscriptions.dart';
 import 'package:stibu/feature/expenses/input.dart';
 import 'package:stibu/main.dart';
 
@@ -117,7 +117,8 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
   void initState() {
     super.initState();
     _loadExpenses();
-    _expensesSubscription = getIt<AppState>().expensesUpdates.listen((update) {
+    _expensesSubscription =
+        getIt<RealtimeSubscriptions>().expensesUpdates.listen((update) {
       switch (update.type) {
         case RealtimeUpdateType.create:
           setState(() {

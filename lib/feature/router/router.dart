@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stibu/api/accounts.dart';
+import 'package:stibu/feature/app_state/app_state.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
 
@@ -39,8 +41,9 @@ class NoTransitionRoute extends CustomRoute {
 class AppRouter extends RootStackRouter {
   @override
   List<AutoRoute> get routes => [
-        AutoRoute(path: "/login", page: LoginRoute.page),
-        AutoRoute(path: "/sign-up", page: CreateAccountRoute.page),
+        NoTransitionRoute(
+          page: AuthenticationRoute.page,
+        ),
         NoTransitionRoute(
           path: "/",
           page: NavigationScaffoldRoute.page,
@@ -84,17 +87,30 @@ class AppRouter extends RootStackRouter {
 class AuthGuard extends AutoRouteGuard {
   @override
   void onNavigation(NavigationResolver resolver, StackRouter router) async {
-    final auth = getIt<AccountsRepository>();
+    final appstate = getIt<AppState>();
 
-    log.info('Auth guard: ${auth.sessionStream.value}');
+    log.info("AuthGuard: isAuthenticated=${appstate.isAuthenticated.value}");
 
-    if (auth.sessionStream.value != null) {
+    if (appstate.isAuthenticated.value) {
       log.info("Authenticated, continuing");
       resolver.next(true);
     } else {
       log.info("Not authenticated, redirecting to login");
-      resolver.redirect(LoginRoute(
-        onResult: resolver.next,
+      late final StreamSubscription sub;
+      sub = appstate.isAuthenticated.listen((isAuthenticated) {
+        if (isAuthenticated) {
+          log.info("Authenticated, continuing");
+          resolver.next(true);
+          sub.cancel();
+        }
+      });
+
+      resolver.redirect(AuthenticationRoute(
+        onAuthenticated: () {
+          log.info("Authenticated, continuing");
+          resolver.next(true);
+          sub.cancel();
+        },
       ));
     }
   }

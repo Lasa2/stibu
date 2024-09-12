@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:appwrite/appwrite.dart';
-import 'package:appwrite/models.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
@@ -9,12 +8,10 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import 'package:stibu/api/accounts.dart';
 import 'package:stibu/api/avatars.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/feature/app_state/app_state.dart';
 import 'package:stibu/feature/router/router.dart';
-import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/l10n/generated/l10n.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:url_protocol/url_protocol.dart';
@@ -42,10 +39,7 @@ Future<void> main(List<String> args) async {
         .setEndPointRealtime('wss://appwrite.vee.icu/v1/realtime'),
   ));
 
-  final accounts = GetIt.I.registerSingleton<AccountsRepository>(
-      AccountsRepositoryAppwrite(client.account));
-  GetIt.I.registerLazySingleton<AppState>(
-      () => AppState(client.realtime, accounts));
+  GetIt.I.registerLazySingleton<AppState>(() => AppState());
   GetIt.I.registerLazySingleton<AvatarsRepository>(
       () => AvatarsRepository(client.avatars));
 
@@ -68,25 +62,17 @@ class StibuApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = getIt<AccountsRepository>();
+    final auth = getIt<AppState>();
     final router = getIt<AppRouter>();
 
-    late final StreamSubscription<Session?> sub;
-    sub = auth.sessionStream.listen((session) {
-      if (session != null) {
-        router.root.push(const DashboardRoute());
-        sub.cancel();
-      }
-    });
-
     return FluentApp.router(
-        title: 'Stibu',
-        routerConfig: router.config(
-          reevaluateListenable:
-              ReevaluateListenable.stream(auth.sessionStream),
-          navigatorObservers: () => [RouteLogger()],
-        ),
-        localizationsDelegates: Lang.localizationsDelegates,
-        supportedLocales: Lang.supportedLocales);
+      title: 'Stibu',
+      routerConfig: router.config(
+        reevaluateListenable: ReevaluateListenable.stream(auth.isAuthenticated),
+        navigatorObservers: () => [RouteLogger()],
+      ),
+      localizationsDelegates: Lang.localizationsDelegates,
+      supportedLocales: Lang.supportedLocales,
+    );
   }
 }

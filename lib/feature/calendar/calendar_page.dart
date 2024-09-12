@@ -9,7 +9,7 @@ import 'package:stibu/common/datetime_formatter.dart';
 import 'package:stibu/common/is_large_screen.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/show_result_info.dart';
-import 'package:stibu/feature/app_state/app_state.dart';
+import 'package:stibu/feature/app_state/realtime_subscriptions.dart';
 import 'package:stibu/feature/calendar/event_input.dart';
 import 'package:stibu/main.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -74,7 +74,8 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void initState() {
     super.initState();
-    _subscription = getIt<AppState>().calendarEventsUpdates.listen((event) {
+    _subscription =
+        getIt<RealtimeSubscriptions>().calendarEventsUpdates.listen((event) {
       final day = event.item.start.stripTime();
       _getEventsForDay(day, force: true);
     });

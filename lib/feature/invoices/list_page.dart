@@ -8,7 +8,7 @@ import 'package:stibu/common/datetime_formatter.dart';
 import 'package:stibu/common/is_large_screen.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/new_ids.dart';
-import 'package:stibu/feature/app_state/app_state.dart';
+import 'package:stibu/feature/app_state/realtime_subscriptions.dart';
 import 'package:stibu/feature/invoices/info_card.dart';
 import 'package:stibu/feature/invoices/input.dart';
 import 'package:stibu/main.dart';
@@ -126,7 +126,8 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
   void initState() {
     super.initState();
     _loadInvoices();
-    _subscription = getIt<AppState>().invoicesUpdates.listen((invoices) {
+    _subscription =
+        getIt<RealtimeSubscriptions>().invoicesUpdates.listen((invoices) {
       switch (invoices.type) {
         case RealtimeUpdateType.create:
           setState(() {

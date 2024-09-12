@@ -6,7 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/is_large_screen.dart';
 import 'package:stibu/common/show_result_info.dart';
-import 'package:stibu/feature/app_state/app_state.dart';
+import 'package:stibu/feature/app_state/realtime_subscriptions.dart';
 import 'package:stibu/feature/orders/list_detail.dart';
 import 'package:stibu/feature/orders/list_entry.dart';
 import 'package:stibu/main.dart';
@@ -45,7 +45,8 @@ class _OrderListPageState extends State<OrderListPage> {
   void initState() {
     super.initState();
     _loadOrders();
-    _subscription = getIt<AppState>().ordersUpdates.listen((event) {
+    _subscription =
+        getIt<RealtimeSubscriptions>().ordersUpdates.listen((event) {
       switch (event.type) {
         case RealtimeUpdateType.create:
           setState(() {

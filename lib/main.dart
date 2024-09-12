@@ -8,9 +8,10 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import 'package:stibu/api/avatars.dart';
 import 'package:stibu/appwrite.models.dart';
-import 'package:stibu/feature/app_state/app_state.dart';
+import 'package:stibu/feature/app_state/account.dart';
+import 'package:stibu/feature/app_state/realtime_subscriptions.dart';
+import 'package:stibu/feature/app_state/theme.dart';
 import 'package:stibu/feature/router/router.dart';
 import 'package:stibu/l10n/generated/l10n.dart';
 import 'package:system_theme/system_theme.dart';
@@ -32,16 +33,16 @@ Future<void> main(List<String> args) async {
   await SystemTheme.accentColor.load();
 
   GetIt.I.registerSingleton<AppRouter>(AppRouter());
-  final client = GetIt.I.registerSingleton<AppwriteClient>(AppwriteClient(
+  GetIt.I.registerLazySingleton<AppwriteClient>(() => AppwriteClient(
     Client()
         .setEndpoint('https://appwrite.vee.icu/v1')
         .setProject('66ba8a48000da48dd442')
         .setEndPointRealtime('wss://appwrite.vee.icu/v1/realtime'),
   ));
-
-  GetIt.I.registerLazySingleton<AppState>(() => AppState());
-  GetIt.I.registerLazySingleton<AvatarsRepository>(
-      () => AvatarsRepository(client.avatars));
+  GetIt.I.registerLazySingleton<Authentication>(() => Authentication());
+  GetIt.I.registerLazySingleton<RealtimeSubscriptions>(
+      () => RealtimeSubscriptions());
+  GetIt.I.registerLazySingleton<ThemeProvider>(() => ThemeProvider());
 
   registerProtocolHandler("stibu");
 
@@ -57,22 +58,46 @@ Future<void> main(List<String> args) async {
   runApp(const StibuApp());
 }
 
-class StibuApp extends StatelessWidget {
+class StibuApp extends StatefulWidget {
   const StibuApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final auth = getIt<AppState>();
-    final router = getIt<AppRouter>();
+  State<StibuApp> createState() => _StibuAppState();
+}
 
-    return FluentApp.router(
-      title: 'Stibu',
-      routerConfig: router.config(
-        reevaluateListenable: ReevaluateListenable.stream(auth.isAuthenticated),
-        navigatorObservers: () => [RouteLogger()],
+class _StibuAppState extends State<StibuApp> {
+  final router = getIt<AppRouter>();
+  final auth = getIt<Authentication>();
+  final themeProvider = getIt<ThemeProvider>();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: themeProvider,
+      builder: (context, child) => FluentApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'Stibu',
+        theme: themeProvider.lightTheme,
+        darkTheme: themeProvider.darkTheme,
+        themeMode: themeProvider.themeMode,
+        routerConfig: router.config(
+          reevaluateListenable:
+              ReevaluateListenable.stream(auth.isAuthenticated),
+          navigatorObservers: () => [RouteLogger()],
+        ),
+        localizationsDelegates: Lang.localizationsDelegates,
+        supportedLocales: Lang.supportedLocales,
       ),
-      localizationsDelegates: Lang.localizationsDelegates,
-      supportedLocales: Lang.supportedLocales,
     );
   }
 }

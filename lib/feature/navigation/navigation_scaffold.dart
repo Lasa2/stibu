@@ -1,7 +1,7 @@
 import 'package:appwrite/models.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:stibu/feature/app_state/app_state.dart';
+import 'package:stibu/feature/app_state/account.dart';
 import 'package:stibu/feature/navigation/windows_appbar.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
@@ -75,7 +75,7 @@ var footerItems = <Object>[
   PaneItemAction(
     icon: const Icon(FluentIcons.sign_out),
     title: const Text('Sign Out'),
-    onTap: () => getIt<AppState>().logout(),
+    onTap: () => getIt<Authentication>().logout(),
   ),
 ];
 

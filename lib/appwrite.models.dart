@@ -731,6 +731,17 @@ class Orders extends AppwriteModel<Orders> {
     side: Side.child,
   );
   final Invoices? invoice;
+	final Relationship orderCouponsRelation = Relationship(
+    required: false,
+    array: false,
+    relatedCollection: '66e4419d003d969599f2',
+    relationType: RelationshipType.oneToMany,
+    twoWay: true,
+    twoWayKey: 'order',
+    onDelete: OnDelete.cascade,
+    side: Side.parent,
+  );
+  final List<OrderCoupons>? orderCoupons;
 	final Relationship productsRelation = Relationship(
     required: false,
     array: false,
@@ -751,6 +762,7 @@ class Orders extends AppwriteModel<Orders> {
 		required this.customerName,
 		required this.date,
 		this.invoice,
+		this.orderCoupons,
 		this.products,
 		this.street,
 		this.zip,
@@ -775,6 +787,7 @@ class Orders extends AppwriteModel<Orders> {
 		required String customerName,
 		required DateTime date,
 		Invoices? invoice,
+		List<OrderCoupons>? orderCoupons,
 		List<OrderProducts>? products,
 		String? street,
 		String? zip,
@@ -785,6 +798,7 @@ class Orders extends AppwriteModel<Orders> {
 			customerName: customerName,
 			date: date,
 			invoice: invoice,
+			orderCoupons: orderCoupons,
 			products: products,
 			street: street,
 			zip: zip,
@@ -805,6 +819,7 @@ class Orders extends AppwriteModel<Orders> {
 			'customerName': customerName,
 			'date': date.toIso8601String(),
 			'invoice': invoice?.toJson(),
+			'orderCoupons': orderCoupons?.map((e) => e.toJson()).toList(),
 			'products': products?.map((e) => e.toJson()).toList(),
 			'street': street,
 			'zip': zip
@@ -822,6 +837,7 @@ class Orders extends AppwriteModel<Orders> {
 			'customerName': customerName,
 			'date': date.toIso8601String(),
 			if (includeRelations) 'invoice': invoice?.toAppwrite(isChild: true),
+			if (includeRelations) 'orderCoupons': orderCoupons?.map((e) => e.toAppwrite(isChild: true)).toList(),
 			if (includeRelations) 'products': products?.map((e) => e.toAppwrite(isChild: true)).toList(),
 			'street': street,
 			'zip': zip,
@@ -836,6 +852,7 @@ class Orders extends AppwriteModel<Orders> {
 		String? customerName,
 		DateTime? date,
 		Invoices? invoice,
+		List<OrderCoupons>? orderCoupons,
 		List<OrderProducts>? products,
 		String? street,
 		String? zip,
@@ -852,6 +869,7 @@ class Orders extends AppwriteModel<Orders> {
 			customerName: customerName ?? this.customerName,
 			date: date ?? this.date,
 			invoice: invoice ?? this.invoice,
+			orderCoupons: orderCoupons ?? this.orderCoupons,
 			products: products ?? this.products,
 			street: street ?? this.street,
 			zip: zip ?? this.zip,
@@ -878,6 +896,7 @@ class Orders extends AppwriteModel<Orders> {
 			customerName == other.customerName &&
 			date == other.date &&
 			invoice == other.invoice &&
+			eq(orderCoupons, other.orderCoupons) &&
 			eq(products, other.products) &&
 			street == other.street &&
 			zip == other.zip &&
@@ -892,6 +911,7 @@ class Orders extends AppwriteModel<Orders> {
 			customerName,
 			date,
 			invoice,
+			...(orderCoupons ?? []),
 			...(products ?? []),
 			street,
 			zip,
@@ -906,6 +926,7 @@ class Orders extends AppwriteModel<Orders> {
 			customerName: doc.data['customerName'],
 			date: DateTime.parse(doc.data['date']),
 			invoice: doc.data['invoice'] == null ? null : Invoices.fromAppwrite(Document.fromMap(doc.data['invoice'])),
+			orderCoupons: List<OrderCoupons>.unmodifiable(doc.data['orderCoupons'] == null ? [] : doc.data['orderCoupons'].map((e) => OrderCoupons.fromAppwrite(Document.fromMap(e)))),
 			products: List<OrderProducts>.unmodifiable(doc.data['products'] == null ? [] : doc.data['products'].map((e) => OrderProducts.fromAppwrite(Document.fromMap(e)))),
 			street: doc.data['street'],
 			zip: doc.data['zip'],
@@ -2403,6 +2424,384 @@ class CalendarEventParticipants extends AppwriteModel<CalendarEventParticipants>
       collectionInfo.databaseId,
       collectionInfo.$id,
       CalendarEventParticipants.fromAppwrite,
+      this,
+    );
+  }
+
+  Future<Result<void, String>> delete() async {
+    return client.delete(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      $id,
+    );
+  }
+}
+
+
+
+class ProductKeys extends AppwriteModel<ProductKeys> {
+  static const collectionInfo = CollectionInfo(
+    $id: 'productKeys',
+    $permissions: [],
+    databaseId: 'internal',
+    name: 'productKeys',
+    enabled: true,
+    documentSecurity: false,
+  );
+
+  final String productKey;
+	final String? userId;
+
+  ProductKeys._({
+    required this.productKey,
+		this.userId,
+    required super.$id,
+    required super.$collectionId,
+    required super.$databaseId,
+    required super.$createdAt,
+    required super.$updatedAt,
+    required super.$permissions,
+  })  : assert(productKey.isNotEmpty),
+				assert(productKey.length <= 128),
+				assert(userId == null || userId.isNotEmpty && userId.length <= 128);
+
+  factory ProductKeys({
+    required String productKey,
+		String? userId,
+  }) {
+    return ProductKeys._(
+      productKey: productKey,
+			userId: userId,
+      $id: ID.unique(),
+      $collectionId: collectionInfo.$id,
+      $databaseId: collectionInfo.databaseId,
+      $createdAt: DateTime.now().toUtc(),
+      $updatedAt: DateTime.now().toUtc(),
+      $permissions: collectionInfo.$permissions,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'productKey': productKey,
+			'userId': userId
+    };
+  }
+
+  @override
+  Map<String, dynamic> toAppwrite({
+    bool isChild = false,
+    bool includeRelations = true,
+  }) {
+    return {
+      'productKey': productKey,
+			'userId': userId,
+      if (isChild) '\$id': $id,
+    };
+  }
+
+  @override
+  ProductKeys copyWith({
+    String? productKey,
+		String? userId,
+    String? $id,
+    String? $collectionId,
+    String? $databaseId,
+    DateTime? $createdAt,
+    DateTime? $updatedAt,
+    List<String>? $permissions,
+  }) {
+    return ProductKeys._(
+      productKey: productKey ?? this.productKey,
+			userId: userId ?? this.userId,
+      $id: $id ?? this.$id,
+      $collectionId: $collectionId ?? this.$collectionId,
+      $databaseId: $databaseId ?? this.$databaseId,
+      $createdAt: $createdAt ?? this.$createdAt,
+      $updatedAt: $updatedAt ?? this.$updatedAt,
+      $permissions: $permissions ?? this.$permissions,
+    );
+  }
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ProductKeys &&
+      productKey == other.productKey &&
+			userId == other.userId &&
+      other.$id == $id;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAllUnordered([
+      productKey,
+			userId,
+      $id,
+    ]);
+  }
+
+  factory ProductKeys.fromAppwrite(Document doc) {
+    return ProductKeys._(
+      productKey: doc.data['productKey'],
+			userId: doc.data['userId'],
+      $id: doc.$id,
+      $collectionId: doc.$collectionId,
+      $databaseId: doc.$databaseId,
+      $createdAt: DateTime.parse(doc.$createdAt),
+      $updatedAt: DateTime.parse(doc.$updatedAt),
+      $permissions: List<String>.unmodifiable(doc.$permissions),
+    );
+  }
+
+// API
+
+  static AppwriteClient get client => GetIt.I.get<AppwriteClient>();
+  static String get databaseId => GetIt.I.get<AppwriteClient>().overrideDatabaseId ?? collectionInfo.databaseId;
+
+  static Future<Result<(int, List<ProductKeys>), String>> page({
+    int limit = 25,
+    int? offset,
+    ProductKeys? last,
+  }) async {
+    return client.page<ProductKeys>(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      ProductKeys.fromAppwrite,
+      limit: limit,
+      offset: offset,
+      last: last,
+    );
+  }
+
+  static Future<Result<ProductKeys, String>> get(String id) async {
+    return client.get<ProductKeys>(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      id,
+      ProductKeys.fromAppwrite,
+    );
+  }
+
+  Future<Result<ProductKeys, String>> create() async {
+    return client.create<ProductKeys>(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      ProductKeys.fromAppwrite,
+      this,
+    );
+  }
+
+  Future<Result<ProductKeys, String>> update() async {
+    return client.update<ProductKeys>(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      ProductKeys.fromAppwrite,
+      this,
+    );
+  }
+
+  Future<Result<void, String>> delete() async {
+    return client.delete(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      $id,
+    );
+  }
+}
+
+
+
+class OrderCoupons extends AppwriteModel<OrderCoupons> {
+  static const collectionInfo = CollectionInfo(
+    $id: '66e4419d003d969599f2',
+    $permissions: [],
+    databaseId: 'dev',
+    name: 'orderCoupons',
+    enabled: true,
+    documentSecurity: false,
+  );
+
+  final int amount;
+	final String name;
+	final Relationship orderRelation = Relationship(
+    required: false,
+    array: false,
+    relatedCollection: 'orders',
+    relationType: RelationshipType.oneToMany,
+    twoWay: true,
+    twoWayKey: 'orderCoupons',
+    onDelete: OnDelete.cascade,
+    side: Side.child,
+  );
+  final Orders? order;
+
+  OrderCoupons._({
+    required this.amount,
+		required this.name,
+		this.order,
+    required super.$id,
+    required super.$collectionId,
+    required super.$databaseId,
+    required super.$createdAt,
+    required super.$updatedAt,
+    required super.$permissions,
+  })  : assert(amount >= -9223372036854775808),
+				assert(amount <= 9223372036854775807),
+				assert(name.isNotEmpty),
+				assert(name.length <= 64);
+
+  factory OrderCoupons({
+    required int amount,
+		required String name,
+		Orders? order,
+  }) {
+    return OrderCoupons._(
+      amount: amount,
+			name: name,
+			order: order,
+      $id: ID.unique(),
+      $collectionId: collectionInfo.$id,
+      $databaseId: collectionInfo.databaseId,
+      $createdAt: DateTime.now().toUtc(),
+      $updatedAt: DateTime.now().toUtc(),
+      $permissions: collectionInfo.$permissions,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'amount': amount,
+			'name': name,
+			'order': order?.toJson()
+    };
+  }
+
+  @override
+  Map<String, dynamic> toAppwrite({
+    bool isChild = false,
+    bool includeRelations = true,
+  }) {
+    return {
+      'amount': amount,
+			'name': name,
+			if (includeRelations) 'order': order?.toAppwrite(isChild: true),
+      if (isChild) '\$id': $id,
+    };
+  }
+
+  @override
+  OrderCoupons copyWith({
+    int? amount,
+		String? name,
+		Orders? order,
+    String? $id,
+    String? $collectionId,
+    String? $databaseId,
+    DateTime? $createdAt,
+    DateTime? $updatedAt,
+    List<String>? $permissions,
+  }) {
+    return OrderCoupons._(
+      amount: amount ?? this.amount,
+			name: name ?? this.name,
+			order: order ?? this.order,
+      $id: $id ?? this.$id,
+      $collectionId: $collectionId ?? this.$collectionId,
+      $databaseId: $databaseId ?? this.$databaseId,
+      $createdAt: $createdAt ?? this.$createdAt,
+      $updatedAt: $updatedAt ?? this.$updatedAt,
+      $permissions: $permissions ?? this.$permissions,
+    );
+  }
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is OrderCoupons &&
+      amount == other.amount &&
+			name == other.name &&
+			order == other.order &&
+      other.$id == $id;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAllUnordered([
+      amount,
+			name,
+			order,
+      $id,
+    ]);
+  }
+
+  factory OrderCoupons.fromAppwrite(Document doc) {
+    return OrderCoupons._(
+      amount: doc.data['amount'],
+			name: doc.data['name'],
+			order: doc.data['order'] == null ? null : Orders.fromAppwrite(Document.fromMap(doc.data['order'])),
+      $id: doc.$id,
+      $collectionId: doc.$collectionId,
+      $databaseId: doc.$databaseId,
+      $createdAt: DateTime.parse(doc.$createdAt),
+      $updatedAt: DateTime.parse(doc.$updatedAt),
+      $permissions: List<String>.unmodifiable(doc.$permissions),
+    );
+  }
+
+// API
+
+  static AppwriteClient get client => GetIt.I.get<AppwriteClient>();
+  static String get databaseId => GetIt.I.get<AppwriteClient>().overrideDatabaseId ?? collectionInfo.databaseId;
+
+  static Future<Result<(int, List<OrderCoupons>), String>> page({
+    int limit = 25,
+    int? offset,
+    OrderCoupons? last,
+  }) async {
+    return client.page<OrderCoupons>(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      OrderCoupons.fromAppwrite,
+      limit: limit,
+      offset: offset,
+      last: last,
+    );
+  }
+
+  static Future<Result<OrderCoupons, String>> get(String id) async {
+    return client.get<OrderCoupons>(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      id,
+      OrderCoupons.fromAppwrite,
+    );
+  }
+
+  Future<Result<OrderCoupons, String>> create() async {
+    return client.create<OrderCoupons>(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      OrderCoupons.fromAppwrite,
+      this,
+    );
+  }
+
+  Future<Result<OrderCoupons, String>> update() async {
+    return client.update<OrderCoupons>(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      OrderCoupons.fromAppwrite,
       this,
     );
   }

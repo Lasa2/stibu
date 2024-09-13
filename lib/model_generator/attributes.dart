@@ -7,6 +7,9 @@ class AttributeInfo {
   final bool array;
   final dynamic defaultValue;
 
+  String get typeAsString =>
+      array ? 'List<${type.toString()}>' : type.toString();
+
   AttributeInfo({
     required this.name,
     this.type = dynamic,
@@ -68,6 +71,10 @@ enum OnDelete { setNull, cascade, restrict }
 enum Side { parent, child }
 
 class AttributeInfoRelationship extends AttributeInfo {
+  final String classAsString;
+  final String _typeAsString;
+  @override
+  String get typeAsString => _typeAsString;
   @override
   Type get type => Relationship;
   final String relatedCollection;
@@ -88,7 +95,43 @@ class AttributeInfoRelationship extends AttributeInfo {
     required this.twoWayKey,
     required this.onDelete,
     required this.side,
-  });
+    required Map<String, String> collectionIdToName,
+  })  : _typeAsString = resolveRelationshipType(
+          collectionIdToName,
+          relationType,
+          side,
+          relatedCollection,
+        ),
+        classAsString = capitalize(collectionIdToName[relatedCollection]!);
+
+  static String resolveRelationshipType(
+    Map<String, String> collectionIdToName,
+    RelationshipType relationType,
+    Side side,
+    String relatedCollectionId,
+  ) {
+    final relatedCollection = collectionIdToName[relatedCollectionId]!;
+    final relatedClass = capitalize(relatedCollection);
+
+    switch (relationType) {
+      case RelationshipType.oneToOne:
+        return relatedClass;
+      case RelationshipType.oneToMany:
+        if (side == Side.parent) {
+          return 'List<$relatedClass>';
+        } else {
+          return relatedClass;
+        }
+      case RelationshipType.manyToOne:
+        if (side == Side.parent) {
+          return relatedClass;
+        } else {
+          return 'List<$relatedClass>';
+        }
+      case RelationshipType.manyToMany:
+        return 'List<$relatedClass>';
+    }
+  }
 }
 
 class AttributeInfoBoolean extends AttributeInfo {
@@ -118,6 +161,9 @@ class AttributeInfoDateTime extends AttributeInfo {
 class AttributeInfoEnum extends AttributeInfo {
   // Marked with format = enum
 
+  @override
+  String get typeAsString => capitalize(name);
+
   final List<String> elements;
   @override
   Type get type => Enum;
@@ -131,7 +177,8 @@ class AttributeInfoEnum extends AttributeInfo {
   });
 }
 
-AttributeInfo resolveAttributeInfo(Map<String, dynamic> attribute) {
+AttributeInfo resolveAttributeInfo(
+    Map<String, dynamic> attribute, Map<String, String> collectionIdToName) {
   final name = attribute['key'] as String;
   final required = attribute['required'] as bool;
   final array = attribute['array'] as bool;
@@ -199,70 +246,26 @@ AttributeInfo resolveAttributeInfo(Map<String, dynamic> attribute) {
         twoWayKey: attribute['twoWayKey'],
         onDelete: OnDelete.values.byName(attribute['onDelete']),
         side: Side.values.byName(attribute['side']),
+        collectionIdToName: collectionIdToName,
       );
     default:
-      return AttributeInfo(
-        name: name,
-        required: required,
-        array: array,
-        defaultValue: defaultValue,
-      );
-  }
-}
-
-String resolveRelationshipType(AttributeInfoRelationship attribute) {
-  final relatedClass = capitalize(attribute.relatedCollection);
-
-  switch (attribute.relationType) {
-    case RelationshipType.oneToOne:
-      return relatedClass;
-    case RelationshipType.oneToMany:
-      if (attribute.side == Side.parent) {
-        return 'List<$relatedClass>';
-      } else {
-        return relatedClass;
-      }
-    case RelationshipType.manyToOne:
-      if (attribute.side == Side.parent) {
-        return relatedClass;
-      } else {
-        return 'List<$relatedClass>';
-      }
-    case RelationshipType.manyToMany:
-      return 'List<$relatedClass>';
+      throw Exception('Invalid attribute type');
   }
 }
 
 String generateField(AttributeInfo attribute) {
-  final type = attribute.type.toString();
-  final name = attribute.name;
-
   if (attribute is AttributeInfoRelationship) {
     return generateRelationshipField(attribute);
   }
 
-  String field = 'final';
-  if (attribute.type == Enum) {
-    field += ' ${capitalize(name)}';
-  } else if (attribute.array) {
-    field += ' List<$type>';
-  } else {
-    field += ' $type';
-  }
-
-  if (!attribute.required) {
-    field += '?';
-  }
-
-  return '$field $name;';
+  return 'final ${attribute.typeAsString}${attribute.required ? '' : '?'} ${attribute.name};';
 }
 
 String generateRelationshipField(AttributeInfoRelationship attribute) {
-  final type = attribute.type.toString();
   final name = attribute.name;
 
   String field = '''
-final $type ${name}Relation = Relationship(
+final Relationship ${name}Relation = Relationship(
     required: ${attribute.required},
     array: ${attribute.array},
     relatedCollection: '${attribute.relatedCollection}',
@@ -274,13 +277,8 @@ final $type ${name}Relation = Relationship(
   );
   ''';
 
-  field += 'final ${resolveRelationshipType(attribute)}';
-
-  if (!attribute.required) {
-    field += '?';
-  }
-
-  return '$field $name;';
+  field += 'final ${attribute.typeAsString}? $name;';
+  return field;
 }
 
 String generateConstructorField(AttributeInfo attribute) {
@@ -334,7 +332,6 @@ List<String> generateAsserts(AttributeInfo attribute) {
 }
 
 String generateNamedConstructorField(AttributeInfo attribute) {
-  final type = attribute.type.toString();
   final name = attribute.name;
 
   String field = '';
@@ -343,15 +340,7 @@ String generateNamedConstructorField(AttributeInfo attribute) {
     field += 'required ';
   }
 
-  if (attribute is AttributeInfoRelationship) {
-    field += resolveRelationshipType(attribute);
-  } else if (attribute.type == Enum) {
-    field += capitalize(name);
-  } else if (attribute.array) {
-    field += 'List<$type>';
-  } else {
-    field += type;
-  }
+  field += attribute.typeAsString;
 
   if (!attribute.required) {
     field += '?';
@@ -388,41 +377,32 @@ String generateToJsonField(AttributeInfo attribute) {
 
 String generateRelationshipToJsonField(AttributeInfoRelationship attribute) {
   final name = attribute.name;
-  switch (attribute.relationType) {
-    case RelationshipType.oneToOne:
-      return "'$name': $name?.toJson()";
-    case RelationshipType.oneToMany:
-      if (attribute.side == Side.parent) {
-        return "'$name': $name?.map((e) => e.toJson()).toList()";
-      } else {
-        return "'$name': $name?.toJson()";
-      }
-    case RelationshipType.manyToOne:
-      if (attribute.side == Side.parent) {
-        return "'$name': $name?.toJson()";
-      } else {
-        return "'$name': $name?.map((e) => e.toJson()).toList()";
-      }
-    case RelationshipType.manyToMany:
-      return "'$name': $name?.map((e) => e.toJson()).toList()";
+
+  if (attribute.relationType == RelationshipType.oneToOne ||
+      attribute.relationType == RelationshipType.oneToMany &&
+          attribute.side == Side.child ||
+      attribute.relationType == RelationshipType.manyToOne &&
+          attribute.side == Side.parent) {
+    return "'$name': $name?.toJson()";
   }
+
+  if (attribute.relationType == RelationshipType.manyToMany ||
+      attribute.relationType == RelationshipType.oneToMany &&
+          attribute.side == Side.parent ||
+      attribute.relationType == RelationshipType.manyToOne &&
+          attribute.side == Side.child) {
+    return "'$name': $name?.map((e) => e.toJson()).toList()";
+  }
+
+  throw Exception('Invalid relationship type');
 }
 
 String generateCopyWithField(AttributeInfo attribute) {
-  final type = attribute.type.toString();
   final name = attribute.name;
 
   String field = '';
 
-  if (attribute is AttributeInfoRelationship) {
-    field += '${resolveRelationshipType(attribute)}?';
-  } else if (attribute.type == Enum) {
-    field += '${capitalize(name)}?';
-  } else if (attribute.array) {
-    field += 'List<$type>?';
-  } else {
-    field += '$type?';
-  }
+  field += '${attribute.typeAsString}?';
 
   if (attribute.defaultValue != null && attribute.defaultValue != '') {
     field += ' = $name';
@@ -467,7 +447,7 @@ String generateFromAppwriteField(AttributeInfo attribute) {
 String generateRelationshipFromAppwriteField(
     AttributeInfoRelationship attribute) {
   final name = attribute.name;
-  final relatedClass = capitalize(attribute.relatedCollection);
+  final relatedClass = attribute.classAsString;
 
   if (attribute.relationType == RelationshipType.oneToOne ||
       attribute.relationType == RelationshipType.oneToMany &&
@@ -541,7 +521,8 @@ String generateToAppwriteField(AttributeInfo attribute) {
   }
 }
 
-String generateRelationshipToAppwriteField(AttributeInfoRelationship attribute) {
+String generateRelationshipToAppwriteField(
+    AttributeInfoRelationship attribute) {
   final name = attribute.name;
 
   if (attribute.relationType == RelationshipType.oneToOne ||

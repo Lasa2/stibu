@@ -137,11 +137,16 @@ class OrderProductsList extends StatelessWidget {
                         if (order.invoice == null)
                           IconButton(
                             icon: const Icon(FluentIcons.delete),
-                            onPressed: () async {
-                              // return await order.deleteProduct(product).then(
-                              //         (value) => showResultInfo(context, value),
-                              //       );
-                            },
+                            onPressed: () async => await order
+                                .copyWith(
+                                    products: order.products!
+                                        .where((element) =>
+                                            element.id != product.id)
+                                        .toList())
+                                .update()
+                                .then(
+                                  (value) => showResultInfo(context, value),
+                                ),
                           ),
                       ],
                     ),

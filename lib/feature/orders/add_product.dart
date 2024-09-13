@@ -231,9 +231,27 @@ Future<void> showAddProductsDialog(BuildContext context, Orders order) async {
   );
 
   if (result != null) {
-    final newProducts = List<OrderProducts>.from(order.products ?? [])
-      ..addAll(result);
-    final newOrder = order.copyWith(products: newProducts);
+    // Add the new products to the order
+    // if the product is already in the order, update the quantity
+
+    final Map<int, OrderProducts> productsMap = {
+      for (final product in order.products ?? <OrderProducts>[])
+        product.id: product
+    };
+
+    for (final newProduct in result) {
+      if (productsMap.containsKey(newProduct.id)) {
+        productsMap[newProduct.id] = productsMap[newProduct.id]!.copyWith(
+          quantity: productsMap[newProduct.id]!.quantity + newProduct.quantity,
+        );
+      } else {
+        productsMap[newProduct.id] = newProduct;
+      }
+    }
+
+    final newOrder = order.copyWith(
+      products: productsMap.values.toList(),
+    );
 
     await newOrder.update().then((value) {
       showResultInfo(context, value,

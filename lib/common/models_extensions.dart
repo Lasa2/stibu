@@ -47,7 +47,7 @@ extension OrdersExtensions on Orders {
           "name": "Invoice ${invoiceId.success}",
           "amount": total.asInt,
           "order": $id,
-          $permissions: [
+          '\$permissions': [
             Permission.read(Role.user(user.$id)),
           ]
         },

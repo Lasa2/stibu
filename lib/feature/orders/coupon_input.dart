@@ -83,10 +83,18 @@ class _InputCouponDialogState extends State<InputCouponDialog> {
           onPressed: () {
             if (_formKey.currentState!.validate()) {
               _formKey.currentState!.save();
-              Navigator.of(context).pop(OrderCoupons(
-                name: _name!,
-                amount: _amount!,
-              ));
+
+              if (widget.coupon != null) {
+                Navigator.of(context).pop(widget.coupon!.copyWith(
+                  name: _name!,
+                  amount: _amount!,
+                ));
+              } else {
+                Navigator.of(context).pop(OrderCoupons(
+                  name: _name!,
+                  amount: _amount!,
+                ));
+              }
             }
           },
           child: Text(widget.okText),
@@ -96,45 +104,36 @@ class _InputCouponDialogState extends State<InputCouponDialog> {
   }
 }
 
-Future<void> showAddCouponDialog(BuildContext context, Orders order) async {
-  final coupon = await showDialog<OrderCoupons>(
-    context: context,
-    builder: (context) => const InputCouponDialog(
-      title: 'Add Coupon',
-      okText: 'Add',
-    ),
-  );
-
-  if (coupon != null) {
-    order.copyWith(coupons: [...order.coupons ?? [], coupon]).update().then(
-        (value) =>
-            showResultInfo(context, value, successMessage: 'Coupon added'));
-  }
-}
+Future<void> showAddCouponDialog(BuildContext context, Orders order) async =>
+    await showDialog<OrderCoupons>(
+      context: context,
+      builder: (context) => const InputCouponDialog(
+        title: 'Add Coupon',
+        okText: 'Add',
+      ),
+    ).then((coupon) async => coupon != null
+        ? await order.addCoupon(coupon).then(
+              (value) async => await showResultInfo(context, value),
+            )
+        : null);
 
 Future<void> showEditCouponDialog(
-    BuildContext context, OrderCoupons coupon) async {
-  final newCoupon = await showDialog<OrderCoupons>(
-    context: context,
-    builder: (context) => InputCouponDialog(
-      title: 'Edit Coupon',
-      okText: 'Save',
-      coupon: coupon,
-      onDelete: (coupon) async => await coupon.order!.deleteCoupon(coupon).then(
-            (value) => showResultInfo(context, value,
-                successMessage: 'Coupon deleted'),
-          ),
-    ),
-  );
-
-  if (newCoupon != null) {
-    coupon
-        .copyWith(
-          name: newCoupon.name,
-          amount: newCoupon.amount,
-        )
-        .update()
-        .then((value) =>
-            showResultInfo(context, value, successMessage: 'Coupon updated'));
-  }
-}
+        BuildContext context, OrderCoupons coupon, Orders order) async =>
+    await showDialog<OrderCoupons>(
+      context: context,
+      builder: (context) => InputCouponDialog(
+        title: 'Edit Coupon',
+        okText: 'Save',
+        coupon: coupon,
+        onDelete: (coupon) async =>
+            await order.deleteCoupon(coupon).then(
+                  (value) => showResultInfo(context, value),
+                ),
+      ),
+    ).then((coupon) async {
+      coupon != null
+          ? await order.updateCoupon(coupon).then(
+                (value) async => await showResultInfo(context, value),
+              )
+          : null;
+    });

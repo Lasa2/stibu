@@ -85,11 +85,34 @@ extension OrdersExtensions on Orders {
     }
   }
 
+  Future<Result<Orders, String>> addCoupon(OrderCoupons coupon) async {
+    final newCoupons = <OrderCoupons>[...(coupons ?? []), coupon];
+    final result = await copyWith(coupons: newCoupons).update();
+    if (result.isFailure) return Failure(result.failure);
+
+    return Success(result.success);
+  }
+
   Future<Result<Orders, String>> deleteCoupon(OrderCoupons coupon) async {
     final newCoupons =
         copyWith(coupons: coupons?.where((c) => c.$id != coupon.$id).toList());
 
-    final result = await copyWith(coupons: newCoupons.coupons).update();
+    final order = await copyWith(coupons: newCoupons.coupons).update();
+    if (order.isFailure) return Failure(order.failure);
+
+    final result = await coupon.delete();
+    if (result.isFailure) return Failure(result.failure);
+
+    return Success(order.success);
+  }
+
+  Future<Result<Orders, String>> updateCoupon(OrderCoupons coupon) async {
+    final newCoupons = coupons?.map((c) {
+      if (c.$id == coupon.$id) return coupon;
+      return c;
+    }).toList();
+
+    final result = await copyWith(coupons: newCoupons).update();
     if (result.isFailure) return Failure(result.failure);
 
     return Success(result.success);

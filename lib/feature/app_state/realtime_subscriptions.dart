@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
+import 'package:result_type/result_type.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/feature/app_state/account.dart';
 import 'package:stibu/feature/app_state/realtime_listener.dart';
@@ -41,6 +42,30 @@ RealtimeUpdate<T> _realtimeUpdateFromMessage<T>(
   );
 }
 
+Future<RealtimeUpdate<T>> _realtimeUpdateFromMessageWithFetch<T>(
+  RealtimeMessage message,
+  T Function(Document doc) fromAppwrite,
+  Future<Result<T, String>> Function(String id) fetch,
+) async {
+  final event = message.events.first.split(".").last;
+  final eventType = RealtimeUpdateTypeExtension.fromString(event);
+
+  if (eventType == RealtimeUpdateType.delete) {
+    final item = fromAppwrite(Document.fromMap(message.payload));
+    return RealtimeUpdate(eventType, item);
+  }
+
+  final itemId = Document.fromMap(message.payload).$id;
+  final item = await fetch(itemId);
+  if (item.isFailure) {
+    log.warning("Failed to fetch item $itemId: ${item.failure}");
+    return RealtimeUpdate(
+        eventType, fromAppwrite(Document.fromMap(message.payload)));
+  }
+
+  return RealtimeUpdate(eventType, item.success);
+}
+
 class RealtimeSubscriptions {
   late final RealtimeListener _realtimeListener;
 
@@ -56,6 +81,16 @@ class RealtimeSubscriptions {
 
   final _ordersUpdates = StreamController<RealtimeUpdate<Orders>>.broadcast();
   Stream<RealtimeUpdate<Orders>> get ordersUpdates => _ordersUpdates.stream;
+
+  final _orderCouponsUpdates =
+      StreamController<RealtimeUpdate<OrderCoupons>>.broadcast();
+  Stream<RealtimeUpdate<OrderCoupons>> get orderCouponsUpdates =>
+      _orderCouponsUpdates.stream;
+
+  final _orderProductsUpdates =
+      StreamController<RealtimeUpdate<OrderProducts>>.broadcast();
+  Stream<RealtimeUpdate<OrderProducts>> get orderProductsUpdates =>
+      _orderProductsUpdates.stream;
 
   final _expensesUpdates =
       StreamController<RealtimeUpdate<Expenses>>.broadcast();
@@ -76,25 +111,12 @@ class RealtimeSubscriptions {
         (message) => _invoicesUpdates.add(_realtimeUpdateFromMessage<Invoices>(
             message, Invoices.fromAppwrite)),
     "databases.${Orders.databaseId}.collections.${Orders.collectionInfo.$id}.documents":
-        (message) async {
-      // Inject products into the order as they are not included in the realtime message
-      final event = message.events.first.split(".").last;
-      final eventType = RealtimeUpdateTypeExtension.fromString(event);
-
-      if (eventType == RealtimeUpdateType.delete) {
-        final order = Orders.fromAppwrite(Document.fromMap(message.payload));
-        _ordersUpdates.add(RealtimeUpdate(eventType, order));
-        return;
-      }
-
-      final orderId = Document.fromMap(message.payload).$id;
-      final order = await Orders.get(orderId);
-      if (order.isFailure) {
-        log.warning("Failed to fetch order $orderId: ${order.failure}");
-        return;
-      }
-      _ordersUpdates.add(RealtimeUpdate(eventType, order.success));
-    },
+        (message) async => _ordersUpdates
+                .add(await _realtimeUpdateFromMessageWithFetch<Orders>(
+              message,
+              Orders.fromAppwrite,
+              Orders.get,
+            )),
     "databases.${Expenses.databaseId}.collections.${Expenses.collectionInfo.$id}.documents":
         (message) => _expensesUpdates.add(_realtimeUpdateFromMessage<Expenses>(
             message, Expenses.fromAppwrite)),

@@ -1,4 +1,5 @@
 import 'package:stibu/model_generator/attributes.dart';
+import 'package:stibu/model_generator/collections.dart';
 
 String capitalize(String text) {
   return text[0].toUpperCase() + text.substring(1);
@@ -12,13 +13,9 @@ enum ${capitalize(e.name)} {
   ''').join('\n\n');
 }
 
-String generateClass(Map<String, dynamic> collection) {
-  final className = capitalize(collection['name']);
-  final List<AttributeInfo> attributeInfos =
-      (collection['attributes'] as List<dynamic>)
-          .map<AttributeInfo>((attribute) =>
-              resolveAttributeInfo(attribute as Map<String, dynamic>))
-          .toList();
+String generateClass(CollectionInfo collection) {
+  final className = capitalize(collection.name);
+  final List<AttributeInfo> attributeInfos = collection.attributes;
 
   attributeInfos.sort((a, b) => a.name.compareTo(b.name));
 
@@ -28,12 +25,12 @@ String generateClass(Map<String, dynamic> collection) {
   return '''${generateEnums(attributeInfos)}
 class $className extends AppwriteModel<$className> {
   static const collectionInfo = CollectionInfo(
-    \$id: '${collection['\$id']}',
-    \$permissions: [${collection['\$permissions'].map((e) => "'$e'").join(', ')}],
-    databaseId: '${collection['databaseId']}',
-    name: '${collection['name']}',
-    enabled: ${collection['enabled']},
-    documentSecurity: ${collection['documentSecurity']},
+    \$id: '${collection.$id}',
+    \$permissions: [${collection.$permissions.map((e) => "'$e'").join(', ')}],
+    databaseId: '${collection.databaseId}',
+    name: '${collection.name}',
+    enabled: ${collection.enabled},
+    documentSecurity: ${collection.documentSecurity},
   );
 
   ${attributeInfos.map(generateField).join('\n\t')}

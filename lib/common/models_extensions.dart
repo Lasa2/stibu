@@ -25,10 +25,17 @@ extension CustomersExtensions on Customers {
 }
 
 extension OrdersExtensions on Orders {
-  Currency get total =>
+  Currency get productsTotal =>
       products?.fold<Currency>(
           Currency.zero, (value, product) => value + product.total) ??
       Currency.zero;
+
+  Currency get couponsTotal =>
+      coupons?.fold<Currency>(
+          Currency.zero, (value, coupon) => value + coupon.amount.currency) ??
+      Currency.zero;
+
+  Currency get total => productsTotal - couponsTotal;
 
   Future<Result<Invoices, String>> createInvoice([DateTime? date]) async {
     final appwrite = getIt<AppwriteClient>();
@@ -76,5 +83,71 @@ extension OrdersExtensions on Orders {
     } on AppwriteException catch (e) {
       return Failure(e.message ?? "Failed to create invoice");
     }
+  }
+
+  Future<Result<Orders, String>> addCoupon(OrderCoupons coupon) async {
+    final newCoupons = <OrderCoupons>[...(coupons ?? []), coupon];
+    final result = await copyWith(coupons: newCoupons).update();
+    if (result.isFailure) return Failure(result.failure);
+
+    return Success(result.success);
+  }
+
+  Future<Result<Orders, String>> deleteCoupon(OrderCoupons coupon) async {
+    final newCoupons =
+        copyWith(coupons: coupons?.where((c) => c.$id != coupon.$id).toList());
+
+    final order = await copyWith(coupons: newCoupons.coupons).update();
+    if (order.isFailure) return Failure(order.failure);
+
+    final result = await coupon.delete();
+    if (result.isFailure) return Failure(result.failure);
+
+    return Success(order.success);
+  }
+
+  Future<Result<Orders, String>> updateCoupon(OrderCoupons coupon) async {
+    final newCoupons = coupons?.map((c) {
+      if (c.$id == coupon.$id) return coupon;
+      return c;
+    }).toList();
+
+    final result = await copyWith(coupons: newCoupons).update();
+    if (result.isFailure) return Failure(result.failure);
+
+    return Success(result.success);
+  }
+
+  Future<Result<Orders, String>> addProduct(OrderProducts product) async {
+    final newProducts = <OrderProducts>[...(products ?? []), product];
+    final result = await copyWith(products: newProducts).update();
+    if (result.isFailure) return Failure(result.failure);
+
+    return Success(result.success);
+  }
+
+  Future<Result<Orders, String>> deleteProduct(OrderProducts product) async {
+    final newProducts = copyWith(
+        products: products?.where((p) => p.$id != product.$id).toList());
+
+    final order = await copyWith(products: newProducts.products).update();
+    if (order.isFailure) return Failure(order.failure);
+
+    final result = await product.delete();
+    if (result.isFailure) return Failure(result.failure);
+
+    return Success(order.success);
+  }
+
+  Future<Result<Orders, String>> updateProduct(OrderProducts product) async {
+    final newProducts = products?.map((p) {
+      if (p.$id == product.$id) return product;
+      return p;
+    }).toList();
+
+    final result = await copyWith(products: newProducts).update();
+    if (result.isFailure) return Failure(result.failure);
+
+    return Success(result.success);
   }
 }

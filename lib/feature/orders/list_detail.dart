@@ -3,8 +3,9 @@ import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/datetime_formatter.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/show_result_info.dart';
-import 'package:stibu/feature/orders/add_product.dart';
-import 'package:stibu/main.dart';
+import 'package:stibu/feature/orders/coupon_input.dart';
+import 'package:stibu/feature/orders/product_add.dart';
+import 'package:stibu/feature/orders/product_edit.dart';
 
 class OrderInfoCard extends StatelessWidget {
   final Orders order;
@@ -83,6 +84,11 @@ class OrderProductsList extends StatelessWidget {
                   await showAddProductsDialog(context, order),
             ),
             CommandBarButton(
+              icon: const Icon(FluentIcons.add),
+              label: const Text('Add coupon'),
+              onPressed: () async => await showAddCouponDialog(context, order),
+            ),
+            CommandBarButton(
               icon: const Icon(FluentIcons.save),
               label: const Text('Create invoice'),
               onPressed: () async => await order.createInvoice().then(
@@ -102,7 +108,8 @@ class OrderProductsList extends StatelessWidget {
 
                   return ListTile(
                     onPressed: order.invoice == null
-                        ? () => log.info('product: ${product.id}')
+                        ? () async =>
+                            await showProductEditDialog(context, product, order)
                         : null,
                     leading: Container(
                       height: 40,
@@ -131,24 +138,22 @@ class OrderProductsList extends StatelessWidget {
                         child: Text(product.title)),
                     subtitle: Text(
                         "${product.quantity} x ${product.price.currency.format()}"),
-                    trailing: Row(
-                      children: [
-                        Text(product.total.format()),
-                        if (order.invoice == null)
-                          IconButton(
-                            icon: const Icon(FluentIcons.delete),
-                            onPressed: () async {
-                              // return await order.deleteProduct(product).then(
-                              //         (value) => showResultInfo(context, value),
-                              //       );
-                            },
-                          ),
-                      ],
-                    ),
+                    trailing: Text(product.total.format()),
                   );
                 },
               ),
       ),
+      if (order.coupons?.isNotEmpty ?? false) ...[
+        const Divider(),
+        for (final coupon in order.coupons!)
+          ListTile(
+            title: Text(coupon.name),
+            trailing: Text(coupon.amount.currency.format()),
+            onPressed: order.invoice == null
+                ? () async => await showEditCouponDialog(context, coupon, order)
+                : null,
+          ),
+      ],
       const Divider(),
       ListTile(
         title: const Text('Total'),

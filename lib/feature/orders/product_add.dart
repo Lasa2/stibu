@@ -16,13 +16,37 @@ class AddProductsDialog extends StatefulWidget {
 }
 
 class _AddProductsDialogState extends State<AddProductsDialog> {
-  Map<Products, int> selectedProductsQty = {};
+  final List<OrderProducts> selectedProducts = [];
   final _suggestBoxController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final porductsFuture = getCurrentProducts();
     _suggestBoxController.clear();
+
+    void onProductAdded(Products product, int qty) {
+      final index = selectedProducts.indexWhere(
+        (element) => element.id == product.id,
+      );
+
+      if (index != -1) {
+        setState(() {
+          selectedProducts[index] = selectedProducts[index]
+              .copyWith(quantity: selectedProducts[index].quantity + qty);
+        });
+      } else {
+        setState(() {
+          selectedProducts.add(
+            OrderProducts(
+              id: product.id,
+              title: product.title,
+              quantity: qty,
+              price: product.itemPrice,
+            ),
+          );
+        });
+      }
+    }
 
     return ContentDialog(
       title: const Text('Add Products'),
@@ -44,16 +68,7 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
               children: [
                 ProductSearch(
                   products: products,
-                  onProductAdded: (product, qty) {
-                    setState(() {
-                      if (selectedProductsQty.containsKey(product)) {
-                        selectedProductsQty[product] =
-                            selectedProductsQty[product]! + qty;
-                      } else {
-                        selectedProductsQty[product] = qty;
-                      }
-                    });
-                  },
+                  onProductAdded: onProductAdded,
                 ),
                 const StrongDivider(),
                 Padding(
@@ -63,16 +78,7 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
                     trailingIcon: const Icon(FluentIcons.search),
                     textInputAction: TextInputAction.search,
                     placeholder: 'Search for a product',
-                    onSelected: (item) {
-                      setState(() {
-                        if (selectedProductsQty.containsKey(item.value!)) {
-                          selectedProductsQty[item.value!] =
-                              selectedProductsQty[item.value]! + 1;
-                        } else {
-                          selectedProductsQty[item.value!] = 1;
-                        }
-                      });
-                    },
+                    onSelected: (item) => onProductAdded(item.value!, 1),
                     items: products
                         .map((product) => AutoSuggestBoxItem<Products>(
                               label: "${product.id} - ${product.title}",
@@ -96,15 +102,17 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
                 const SizedBox(height: 10),
                 GridView.builder(
                   shrinkWrap: true,
-                  itemCount: selectedProductsQty.keys.length,
+                  itemCount: selectedProducts.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 4,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
                   ),
                   itemBuilder: (context, index) {
-                    final product = selectedProductsQty.keys.elementAt(index);
-                    final qty = selectedProductsQty.values.elementAt(index);
+                    final orderProduct = selectedProducts[index];
+                    final product = products.firstWhere(
+                      (element) => element.id == orderProduct.id,
+                    );
 
                     return Container(
                       decoration: BoxDecoration(
@@ -135,7 +143,7 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
                                 ),
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  qty.toString(),
+                                  orderProduct.quantity.toString(),
                                   style: const TextStyle(
                                     fontSize: 12,
                                   ),
@@ -164,7 +172,7 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
                                 icon: const Icon(FluentIcons.delete),
                                 onPressed: () {
                                   setState(() {
-                                    selectedProductsQty.remove(product);
+                                    selectedProducts.removeAt(index);
                                   });
                                 },
                               ),
@@ -208,14 +216,7 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
         ),
         Button(
           onPressed: () {
-            Navigator.of(context).pop(selectedProductsQty.entries
-                .map((entry) => OrderProducts(
-                      id: entry.key.id,
-                      title: entry.key.title,
-                      quantity: entry.value,
-                      price: entry.key.itemPrice,
-                    ))
-                .toList());
+            Navigator.of(context).pop(selectedProducts);
           },
           child: const Text('Add'),
         ),
@@ -231,9 +232,27 @@ Future<void> showAddProductsDialog(BuildContext context, Orders order) async {
   );
 
   if (result != null) {
-    final newProducts = List<OrderProducts>.from(order.products ?? [])
-      ..addAll(result);
-    final newOrder = order.copyWith(products: newProducts);
+    // Add the new products to the order
+    // if the product is already in the order, update the quantity
+
+    final Map<int, OrderProducts> productsMap = {
+      for (final product in order.products ?? <OrderProducts>[])
+        product.id: product
+    };
+
+    for (final newProduct in result) {
+      if (productsMap.containsKey(newProduct.id)) {
+        productsMap[newProduct.id] = productsMap[newProduct.id]!.copyWith(
+          quantity: productsMap[newProduct.id]!.quantity + newProduct.quantity,
+        );
+      } else {
+        productsMap[newProduct.id] = newProduct;
+      }
+    }
+
+    final newOrder = order.copyWith(
+      products: productsMap.values.toList(),
+    );
 
     await newOrder.update().then((value) {
       showResultInfo(context, value,

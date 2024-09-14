@@ -3,9 +3,9 @@ import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/datetime_formatter.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/show_result_info.dart';
-import 'package:stibu/feature/orders/add_product.dart';
 import 'package:stibu/feature/orders/coupon_input.dart';
-import 'package:stibu/main.dart';
+import 'package:stibu/feature/orders/product_add.dart';
+import 'package:stibu/feature/orders/product_edit.dart';
 
 class OrderInfoCard extends StatelessWidget {
   final Orders order;
@@ -108,7 +108,8 @@ class OrderProductsList extends StatelessWidget {
 
                   return ListTile(
                     onPressed: order.invoice == null
-                        ? () => log.info('product: ${product.id}')
+                        ? () async =>
+                            await showProductEditDialog(context, product, order)
                         : null,
                     leading: Container(
                       height: 40,
@@ -137,25 +138,7 @@ class OrderProductsList extends StatelessWidget {
                         child: Text(product.title)),
                     subtitle: Text(
                         "${product.quantity} x ${product.price.currency.format()}"),
-                    trailing: Row(
-                      children: [
-                        Text(product.total.format()),
-                        if (order.invoice == null)
-                          IconButton(
-                            icon: const Icon(FluentIcons.delete),
-                            onPressed: () async => await order
-                                .copyWith(
-                                    products: order.products!
-                                        .where((element) =>
-                                            element.id != product.id)
-                                        .toList())
-                                .update()
-                                .then(
-                                  (value) => showResultInfo(context, value),
-                                ),
-                          ),
-                      ],
-                    ),
+                    trailing: Text(product.total.format()),
                   );
                 },
               ),

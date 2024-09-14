@@ -4,13 +4,13 @@ import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/show_result_info.dart';
 
-class InputCouponDialog extends StatefulWidget {
+class CouponInputDialog extends StatefulWidget {
   final String title;
   final String okText;
   final OrderCoupons? coupon;
   final void Function(OrderCoupons)? onDelete;
 
-  const InputCouponDialog({
+  const CouponInputDialog({
     super.key,
     required this.title,
     required this.okText,
@@ -19,10 +19,10 @@ class InputCouponDialog extends StatefulWidget {
   });
 
   @override
-  State<InputCouponDialog> createState() => _InputCouponDialogState();
+  State<CouponInputDialog> createState() => _CouponInputDialogState();
 }
 
-class _InputCouponDialogState extends State<InputCouponDialog> {
+class _CouponInputDialogState extends State<CouponInputDialog> {
   final _formKey = GlobalKey<FormState>();
   late String? _name = widget.coupon?.name;
   late int? _amount = widget.coupon?.amount;
@@ -107,7 +107,7 @@ class _InputCouponDialogState extends State<InputCouponDialog> {
 Future<void> showAddCouponDialog(BuildContext context, Orders order) async =>
     await showDialog<OrderCoupons>(
       context: context,
-      builder: (context) => const InputCouponDialog(
+      builder: (context) => const CouponInputDialog(
         title: 'Add Coupon',
         okText: 'Add',
       ),
@@ -121,7 +121,7 @@ Future<void> showEditCouponDialog(
         BuildContext context, OrderCoupons coupon, Orders order) async =>
     await showDialog<OrderCoupons>(
       context: context,
-      builder: (context) => InputCouponDialog(
+      builder: (context) => CouponInputDialog(
         title: 'Edit Coupon',
         okText: 'Save',
         coupon: coupon,

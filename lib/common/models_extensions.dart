@@ -117,4 +117,37 @@ extension OrdersExtensions on Orders {
 
     return Success(result.success);
   }
+
+  Future<Result<Orders, String>> addProduct(OrderProducts product) async {
+    final newProducts = <OrderProducts>[...(products ?? []), product];
+    final result = await copyWith(products: newProducts).update();
+    if (result.isFailure) return Failure(result.failure);
+
+    return Success(result.success);
+  }
+
+  Future<Result<Orders, String>> deleteProduct(OrderProducts product) async {
+    final newProducts = copyWith(
+        products: products?.where((p) => p.$id != product.$id).toList());
+
+    final order = await copyWith(products: newProducts.products).update();
+    if (order.isFailure) return Failure(order.failure);
+
+    final result = await product.delete();
+    if (result.isFailure) return Failure(result.failure);
+
+    return Success(order.success);
+  }
+
+  Future<Result<Orders, String>> updateProduct(OrderProducts product) async {
+    final newProducts = products?.map((p) {
+      if (p.$id == product.$id) return product;
+      return p;
+    }).toList();
+
+    final result = await copyWith(products: newProducts).update();
+    if (result.isFailure) return Failure(result.failure);
+
+    return Success(result.success);
+  }
 }

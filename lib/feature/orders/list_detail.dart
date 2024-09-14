@@ -3,6 +3,7 @@ import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/datetime_formatter.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/show_result_info.dart';
+import 'package:stibu/feature/orders/coupon_input.dart';
 import 'package:stibu/feature/orders/add_product.dart';
 import 'package:stibu/main.dart';
 
@@ -83,6 +84,11 @@ class OrderProductsList extends StatelessWidget {
                   await showAddProductsDialog(context, order),
             ),
             CommandBarButton(
+              icon: const Icon(FluentIcons.add),
+              label: const Text('Add coupon'),
+              onPressed: () async => await showAddCouponDialog(context, order),
+            ),
+            CommandBarButton(
               icon: const Icon(FluentIcons.save),
               label: const Text('Create invoice'),
               onPressed: () async => await order.createInvoice().then(
@@ -154,6 +160,18 @@ class OrderProductsList extends StatelessWidget {
                 },
               ),
       ),
+      if (order.coupons?.isNotEmpty ?? false) ...[
+        const Divider(),
+        for (final coupon in order.coupons!)
+          ListTile(
+            title: Text(coupon.name),
+            trailing: Text(coupon.amount.currency.format()),
+            onPressed: order.invoice == null
+                ? () async => await showEditCouponDialog(
+                    context, coupon.copyWith(order: order))
+                : null,
+          ),
+      ],
       const Divider(),
       ListTile(
         title: const Text('Total'),

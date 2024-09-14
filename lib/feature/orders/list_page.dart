@@ -26,7 +26,7 @@ class _OrderListPageState extends State<OrderListPage> {
 
   final _orders = <Orders>[];
   int _totalOders = 0;
-  StreamSubscription? _subscription;
+  StreamSubscription? _orderSubscription;
 
   Future<void> _loadOrders() async {
     late final (int, List<Orders>) result;
@@ -41,36 +41,40 @@ class _OrderListPageState extends State<OrderListPage> {
     });
   }
 
+  void _processEvent(RealtimeUpdateType type, Orders item) {
+    switch (type) {
+      case RealtimeUpdateType.create:
+        setState(() {
+          _orders.add(item);
+        });
+        break;
+      case RealtimeUpdateType.update:
+        final index = _orders.indexWhere((e) => e.$id == item.$id);
+        if (index != -1) {
+          setState(() {
+            _orders[index] = item;
+          });
+        }
+        break;
+      case RealtimeUpdateType.delete:
+        _orders.removeWhere((e) => e.$id == item.$id);
+        break;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _loadOrders();
-    _subscription =
-        getIt<RealtimeSubscriptions>().ordersUpdates.listen((event) {
-      switch (event.type) {
-        case RealtimeUpdateType.create:
-          setState(() {
-            _orders.add(event.item);
-          });
-          break;
-        case RealtimeUpdateType.update:
-          final index = _orders.indexWhere((e) => e.$id == event.item.$id);
-          if (index != -1) {
-            setState(() {
-              _orders[index] = event.item;
-            });
-          }
-          break;
-        case RealtimeUpdateType.delete:
-          _orders.removeWhere((e) => e.$id == event.item.$id);
-          break;
-      }
-    });
+
+    final realtime = getIt<RealtimeSubscriptions>();
+    _orderSubscription = realtime.ordersUpdates
+        .listen((event) => _processEvent(event.type, event.item));
   }
 
   @override
   void dispose() {
-    _subscription?.cancel();
+    _orderSubscription?.cancel();
     super.dispose();
   }
 

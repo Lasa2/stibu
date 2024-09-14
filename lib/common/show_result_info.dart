@@ -10,7 +10,7 @@ Future<void> showResultInfo<T>(BuildContext context, Result<T, String> result,
               content: Text(result.failure),
               severity: InfoBarSeverity.error,
             ));
-  } else if (successMessage != null) {
+  } else if (successMessage != null && context.mounted) {
     await displayInfoBar(context,
         builder: (context, close) => InfoBar(
               title: const Text('Success'),

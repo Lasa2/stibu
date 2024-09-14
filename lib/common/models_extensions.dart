@@ -25,10 +25,17 @@ extension CustomersExtensions on Customers {
 }
 
 extension OrdersExtensions on Orders {
-  Currency get total =>
+  Currency get productsTotal =>
       products?.fold<Currency>(
           Currency.zero, (value, product) => value + product.total) ??
       Currency.zero;
+
+  Currency get couponsTotal =>
+      coupons?.fold<Currency>(
+          Currency.zero, (value, coupon) => value + coupon.amount.currency) ??
+      Currency.zero;
+
+  Currency get total => productsTotal - couponsTotal;
 
   Future<Result<Invoices, String>> createInvoice([DateTime? date]) async {
     final appwrite = getIt<AppwriteClient>();
@@ -76,5 +83,15 @@ extension OrdersExtensions on Orders {
     } on AppwriteException catch (e) {
       return Failure(e.message ?? "Failed to create invoice");
     }
+  }
+
+  Future<Result<Orders, String>> deleteCoupon(OrderCoupons coupon) async {
+    final newCoupons =
+        copyWith(coupons: coupons?.where((c) => c.$id != coupon.$id).toList());
+
+    final result = await copyWith(coupons: newCoupons.coupons).update();
+    if (result.isFailure) return Failure(result.failure);
+
+    return Success(result.success);
   }
 }

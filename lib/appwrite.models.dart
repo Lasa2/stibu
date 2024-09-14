@@ -717,6 +717,17 @@ class Orders extends AppwriteModel<Orders> {
   );
 
   final String? city;
+	final Relationship couponsRelation = Relationship(
+    required: false,
+    array: false,
+    relatedCollection: '66e4419d003d969599f2',
+    relationType: RelationshipType.oneToMany,
+    twoWay: true,
+    twoWayKey: 'order',
+    onDelete: OnDelete.cascade,
+    side: Side.parent,
+  );
+  final List<OrderCoupons>? coupons;
 	final int customerId;
 	final String customerName;
 	final DateTime date;
@@ -731,17 +742,6 @@ class Orders extends AppwriteModel<Orders> {
     side: Side.child,
   );
   final Invoices? invoice;
-	final Relationship orderCouponsRelation = Relationship(
-    required: false,
-    array: false,
-    relatedCollection: '66e4419d003d969599f2',
-    relationType: RelationshipType.oneToMany,
-    twoWay: true,
-    twoWayKey: 'order',
-    onDelete: OnDelete.cascade,
-    side: Side.parent,
-  );
-  final List<OrderCoupons>? orderCoupons;
 	final Relationship productsRelation = Relationship(
     required: false,
     array: false,
@@ -758,11 +758,11 @@ class Orders extends AppwriteModel<Orders> {
 
   Orders._({
     this.city,
+		this.coupons,
 		required this.customerId,
 		required this.customerName,
 		required this.date,
 		this.invoice,
-		this.orderCoupons,
 		this.products,
 		this.street,
 		this.zip,
@@ -783,22 +783,22 @@ class Orders extends AppwriteModel<Orders> {
 
   factory Orders({
     String? city,
+		List<OrderCoupons>? coupons,
 		required int customerId,
 		required String customerName,
 		required DateTime date,
 		Invoices? invoice,
-		List<OrderCoupons>? orderCoupons,
 		List<OrderProducts>? products,
 		String? street,
 		String? zip,
   }) {
     return Orders._(
       city: city,
+			coupons: coupons,
 			customerId: customerId,
 			customerName: customerName,
 			date: date,
 			invoice: invoice,
-			orderCoupons: orderCoupons,
 			products: products,
 			street: street,
 			zip: zip,
@@ -815,11 +815,11 @@ class Orders extends AppwriteModel<Orders> {
   Map<String, dynamic> toJson() {
     return {
       'city': city,
+			'coupons': coupons?.map((e) => e.toJson()).toList(),
 			'customerId': customerId,
 			'customerName': customerName,
 			'date': date.toIso8601String(),
 			'invoice': invoice?.toJson(),
-			'orderCoupons': orderCoupons?.map((e) => e.toJson()).toList(),
 			'products': products?.map((e) => e.toJson()).toList(),
 			'street': street,
 			'zip': zip
@@ -833,11 +833,11 @@ class Orders extends AppwriteModel<Orders> {
   }) {
     return {
       'city': city,
+			if (includeRelations) 'coupons': coupons?.map((e) => e.toAppwrite(isChild: true)).toList(),
 			'customerId': customerId,
 			'customerName': customerName,
 			'date': date.toIso8601String(),
 			if (includeRelations) 'invoice': invoice?.toAppwrite(isChild: true),
-			if (includeRelations) 'orderCoupons': orderCoupons?.map((e) => e.toAppwrite(isChild: true)).toList(),
 			if (includeRelations) 'products': products?.map((e) => e.toAppwrite(isChild: true)).toList(),
 			'street': street,
 			'zip': zip,
@@ -848,11 +848,11 @@ class Orders extends AppwriteModel<Orders> {
   @override
   Orders copyWith({
     String? city,
+		List<OrderCoupons>? coupons,
 		int? customerId,
 		String? customerName,
 		DateTime? date,
 		Invoices? invoice,
-		List<OrderCoupons>? orderCoupons,
 		List<OrderProducts>? products,
 		String? street,
 		String? zip,
@@ -865,11 +865,11 @@ class Orders extends AppwriteModel<Orders> {
   }) {
     return Orders._(
       city: city ?? this.city,
+			coupons: coupons ?? this.coupons,
 			customerId: customerId ?? this.customerId,
 			customerName: customerName ?? this.customerName,
 			date: date ?? this.date,
 			invoice: invoice ?? this.invoice,
-			orderCoupons: orderCoupons ?? this.orderCoupons,
 			products: products ?? this.products,
 			street: street ?? this.street,
 			zip: zip ?? this.zip,
@@ -892,11 +892,11 @@ class Orders extends AppwriteModel<Orders> {
 		final eq = const ListEquality().equals;
     return other is Orders &&
       city == other.city &&
+			eq(coupons, other.coupons) &&
 			customerId == other.customerId &&
 			customerName == other.customerName &&
 			date == other.date &&
 			invoice == other.invoice &&
-			eq(orderCoupons, other.orderCoupons) &&
 			eq(products, other.products) &&
 			street == other.street &&
 			zip == other.zip &&
@@ -907,11 +907,11 @@ class Orders extends AppwriteModel<Orders> {
   int get hashCode {
     return Object.hashAllUnordered([
       city,
+			...(coupons ?? []),
 			customerId,
 			customerName,
 			date,
 			invoice,
-			...(orderCoupons ?? []),
 			...(products ?? []),
 			street,
 			zip,
@@ -922,11 +922,11 @@ class Orders extends AppwriteModel<Orders> {
   factory Orders.fromAppwrite(Document doc) {
     return Orders._(
       city: doc.data['city'],
+			coupons: List<OrderCoupons>.unmodifiable(doc.data['coupons'] == null ? [] : doc.data['coupons'].map((e) => OrderCoupons.fromAppwrite(Document.fromMap(e)))),
 			customerId: doc.data['customerId'],
 			customerName: doc.data['customerName'],
 			date: DateTime.parse(doc.data['date']),
 			invoice: doc.data['invoice'] == null ? null : Invoices.fromAppwrite(Document.fromMap(doc.data['invoice'])),
-			orderCoupons: List<OrderCoupons>.unmodifiable(doc.data['orderCoupons'] == null ? [] : doc.data['orderCoupons'].map((e) => OrderCoupons.fromAppwrite(Document.fromMap(e)))),
 			products: List<OrderProducts>.unmodifiable(doc.data['products'] == null ? [] : doc.data['products'].map((e) => OrderProducts.fromAppwrite(Document.fromMap(e)))),
 			street: doc.data['street'],
 			zip: doc.data['zip'],
@@ -2620,11 +2620,11 @@ class ProductKeys extends AppwriteModel<ProductKeys> {
 class OrderCoupons extends AppwriteModel<OrderCoupons> {
   static const collectionInfo = CollectionInfo(
     $id: '66e4419d003d969599f2',
-    $permissions: [],
+    $permissions: ['create("label:validProductKey")'],
     databaseId: 'dev',
     name: 'orderCoupons',
     enabled: true,
-    documentSecurity: false,
+    documentSecurity: true,
   );
 
   final int amount;

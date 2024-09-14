@@ -213,10 +213,8 @@ class _NewOrderDialogState extends State<NewOrderDialog> {
             Query.search('name', query),
           ]).then((result) {
         final items = result.documents.map((e) => Customers.fromAppwrite(e));
-        print(items);
         final newItems =
             items.where((e) => !_customers.any((c) => c.$id == e.$id));
-        print(newItems);
         setState(() {
           _customers.addAll(newItems);
         });

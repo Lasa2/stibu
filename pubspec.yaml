@@ -32,6 +32,7 @@ dependencies:
   http: ^1.2.2
   table_calendar: ^3.1.2
   build: ^2.4.1
+  pdf: ^3.11.1
 
 
 

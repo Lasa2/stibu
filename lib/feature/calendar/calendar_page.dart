@@ -55,9 +55,11 @@ class _CalendarPageState extends State<CalendarPage> {
             .map<CalendarEvents>((e) => CalendarEvents.fromAppwrite(e))
             .toList();
 
-        setState(() {
+        if (mounted) {
+          setState(() {
           _events[day] = events;
         });
+        }
       });
     }
     return events ?? [];

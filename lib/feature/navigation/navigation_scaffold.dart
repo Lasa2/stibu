@@ -3,6 +3,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:stibu/feature/app_state/account.dart';
 import 'package:stibu/feature/navigation/windows_appbar.dart';
+import 'package:stibu/feature/router/router.dart';
 import 'package:stibu/feature/router/router.gr.dart';
 import 'package:stibu/main.dart';
 
@@ -39,10 +40,10 @@ var items = <Object>[
     route: DashboardRoute(),
   ),
   PaneItemSeparator(),
-  const RouteDestination(
+  RouteDestination(
     title: 'Customers',
     icon: FluentIcons.people,
-    route: CustomerListRoute(),
+    route: CustomerTab(),
   ),
   const RouteDestination(
     title: "Orders",
@@ -99,41 +100,21 @@ class NavigationScaffoldPage extends StatefulWidget {
 }
 
 class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
-  final autoRouterKey = GlobalKey<AutoRouterState>();
-  late final autoRouter = AutoRouter(
-    key: autoRouterKey,
-  );
-
   List<RouteDestination> get routeDestinations =>
       (flatten(items) + flatten(footerItems)).toList(growable: false);
 
-  void onChanged(BuildContext context, int index) {
-    context.router.push(routeDestinations[index].route);
-    setState(() {});
-  }
-
-  void onTap(
-      BuildContext context, RouteDestination element, int selectedIndex) {
-    final index = routeDestinations.indexOf(element);
-    final isSameIndex = selectedIndex == index;
-    final childRouter = context.router.childControllers.last;
-
-    if (isSameIndex && childRouter.current.name != element.route.routeName) {
-      childRouter.maybePop();
-    } else if (!isSameIndex) {
-      onChanged(context, index);
-    }
-  }
-
-  List<NavigationPaneItem> buildItems(List<Object> items, int selectedIndex) {
+  List<NavigationPaneItem> buildItems(
+    List<Object> items,
+    int selectedIndex,
+    Widget child,
+  ) {
     return items.map<NavigationPaneItem>((element) {
       if (element is RouteDestination) {
         if (element.items == null) {
           return PaneItem(
             icon: Icon(element.icon),
             title: Text(element.title),
-            body: autoRouter,
-            onTap: () => onTap(context, element, selectedIndex),
+            body: child,
             trailing: element.trailing,
             infoBadge: element.infoBadge,
             mouseCursor: element.mouseCursor,
@@ -145,9 +126,8 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
           return PaneItemExpander(
             icon: Icon(element.icon),
             title: Text(element.title),
-            body: autoRouter,
-            items: buildItems(element.items!, selectedIndex),
-            onTap: () => onTap(context, element, selectedIndex),
+            body: child,
+            items: buildItems(element.items!, selectedIndex, child),
             trailing: element.trailing ?? PaneItemExpander.kDefaultTrailing,
             infoBadge: element.infoBadge,
             mouseCursor: element.mouseCursor,
@@ -195,31 +175,30 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: selected index not always correct
-    final topRouteName = context
-        .router.childControllers.firstOrNull?.currentSegments.firstOrNull?.name;
-    final index = routeDestinations.indexWhere(
-      (element) => element.route.routeName == topRouteName,
-    );
-    final selectedIndex = index == -1 ? 0 : index;
-
-    return NavigationView(
-      appBar: buildNavigationAppBar(context),
-      pane: NavigationPane(
-        selected: selectedIndex,
-        // onChanged: (index) => onChanged(context, index),
-        displayMode: PaneDisplayMode.auto,
-        header: SizedBox(
-          height: 78,
-          child: ListTile(
-            leading: avatar,
-            title: Text(user?.name ?? "User"),
-            subtitle: Text(user?.email ?? ""),
+    return AutoTabsRouter(
+      routes: routeDestinations.map((e) => e.route).toList(),
+      homeIndex: 0,
+      builder: (context, child) {
+        return NavigationView(
+          appBar: buildNavigationAppBar(context),
+          pane: NavigationPane(
+            selected: context.tabsRouter.activeIndex,
+            onChanged: (index) => context.tabsRouter.setActiveIndex(index),
+            displayMode: PaneDisplayMode.auto,
+            header: SizedBox(
+              height: 78,
+              child: ListTile(
+                leading: avatar,
+                title: Text(user?.name ?? "User"),
+                subtitle: Text(user?.email ?? ""),
+              ),
+            ),
+            items: buildItems(items, context.tabsRouter.activeIndex, child),
+            footerItems:
+                buildItems(footerItems, context.tabsRouter.activeIndex, child),
           ),
-        ),
-        items: buildItems(items, selectedIndex),
-        footerItems: buildItems(footerItems, selectedIndex),
-      ),
+        );
+      },
     );
   }
 }

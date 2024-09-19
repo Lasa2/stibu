@@ -39,6 +39,9 @@ class NoTransitionRoute extends CustomRoute {
         );
 }
 
+// ignore: constant_identifier_names
+const CustomerTab = EmptyShellRoute('CustomerTab');
+
 @AutoRouterConfig(replaceInRouteName: "Page,Route")
 class AppRouter extends RootStackRouter {
   @override
@@ -66,11 +69,16 @@ class AppRouter extends RootStackRouter {
             ),
             NoTransitionRoute(
               path: "customers",
-              page: CustomerListRoute.page,
-            ),
-            NoTransitionRoute(
-              path: "customers/:id",
-              page: CustomerDetailRoute.page,
+              page: CustomerTab, children: [
+              NoTransitionRoute(
+                path: '',
+                page: CustomerListRoute.page,
+              ),
+              NoTransitionRoute(
+                path: ':id',
+                page: CustomerDetailRoute.page,
+              ),
+            ]
             ),
             NoTransitionRoute(
               path: "invoices",

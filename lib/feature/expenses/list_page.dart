@@ -107,6 +107,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
       result = (await Expenses.page(last: _expenses.last)).success;
     }
 
+    print('ExpensesListPage._loadExpenses: $result');
     setState(() {
       _totalExpenses = result.$1;
       _expenses.addAll(result.$2);
@@ -119,6 +120,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
     _loadExpenses();
     _expensesSubscription =
         getIt<RealtimeSubscriptions>().expensesUpdates.listen((update) {
+      print('ExpensesListPage._expensesSubscription: $update');
       switch (update.type) {
         case RealtimeUpdateType.create:
           setState(() {
@@ -153,6 +155,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('ExpensesListPage.build');
     final largeScreen = isLargeScreen(context);
     _selectedIndex = largeScreen ? _selectedIndex : null;
 

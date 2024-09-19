@@ -211,8 +211,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
                   isSelected: selectedIndex == index,
                   onPressed: () {
                     if (!largeScreen) {
-                      AutoRouter.of(context)
-                          .push(CustomerDetailRoute(id: customer.$id));
+                      context.navigateTo(CustomerDetailRoute(id: customer.$id));
                       return;
                     }
                     if (selectedIndex == index) return;

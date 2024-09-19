@@ -3,6 +3,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/feature/customers/customer_info_card.dart';
 import 'package:stibu/feature/customers/customer_input.dart';
+import 'package:stibu/feature/router/router.dart';
 import 'package:stibu/widgets/custom_page_header.dart';
 
 @RoutePage()
@@ -46,7 +47,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                 ],
                 onItemPressed: (item) {
                   if (item.value == 0) {
-                    context.router.maybePop();
+                    context.navigateTo(CustomerTab());
                   }
                 },
               ),

@@ -9,7 +9,7 @@ import 'package:stibu/model_generator/model.dart';
 class ModelBuilder implements Builder {
   @override
   Map<String, List<String>> get buildExtensions => {
-        'appwrite.json': ['lib/appwrite.models.dart']
+        'appwrite.json': ['lib/appwrite.models.dart', 'appwrite.example.json']
       };
 
   @override
@@ -39,8 +39,22 @@ class ModelBuilder implements Builder {
 
     generatedCode += collections.map(generateClass).join('\n\n');
 
-    const outputPath = 'lib/appwrite.models.dart';
     await buildStep.writeAsString(
-        AssetId(buildStep.inputId.package, outputPath), generatedCode);
+      AssetId(buildStep.inputId.package, 'lib/appwrite.models.dart'),
+      generatedCode,
+    );
+
+    // Generate example json
+    final exampleJson = <String, dynamic>{
+      'collections': jsonMap['collections'],
+      'databases': jsonMap['databases'],
+    };
+    final jsonEncoder = JsonEncoder.withIndent(' ' * 4);
+    final exampleOutput = jsonEncoder.convert(exampleJson);
+
+    await buildStep.writeAsString(
+      AssetId(buildStep.inputId.package, 'appwrite.example.json'),
+      exampleOutput,
+    );
   }
 }

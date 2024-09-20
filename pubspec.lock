@@ -313,6 +313,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.17.3"
+  dart_helper_utils:
+    dependency: "direct main"
+    description:
+      name: dart_helper_utils
+      sha256: "135d1960e48f44b47ac1ce273a3da5aa20a19b4b446a774476df43be3803e920"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.7.0"
   dart_style:
     dependency: transitive
     description:
@@ -390,6 +398,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_helper_utils:
+    dependency: "direct main"
+    description:
+      name: flutter_helper_utils
+      sha256: "01ef6666877ae747d9e5b60897c34ecf3c3081e3018223b623a74f606e55c940"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.6.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -633,10 +649,10 @@ packages:
     dependency: transitive
     description:
       name: mime
-      sha256: "2e123074287cc9fd6c09de8336dae606d1ddb88d9ac47358826db698c176a1f2"
+      sha256: "801fd0b26f14a4a58ccb09d5892c3fbdeff209594300a542492cf13fba9d247a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.5"
+    version: "1.0.6"
   package_config:
     dependency: transitive
     description:

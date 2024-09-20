@@ -3,7 +3,7 @@ import 'package:result_type/result_type.dart';
 
 Future<void> showResultInfo<T>(BuildContext context, Result<T, String> result,
     {String? successMessage}) async {
-  if (result.isFailure) {
+  if (result.isFailure && context.mounted) {
     await displayInfoBar(context,
         builder: (context, close) => InfoBar(
               title: const Text('Error'),

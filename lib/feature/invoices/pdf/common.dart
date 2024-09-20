@@ -10,7 +10,9 @@ const invoicesWithOrderDispatch = <String, Future<Document> Function(Invoices)>{
 };
 
 const invoicesWithoutOrderDispatch =
-    <String, Future<Document> Function(Invoices)>{};
+    <String, Future<Document> Function(Invoices)>{
+  'basic': generateBasicInvoiceWithoutOrder,
+};
 
 Future<Document> getDocument(Invoices invoice) async {
   if (invoice.order == null) {
@@ -20,7 +22,7 @@ Future<Document> getDocument(Invoices invoice) async {
 
     if (templatePreferences == null ||
         !invoicesWithoutOrderDispatch.containsKey(templatePreferences)) {
-      throw Exception('No template found for $templatePreferences');
+      return generateBasicInvoiceWithoutOrder(invoice);
     }
 
     return invoicesWithoutOrderDispatch[templatePreferences]!(invoice);
@@ -31,7 +33,7 @@ Future<Document> getDocument(Invoices invoice) async {
 
   if (templatePreferences == null ||
       !invoicesWithOrderDispatch.containsKey(templatePreferences)) {
-    throw Exception('No template found for $templatePreferences');
+    return generateBasicInvoiceWithOrder(invoice);
   }
 
   return invoicesWithOrderDispatch[templatePreferences]!(invoice);

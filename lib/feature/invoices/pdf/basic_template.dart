@@ -188,3 +188,114 @@ Future<Document> generateBasicInvoiceWithOrder(Invoices invoice) async {
 
   return pdf;
 }
+
+
+Future<Document> generateBasicInvoiceWithoutOrder(Invoices invoice) async {
+  assert(invoice.order == null);
+
+  final pdf = Document();
+
+  final font = await PdfGoogleFonts.robotoRegular();
+  final fontBold = await PdfGoogleFonts.robotoBold();
+
+  pdf.addPage(Page(
+    pageFormat: PdfPageFormat.a4,
+    orientation: PageOrientation.portrait,
+    build: (context) {
+      TextStyle defaultTextStyle =
+          TextStyle(fontSize: 10, font: font, fontBold: fontBold);
+
+      return SizedBox(
+          width: PdfPageFormat.a4.availableWidth,
+          height: PdfPageFormat.a4.availableHeight / 2,
+          child: Column(
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Quittung',
+                      textAlign: TextAlign.left,
+                      style: defaultTextStyle.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text('Nr: ${invoice.invoiceNumber}',
+                        textAlign: TextAlign.right, style: defaultTextStyle),
+                  ],
+                ),
+              ),
+              Container(
+                width: PdfPageFormat.a5.availableHeight / (3 / 4),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: PdfColors.black,
+                    width: 1,
+                  ),
+                ),
+                margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+                padding: const EdgeInsets.all(10),
+                child: Text(
+                  invoice.name,
+                  textAlign: TextAlign.center,
+                  style: defaultTextStyle,
+                  maxLines: 3,
+                ),
+              ),
+              SizedBox(
+                width: PdfPageFormat.a5.availableHeight,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 5),
+                  child: Text(
+                    'Gesamtbetrag: ${invoice.amount.currency.format()}',
+                    textAlign: TextAlign.right,
+                    style: defaultTextStyle,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: PdfPageFormat.a5.availableHeight,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 5, 20, 0),
+                  child: Text(
+                    'Datum: ${invoice.date.formatDate()}',
+                    textAlign: TextAlign.left,
+                    style: defaultTextStyle,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: PdfPageFormat.a5.availableHeight,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 5, 20, 10),
+                  child: Text(
+                    'Ort: ',
+                    textAlign: TextAlign.left,
+                    style: defaultTextStyle,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: PdfPageFormat.a5.availableHeight,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                  child: Text(
+                    'Unterschrift: ',
+                    textAlign: TextAlign.left,
+                    style: defaultTextStyle,
+                  ),
+                ),
+              ),
+            ],
+          ));
+    },
+  ));
+
+  return pdf;
+}

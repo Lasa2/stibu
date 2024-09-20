@@ -55,6 +55,7 @@ class AppwriteClient {
   late final Realtime realtime = Realtime(client);
   late final Functions functions = Functions(client);
   late final Avatars avatars = Avatars(client);
+  late final Storage storage = Storage(client);
 
   String? overrideDatabaseId;
 

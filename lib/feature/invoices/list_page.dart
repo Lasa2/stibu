@@ -11,6 +11,7 @@ import 'package:stibu/common/new_ids.dart';
 import 'package:stibu/feature/app_state/realtime_subscriptions.dart';
 import 'package:stibu/feature/invoices/info_card.dart';
 import 'package:stibu/feature/invoices/input.dart';
+import 'package:stibu/feature/invoices/pdf/common.dart';
 import 'package:stibu/main.dart';
 
 Future<Invoices?> _showInvoiceCreateDialog(BuildContext context) async {
@@ -211,35 +212,16 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
                     }
                   },
                 ),
-                // CommandBarButton(
-                //   icon: const Icon(FluentIcons.delete),
-                //   label: const Text('Delete'),
-                //   onPressed: () async {
-                //     final result = await _invoices[selectedIndex!].delete();
+                CommandBarButton(
+                  icon: const Icon(FluentIcons.print),
+                  label: const Text('Print'),
+                  onPressed: () async {
+                    final invoice = _invoices[selectedIndex!];
 
-                //     if (!context.mounted) return;
-
-                //     if (result.isFailure) {
-                //       await displayInfoBar(context,
-                //           builder: (context, close) => InfoBar(
-                //                 title: const Text("Error"),
-                //                 content: Text(result.failure),
-                //                 severity: InfoBarSeverity.error,
-                //               ));
-                //     } else {
-                //       await displayInfoBar(context,
-                //           builder: (context, close) => const InfoBar(
-                //                 title: Text("Success"),
-                //                 content: Text("Receipt deleted"),
-                //                 severity: InfoBarSeverity.success,
-                //               ));
-                //       setState(() {
-                //         selectedIndex = null;
-                //       });
-                //     }
-                //   },
-                // ),
-              ]
+                    await shareInvoice(_invoices[selectedIndex!]);
+                  },
+                )
+              ],
             ],
           ),
         ),

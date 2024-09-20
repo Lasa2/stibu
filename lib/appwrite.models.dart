@@ -53,6 +53,7 @@ class AppwriteClient {
   late final Realtime realtime = Realtime(client);
   late final Functions functions = Functions(client);
   late final Avatars avatars = Avatars(client);
+  late final Storage storage = Storage(client);
 
   String? overrideDatabaseId;
 
@@ -2635,7 +2636,7 @@ class OrderCoupons extends AppwriteModel<OrderCoupons> {
     relatedCollection: 'orders',
     relationType: RelationshipType.oneToMany,
     twoWay: true,
-    twoWayKey: 'orderCoupons',
+    twoWayKey: 'coupons',
     onDelete: OnDelete.cascade,
     side: Side.child,
   );
@@ -2802,6 +2803,185 @@ class OrderCoupons extends AppwriteModel<OrderCoupons> {
       collectionInfo.databaseId,
       collectionInfo.$id,
       OrderCoupons.fromAppwrite,
+      this,
+    );
+  }
+
+  Future<Result<void, String>> delete() async {
+    return client.delete(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      $id,
+    );
+  }
+}
+
+
+
+class PdfTemplates extends AppwriteModel<PdfTemplates> {
+  static const collectionInfo = CollectionInfo(
+    $id: '66ec10e100342209605d',
+    $permissions: ['create("label:validProductKey")'],
+    databaseId: 'dev',
+    name: 'pdfTemplates',
+    enabled: true,
+    documentSecurity: true,
+  );
+
+  final String template;
+	final String title;
+
+  PdfTemplates._({
+    required this.template,
+		required this.title,
+    required super.$id,
+    required super.$collectionId,
+    required super.$databaseId,
+    required super.$createdAt,
+    required super.$updatedAt,
+    required super.$permissions,
+  })  : assert(template.isNotEmpty),
+				assert(template.length <= 128000),
+				assert(title.isNotEmpty),
+				assert(title.length <= 128);
+
+  factory PdfTemplates({
+    required String template,
+		required String title,
+  }) {
+    return PdfTemplates._(
+      template: template,
+			title: title,
+      $id: ID.unique(),
+      $collectionId: collectionInfo.$id,
+      $databaseId: collectionInfo.databaseId,
+      $createdAt: DateTime.now().toUtc(),
+      $updatedAt: DateTime.now().toUtc(),
+      $permissions: collectionInfo.$permissions,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'template': template,
+			'title': title
+    };
+  }
+
+  @override
+  Map<String, dynamic> toAppwrite({
+    bool isChild = false,
+    bool includeRelations = true,
+  }) {
+    return {
+      'template': template,
+			'title': title,
+      if (isChild) '\$id': $id,
+    };
+  }
+
+  @override
+  PdfTemplates copyWith({
+    String? template,
+		String? title,
+    String? $id,
+    String? $collectionId,
+    String? $databaseId,
+    DateTime? $createdAt,
+    DateTime? $updatedAt,
+    List<String>? $permissions,
+  }) {
+    return PdfTemplates._(
+      template: template ?? this.template,
+			title: title ?? this.title,
+      $id: $id ?? this.$id,
+      $collectionId: $collectionId ?? this.$collectionId,
+      $databaseId: $databaseId ?? this.$databaseId,
+      $createdAt: $createdAt ?? this.$createdAt,
+      $updatedAt: $updatedAt ?? this.$updatedAt,
+      $permissions: $permissions ?? this.$permissions,
+    );
+  }
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PdfTemplates &&
+      template == other.template &&
+			title == other.title &&
+      other.$id == $id;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAllUnordered([
+      template,
+			title,
+      $id,
+    ]);
+  }
+
+  factory PdfTemplates.fromAppwrite(Document doc) {
+    return PdfTemplates._(
+      template: doc.data['template'],
+			title: doc.data['title'],
+      $id: doc.$id,
+      $collectionId: doc.$collectionId,
+      $databaseId: doc.$databaseId,
+      $createdAt: DateTime.parse(doc.$createdAt),
+      $updatedAt: DateTime.parse(doc.$updatedAt),
+      $permissions: List<String>.unmodifiable(doc.$permissions),
+    );
+  }
+
+// API
+
+  static AppwriteClient get client => GetIt.I.get<AppwriteClient>();
+  static String get databaseId => GetIt.I.get<AppwriteClient>().overrideDatabaseId ?? collectionInfo.databaseId;
+
+  static Future<Result<(int, List<PdfTemplates>), String>> page({
+    int limit = 25,
+    int? offset,
+    PdfTemplates? last,
+  }) async {
+    return client.page<PdfTemplates>(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      PdfTemplates.fromAppwrite,
+      limit: limit,
+      offset: offset,
+      last: last,
+    );
+  }
+
+  static Future<Result<PdfTemplates, String>> get(String id) async {
+    return client.get<PdfTemplates>(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      id,
+      PdfTemplates.fromAppwrite,
+    );
+  }
+
+  Future<Result<PdfTemplates, String>> create() async {
+    return client.create<PdfTemplates>(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      PdfTemplates.fromAppwrite,
+      this,
+    );
+  }
+
+  Future<Result<PdfTemplates, String>> update() async {
+    return client.update<PdfTemplates>(
+      collectionInfo.databaseId,
+      collectionInfo.$id,
+      PdfTemplates.fromAppwrite,
       this,
     );
   }

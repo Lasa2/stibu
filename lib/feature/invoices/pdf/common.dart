@@ -1,6 +1,7 @@
 import 'package:pdf/widgets.dart';
 import 'package:printing/printing.dart';
 import 'package:result_type/result_type.dart';
+import 'package:sanitize_filename/sanitize_filename.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/feature/invoices/pdf/basic_template.dart';
 import 'package:stibu/main.dart';
@@ -48,9 +49,10 @@ Future<Result<void, String>> shareInvoice(Invoices invoice) async {
     final String filenamePattern = preferences['invoiceWithOrderFilename'] ??
         'Invoice {invoiceDate} - {invoiceNumber}';
 
-    final filename = filenamePattern
+    final filename = sanitizeFilename(filenamePattern
         .replaceAll('{invoiceNumber}', invoice.invoiceNumber)
-        .replaceAll('{invoiceDate}', invoice.date.toIso8601String());
+        .replaceAll('{invoiceDate}',
+            '${invoice.date.year}-${invoice.date.month}-${invoice.date.day}'));
 
     await Printing.sharePdf(
       bytes: await doc.save(),

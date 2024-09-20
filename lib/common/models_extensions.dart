@@ -44,27 +44,25 @@ extension OrdersExtensions on Orders {
       if (invoiceId.isFailure) return Failure(invoiceId.failure);
       final user = await appwrite.account.get();
 
+      final permissions = [
+        Permission.read(Role.user(user.$id)),
+      ];
+
       final doc = await appwrite.databases.createDocument(
         databaseId: Invoices.databaseId,
         collectionId: Invoices.collectionInfo.$id,
-        documentId: invoiceId.success,
+        documentId: ID.unique(),
         data: {
           "invoiceNumber": invoiceId.success,
           'date': date?.toIso8601String() ?? DateTime.now().toIso8601String(),
           "name": "Invoice ${invoiceId.success}",
           "amount": total.asInt,
           "order": $id,
-          '\$permissions': [
-            Permission.read(Role.user(user.$id)),
-          ]
         },
+        permissions: permissions
       );
 
-      // Set order and orderProducts permissions to read-only
-      final permissions = [
-        Permission.read(Role.user(user.$id)),
-      ];
-
+      // Set order, orderProducts and orderCoupons permissions to read-only
       await appwrite.databases.updateDocument(
           databaseId: Orders.databaseId,
           collectionId: Orders.collectionInfo.$id,
@@ -74,6 +72,12 @@ extension OrdersExtensions on Orders {
             'products': products?.map((product) {
               return {
                 '\$id': product.$id,
+                '\$permissions': permissions,
+              };
+            }).toList(),
+            'coupons': coupons?.map((coupon) {
+              return {
+                '\$id': coupon.$id,
                 '\$permissions': permissions,
               };
             }).toList(),

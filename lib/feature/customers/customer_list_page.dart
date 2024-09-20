@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/is_large_screen.dart';
@@ -141,6 +142,17 @@ class _CustomerListPageState extends State<CustomerListPage> {
   Widget build(BuildContext context) {
     final largeScreen = isLargeScreen(context);
     selectedIndex = largeScreen ? selectedIndex : null;
+
+    if (selectCustomer != null) {
+      final index =
+          _customers.firstWhereOrNull((e) => e.id == selectCustomer!.id);
+
+      selectedIndex = index != null ? _customers.indexOf(index) : null;
+    }
+
+    if (selectedIndex != null && selectedIndex! >= _customers.length) {
+      selectedIndex = null;
+    }
 
     return ScaffoldPage(
       header: PageHeader(

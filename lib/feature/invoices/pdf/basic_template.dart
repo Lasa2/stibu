@@ -5,7 +5,7 @@ import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/datetime_formatter.dart';
 import 'package:stibu/common/models_extensions.dart';
 
-Future<Document> generateInvoice(Invoices invoice) async {
+Future<Document> generateBasicInvoiceWithOrder(Invoices invoice) async {
   assert(invoice.order != null);
   assert(invoice.order!.products != null);
   assert(invoice.order!.coupons != null);

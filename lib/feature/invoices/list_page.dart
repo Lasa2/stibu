@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:appwrite/appwrite.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:result_type/result_type.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/datetime_formatter.dart';
 import 'package:stibu/common/is_large_screen.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/new_ids.dart';
+import 'package:stibu/common/show_result_info.dart';
 import 'package:stibu/feature/app_state/realtime_subscriptions.dart';
 import 'package:stibu/feature/invoices/info_card.dart';
 import 'package:stibu/feature/invoices/input.dart';
@@ -212,16 +214,36 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
                     }
                   },
                 ),
+              ],
                 CommandBarButton(
                   icon: const Icon(FluentIcons.print),
                   label: const Text('Print'),
                   onPressed: () async {
                     final invoice = _invoices[selectedIndex!];
 
-                    await shareInvoice(_invoices[selectedIndex!]);
+                  if (invoice.canUpdate) {
+                    final appwrite = getIt<AppwriteClient>();
+                    final user = await appwrite.account.get();
+
+                    try {
+                      await appwrite.databases.updateDocument(
+                        databaseId: Invoices.collectionInfo.databaseId,
+                        collectionId: Invoices.collectionInfo.$id,
+                        documentId: invoice.$id,
+                        permissions: [Permission.read(Role.user(user.$id))],
+                      );
+                    } catch (e) {
+                      if (context.mounted) {
+                        await showResultInfo(context, Failure(e.toString()));
+                      }
+                      return;
+                    }
+                  }
+
+                  final result = await shareInvoice(invoice);
+                  if (context.mounted) await showResultInfo(context, result);
                   },
-                )
-              ],
+              )
             ],
           ),
         ),

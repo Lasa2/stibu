@@ -18,7 +18,7 @@ class InvoiceInputDialog extends StatefulWidget {
 
 class _InvoiceInputDialogState extends State<InvoiceInputDialog> {
   final _formKey = GlobalKey<FormState>();
-  late DateTime? _date = widget.invoice?.date ?? DateTime.now();
+  late DateTime _date = widget.invoice?.date.toLocal() ?? DateTime.now();
   late String? _name = widget.invoice?.name;
   late String? _notes = widget.invoice?.notes;
   late int? _amount = widget.invoice?.amount;
@@ -36,14 +36,14 @@ class _InvoiceInputDialogState extends State<InvoiceInputDialog> {
               late final Invoices invoice;
               if (widget.invoice != null) {
                 invoice = widget.invoice!.copyWith(
-                  date: _date,
+                  date: _date.toUtc(),
                   name: _name,
                   notes: _notes,
                   amount: _amount,
                 );
               } else {
                 final invoiceNumber = await newInvoiceNumber(
-                  _date,
+                  _date.toUtc(),
                 );
 
                 if (!context.mounted) return;
@@ -58,7 +58,7 @@ class _InvoiceInputDialogState extends State<InvoiceInputDialog> {
                 }
                 invoice = Invoices(
                   invoiceNumber: invoiceNumber.success,
-                  date: _date!,
+                  date: _date.toUtc(),
                   name: _name!,
                   notes: _notes,
                   amount: _amount!,
@@ -86,7 +86,7 @@ class _InvoiceInputDialogState extends State<InvoiceInputDialog> {
               InfoLabel(
                 label: "Date",
                 child: DatePicker(
-                  selected: _date!,
+                  selected: _date,
                   onChanged: (value) => _date = value,
                 ),
               ),

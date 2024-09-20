@@ -37,7 +37,7 @@ migrate_working_dir/
 /lib/l10n/generated
 /lib/l10n/generated/**
 /windows/flutter/generated*
-appwrite.models.dart
+/lib/appwrite.models.dart
 
 # Symbolication related
 app.*.symbols

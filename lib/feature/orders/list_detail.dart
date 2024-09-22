@@ -66,6 +66,97 @@ class OrderInfoCard extends StatelessWidget {
   }
 }
 
+Future<void> createInvoice(BuildContext context, Orders order) async =>
+    await showDialog(
+      context: context,
+      builder: (context) => CreateOrderInvoiceDialog(
+        order: order,
+      ),
+    );
+
+class CreateOrderInvoiceDialog extends StatefulWidget {
+  final Orders order;
+
+  const CreateOrderInvoiceDialog({
+    super.key,
+    required this.order,
+  });
+
+  @override
+  State<CreateOrderInvoiceDialog> createState() =>
+      _CreateOrderInvoiceDialogState();
+}
+
+class _CreateOrderInvoiceDialogState extends State<CreateOrderInvoiceDialog> {
+  DateTime selected = DateTime.now();
+  final controller = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return ContentDialog(
+      title: const Center(child: Text('Create invoice')),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InfoLabel(
+                label: 'Date',
+                child: DatePicker(
+                  selected: selected,
+                  onChanged: (value) {
+                    setState(() {
+                      selected = value;
+                    });
+                  },
+                ),
+              ),
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 295),
+                child: InfoLabel(
+                  label: 'Note',
+                  child: TextBox(
+                    controller: controller,
+                    placeholder: 'Note',
+                    maxLines: 10,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        Button(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        Button(
+          onPressed: () async => widget.order
+              .createInvoice(
+            date: selected,
+            note: controller.text,
+          )
+              .then((result) {
+            if (result.isSuccess) {
+              Navigator.of(context).pop();
+            } else {
+              showResultInfo(context, result);
+            }
+          }),
+          child: const Text('Confirm'),
+        ),
+      ],
+    );
+  }
+}
+
 class OrderProductsList extends StatelessWidget {
   final Orders order;
 
@@ -91,10 +182,7 @@ class OrderProductsList extends StatelessWidget {
             CommandBarButton(
               icon: const Icon(FluentIcons.save),
               label: const Text('Create invoice'),
-              onPressed: () async => await order.createInvoice().then(
-                    (value) => showResultInfo(context, value,
-                        successMessage: 'Invoice created'),
-                  ),
+              onPressed: () async => await createInvoice(context, order),
             ),
           ],
         ),

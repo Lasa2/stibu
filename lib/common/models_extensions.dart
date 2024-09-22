@@ -37,7 +37,8 @@ extension OrdersExtensions on Orders {
 
   Currency get total => productsTotal - couponsTotal;
 
-  Future<Result<Invoices, String>> createInvoice([DateTime? date]) async {
+  Future<Result<Invoices, String>> createInvoice(
+      {DateTime? date, String? note}) async {
     final appwrite = getIt<AppwriteClient>();
     try {
       final invoiceId = await newInvoiceNumber(date);
@@ -49,18 +50,18 @@ extension OrdersExtensions on Orders {
       ];
 
       final doc = await appwrite.databases.createDocument(
-        databaseId: Invoices.databaseId,
-        collectionId: Invoices.collectionInfo.$id,
-        documentId: ID.unique(),
-        data: {
-          "invoiceNumber": invoiceId.success,
-          'date': date?.toIso8601String() ?? DateTime.now().toIso8601String(),
-          "name": "Invoice ${invoiceId.success}",
-          "amount": total.asInt,
-          "order": $id,
-        },
-        permissions: permissions
-      );
+          databaseId: Invoices.databaseId,
+          collectionId: Invoices.collectionInfo.$id,
+          documentId: ID.unique(),
+          data: {
+            "invoiceNumber": invoiceId.success,
+            'date': date?.toIso8601String() ?? DateTime.now().toIso8601String(),
+            "name": "Invoice ${invoiceId.success}",
+            "amount": total.asInt,
+            "notes": note,
+            "order": $id,
+          },
+          permissions: permissions);
 
       // Set order, orderProducts and orderCoupons permissions to read-only
       await appwrite.databases.updateDocument(

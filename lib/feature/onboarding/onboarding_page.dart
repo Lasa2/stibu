@@ -56,12 +56,10 @@ class OnboardingPage extends StatelessWidget {
               title: 'Select accent color and theme mode',
               content: ThemeAndAccentColorSelection(
                 onAccentColorChanged: (color) {
-                  final themeProvider = getIt<ThemeProvider>();
-                  themeProvider.accentColor = color;
+                  getIt<ThemeProvider>().accentColor = color;
                 },
                 onThemeModeChanged: (mode) {
-                  final themeProvider = getIt<ThemeProvider>();
-                  themeProvider.themeMode = mode;
+                  getIt<ThemeProvider>().themeMode = mode;
                 },
               ),
             ),

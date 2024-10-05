@@ -17,6 +17,7 @@ import 'package:stibu/main.dart';
 
 Future<Customers?> _showCustomerCreateDialog(BuildContext context) async =>
     newCustomerId().then((result) {
+      if (!context.mounted) return null;
       showResultInfo(context, result);
 
       return showDialog<Customers>(
@@ -37,6 +38,7 @@ Future<Customers?> _showCustomerCreateDialog(BuildContext context) async =>
               )
               .create()
               .then((result) {
+                if (!context.mounted) return null;
                 showResultInfo(
                   context,
                   result,
@@ -70,6 +72,7 @@ Future<Customers?> _showCustomerEditDialog(
 
   if (updatedCustomer != null) {
     return updatedCustomer.update().then((result) {
+      if (!context.mounted) return null;
       showResultInfo(context, result, successMessage: "Customer updated");
       return result.isSuccess ? updatedCustomer : null;
     });

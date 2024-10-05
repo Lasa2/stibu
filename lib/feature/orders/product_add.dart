@@ -258,13 +258,15 @@ Future<void> showAddProductsDialog(BuildContext context, Orders order) async {
       products: productsMap.values.toList(),
     );
 
-    await newOrder.update().then((value) {
-      showResultInfo(
+    await newOrder.update().then(
+          (value) => context.mounted
+              ? showResultInfo(
         context,
         value,
         successMessage: 'Added ${result.length} products to order',
-      );
-    });
+                )
+              : null,
+        );
   }
 }
 

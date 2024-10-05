@@ -495,9 +495,10 @@ void displayEditEventDialog(BuildContext context, CalendarEvents event) {
   ).then((value) {
     if (value != null) {
       // save event
-      value.update().then((response) {
-        showResultInfo(context, response);
-      });
+      value.update().then(
+            (response) =>
+                context.mounted ? showResultInfo(context, response) : null,
+          );
     }
   });
 }

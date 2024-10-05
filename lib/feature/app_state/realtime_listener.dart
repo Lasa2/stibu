@@ -16,9 +16,9 @@ class RealtimeListener {
       _subscription?.stream.listen((message) {
         final messageChannels = Set.from(message.channels);
         final intersection = messageChannels.intersection(channels);
-        log.info("Received message for on channel $intersection");
-        log.info("Event: ${message.events.first}");
-        log.info("Message: ${message.payload}");
+        log..info("Received message for on channel $intersection")
+        ..info("Event: ${message.events.first}")
+        ..info("Message: ${message.payload}");
 
         // check if the message is for any of the channels we are listening to
         for (var channel in intersection) {

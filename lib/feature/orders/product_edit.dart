@@ -153,10 +153,12 @@ Future<void> showProductEditDialog(
         return ProductEditDialog(
           product: product,
           onEdited: (product) async => await order.updateProduct(product).then(
-                (value) async => await showResultInfo(context, value),
+                (value) =>
+                    context.mounted ? showResultInfo(context, value) : null,
               ),
           onDelete: (product) async => await order.deleteProduct(product).then(
-                (value) async => await showResultInfo(context, value),
+                (value) =>
+                    context.mounted ? showResultInfo(context, value) : null,
               ),
         );
       },

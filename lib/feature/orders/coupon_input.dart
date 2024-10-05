@@ -118,7 +118,8 @@ Future<void> showAddCouponDialog(BuildContext context, Orders order) async =>
     ).then(
       (coupon) async => coupon != null
           ? await order.addCoupon(coupon).then(
-                (value) async => await showResultInfo(context, value),
+                (value) =>
+                    context.mounted ? showResultInfo(context, value) : null,
               )
           : null,
     );
@@ -135,13 +136,15 @@ Future<void> showEditCouponDialog(
         okText: 'Save',
         coupon: coupon,
         onDelete: (coupon) async => await order.deleteCoupon(coupon).then(
-              (value) => showResultInfo(context, value),
+              (value) =>
+                  context.mounted ? showResultInfo(context, value) : null,
             ),
       ),
     ).then((coupon) async {
       coupon != null
           ? await order.updateCoupon(coupon).then(
-                (value) async => await showResultInfo(context, value),
+                (value) =>
+                    context.mounted ? showResultInfo(context, value) : null,
               )
           : null;
     });

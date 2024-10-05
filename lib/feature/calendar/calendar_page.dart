@@ -253,7 +253,7 @@ class EventListEntry extends StatelessWidget {
           MenuFlyoutItem(
             text: const Text("Delete"),
             onPressed: () =>
-                event.delete().then((value) => showResultInfo(context, value)),
+                event.delete().then((value) => context.mounted ? showResultInfo(context, value) : null),
           ),
         ],
       ),

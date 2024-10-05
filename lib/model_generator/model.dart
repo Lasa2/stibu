@@ -20,9 +20,8 @@ enum ${capitalize(e.name)} {
 
 String generateClass(CollectionInfo collection) {
   final className = capitalize(collection.name);
-  final List<AttributeInfo> attributeInfos = collection.attributes;
-
-  attributeInfos.sort((a, b) => a.name.compareTo(b.name));
+  final List<AttributeInfo> attributeInfos = collection.attributes
+    ..sort((a, b) => a.name.compareTo(b.name));
 
   final asserts =
       attributeInfos.expand((e) => generateAsserts(e)).join(',\n\t\t\t\t');

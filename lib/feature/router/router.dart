@@ -106,7 +106,9 @@ class AppRouter extends RootStackRouter {
 class ValidProductKeyGuard extends AutoRouteGuard {
   @override
   Future<void> onNavigation(
-      NavigationResolver resolver, StackRouter router) async {
+    NavigationResolver resolver,
+    StackRouter router,
+  ) async {
     final appwrite = getIt<AppwriteClient>();
 
     try {
@@ -135,7 +137,9 @@ class ValidProductKeyGuard extends AutoRouteGuard {
 class OnboardingGuard extends AutoRouteGuard {
   @override
   Future<void> onNavigation(
-      NavigationResolver resolver, StackRouter router) async {
+    NavigationResolver resolver,
+    StackRouter router,
+  ) async {
     final appwrite = getIt<AppwriteClient>();
 
     try {
@@ -165,7 +169,9 @@ class OnboardingGuard extends AutoRouteGuard {
 class AuthGuard extends AutoRouteGuard {
   @override
   Future<void> onNavigation(
-      NavigationResolver resolver, StackRouter router) async {
+    NavigationResolver resolver,
+    StackRouter router,
+  ) async {
     final auth = getIt<Authentication>();
 
     log.info("AuthGuard: isAuthenticated=${auth.isAuthenticated.value}");

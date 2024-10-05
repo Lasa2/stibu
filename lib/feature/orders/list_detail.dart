@@ -148,6 +148,7 @@ class _CreateOrderInvoiceDialogState extends State<CreateOrderInvoiceDialog> {
             note: controller.text,
           )
               .then((result) {
+            if (!context.mounted) return;
             if (result.isSuccess) {
               Navigator.of(context).pop();
             } else {
@@ -203,7 +204,10 @@ class OrderProductsList extends StatelessWidget {
                     return ListTile(
                       onPressed: order.invoice == null
                           ? () async => await showProductEditDialog(
-                              context, product, order)
+                                context,
+                                product,
+                                order,
+                              )
                           : null,
                       leading: Container(
                         height: 40,

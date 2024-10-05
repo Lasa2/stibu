@@ -318,11 +318,13 @@ List<String> generateAsserts(AttributeInfo attribute) {
     }
   } else if (attribute is AttributeInfoInteger) {
     if (attribute.required) {
-      asserts.add('assert($name >= ${attribute.min})');
-      asserts.add('assert($name <= ${attribute.max})');
+      asserts
+        ..add('assert($name >= ${attribute.min})')
+        ..add('assert($name <= ${attribute.max})');
     } else {
-      asserts.add('assert($name == null || $name >= ${attribute.min})');
-      asserts.add('assert($name == null || $name <= ${attribute.max})');
+      asserts
+        ..add('assert($name == null || $name >= ${attribute.min})')
+        ..add('assert($name == null || $name <= ${attribute.max})');
     }
   } else if (attribute is AttributeInfoDateTime) {
     if (attribute.required) {

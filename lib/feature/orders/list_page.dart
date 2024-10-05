@@ -112,13 +112,15 @@ class _OrderListPageState extends State<OrderListPage> {
                   });
 
                   _orders[index!].delete().then((value) {
-                    showResultInfo(context, value).then((_) {
+                    context.mounted
+                        ? showResultInfo(context, value).then((_) {
                       if (value.isFailure) {
                         setState(() {
                           selectedIndex = index;
                         });
                       }
-                    });
+                          })
+                        : null;
                   });
                 },
               ),
@@ -230,7 +232,7 @@ class _NewOrderDialogState extends State<NewOrderDialog> {
       title: const Text('New Order'),
       actions: [
         Button(
-          onPressed: () {
+          onPressed: () async {
             if (_formKey.currentState!.validate()) {
               _formKey.currentState!.save();
 
@@ -240,13 +242,13 @@ class _NewOrderDialogState extends State<NewOrderDialog> {
                 date: selectedDate.toUtc(),
               );
 
-              order.create().then((value) {
-                showResultInfo(context, value).then((_) {
-                  if (value.isSuccess) {
-                    Navigator.of(context).pop(order);
-                  }
-                });
-              });
+              final result = await order.create();
+
+              if (!context.mounted) return;
+              await showResultInfo(context, result);
+
+              if (!context.mounted) return;
+              Navigator.of(context).pop(order);
             }
           },
           child: const Text('Save'),

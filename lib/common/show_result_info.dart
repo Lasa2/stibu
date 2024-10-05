@@ -6,7 +6,7 @@ Future<void> showResultInfo<T>(
   Result<T, String> result, {
   String? successMessage,
 }) async {
-  if (result.isFailure && context.mounted) {
+  if (result.isFailure) {
     await displayInfoBar(
       context,
       builder: (context, close) => InfoBar(
@@ -15,7 +15,7 @@ Future<void> showResultInfo<T>(
         severity: InfoBarSeverity.error,
       ),
     );
-  } else if (successMessage != null && context.mounted) {
+  } else if (successMessage != null) {
     await displayInfoBar(
       context,
       builder: (context, close) => InfoBar(

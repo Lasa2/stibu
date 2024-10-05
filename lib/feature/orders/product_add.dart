@@ -21,7 +21,6 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final porductsFuture = getCurrentProducts();
     _suggestBoxController.clear();
 
     void onProductAdded(Products product, int qty) {
@@ -52,7 +51,8 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
       title: const Text('Add Products'),
       constraints: const BoxConstraints(maxWidth: 900),
       content: FutureBuilder(
-        future: porductsFuture,
+        // ignore: discarded_futures
+        future: getCurrentProducts(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             if (snapshot.data!.isFailure) {
@@ -83,7 +83,7 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
                     items: products
                         .map(
                           (product) => AutoSuggestBoxItem<Products>(
-                            label: "${product.id} - ${product.title}",
+                            label: '${product.id} - ${product.title}',
                             value: product,
                             child: Tooltip(
                               message: product.title,
@@ -91,7 +91,7 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
                                 waitDuration: Duration(milliseconds: 300),
                               ),
                               child: Text(
-                                "${product.id} - ${product.title}",
+                                '${product.id} - ${product.title}',
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -120,9 +120,9 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
                     return Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          width: 1.0,
+                          width: 1,
                         ),
-                        borderRadius: BorderRadius.circular(4.0),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                       child:
                           // Image
@@ -142,9 +142,9 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.8),
-                                  borderRadius: BorderRadius.circular(4.0),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8),
                                 child: Text(
                                   orderProduct.quantity.toString(),
                                   style: const TextStyle(
@@ -158,9 +158,9 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.8),
-                                  borderRadius: BorderRadius.circular(4.0),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8),
                                 child: Text(
                                   product.id.toString(),
                                   style: const TextStyle(
@@ -185,9 +185,9 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.8),
-                                  borderRadius: BorderRadius.circular(4.0),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8),
                                 child: Text(
                                   product.title,
                                   textWidthBasis: TextWidthBasis.longestLine,
@@ -261,9 +261,9 @@ Future<void> showAddProductsDialog(BuildContext context, Orders order) async {
     await newOrder.update().then(
           (value) => context.mounted
               ? showResultInfo(
-        context,
-        value,
-        successMessage: 'Added ${result.length} products to order',
+                  context,
+                  value,
+                  successMessage: 'Added ${result.length} products to order',
                 )
               : null,
         );
@@ -325,128 +325,126 @@ class _ProductSearchState extends State<ProductSearch> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 150,
-      child: Row(
-        children: [
-          SizedBox(
-            width: 200,
-            child: Column(
-              children: [
-                TextBox(
-                  controller: _idController,
-                  prefix: const Padding(
-                    padding: EdgeInsets.only(left: 8.0),
-                    child: Text('Product ID:'),
-                  ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
-                  onEditingComplete: _onProductAdded,
-                  onChanged: (value) async {
-                    final id = int.tryParse(value);
-
-                    if (id == null) {
-                      return;
-                    }
-
-                    final product = widget.products.firstWhereOrNull(
-                      (element) => element.id == id,
-                    );
-
-                    if (product != null) {
-                      setState(() {
-                        _currentProduct = product;
-                      });
-                    } else {
-                      setState(() {
-                        _currentProduct = null;
-                      });
-                    }
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 8),
-                  child: TextBox(
-                    controller: _qtyController,
+  Widget build(BuildContext context) => SizedBox(
+        height: 150,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 200,
+              child: Column(
+                children: [
+                  TextBox(
+                    controller: _idController,
                     prefix: const Padding(
-                      padding: EdgeInsets.only(left: 8.0),
-                      child: Text('Quantity:'),
+                      padding: EdgeInsets.only(left: 8),
+                      child: Text('Product ID:'),
                     ),
-                    onChanged: (value) => setState(() {
-                      _currentQty = int.tryParse(value) ?? 1;
-                    }),
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
                     ],
+                    onEditingComplete: _onProductAdded,
+                    onChanged: (value) async {
+                      final id = int.tryParse(value);
+
+                      if (id == null) {
+                        return;
+                      }
+
+                      final product = widget.products.firstWhereOrNull(
+                        (element) => element.id == id,
+                      );
+
+                      if (product != null) {
+                        setState(() {
+                          _currentProduct = product;
+                        });
+                      } else {
+                        setState(() {
+                          _currentProduct = null;
+                        });
+                      }
+                    },
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconButton(
-                      icon: const Icon(FluentIcons.add),
-                      onPressed: _onProductAdded,
-                    ),
-                    Button(
-                      onPressed: _onProductAddedUnlisted,
-                      child: const Text('As Unlisted'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const VerticalDivider(),
-          if (_currentProduct != null)
-            SizedBox(
-              width: 150,
-              height: 150,
-              child: _currentProduct!.imageUrl != null
-                  ? Image(image: NetworkImage(_currentProduct!.imageUrl!))
-                  : const Center(child: Text('No image')),
-            ),
-          Expanded(
-            child: _currentProduct == null
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('No product found'),
-                        ProgressBar(),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 8),
+                    child: TextBox(
+                      controller: _qtyController,
+                      prefix: const Padding(
+                        padding: EdgeInsets.only(left: 8),
+                        child: Text('Quantity:'),
+                      ),
+                      onChanged: (value) => setState(() {
+                        _currentQty = int.tryParse(value) ?? 1;
+                      }),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
                       ],
                     ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _currentProduct!.title,
-                          style: FluentTheme.of(context).typography.subtitle,
-                        ),
-                        Text(
-                          _currentProduct!.description,
-                          overflow: TextOverflow.fade,
-                          maxLines: 4,
-                        ),
-                        const Spacer(),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            "$_currentQty x ${_currentProduct!.itemPrice.currency.format()} = ${(_currentProduct!.itemPrice * _currentQty).currency.format()}",
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      IconButton(
+                        icon: const Icon(FluentIcons.add),
+                        onPressed: _onProductAdded,
+                      ),
+                      Button(
+                        onPressed: _onProductAddedUnlisted,
+                        child: const Text('As Unlisted'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const VerticalDivider(),
+            if (_currentProduct != null)
+              SizedBox(
+                width: 150,
+                height: 150,
+                child: _currentProduct!.imageUrl != null
+                    ? Image(image: NetworkImage(_currentProduct!.imageUrl!))
+                    : const Center(child: Text('No image')),
+              ),
+            Expanded(
+              child: _currentProduct == null
+                  ? const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('No product found'),
+                          ProgressBar(),
+                        ],
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _currentProduct!.title,
+                            style: FluentTheme.of(context).typography.subtitle,
                           ),
-                        ),
-                      ],
+                          Text(
+                            _currentProduct!.description,
+                            overflow: TextOverflow.fade,
+                            maxLines: 4,
+                          ),
+                          const Spacer(),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              '$_currentQty x ${_currentProduct!.itemPrice.currency.format()} = ${(_currentProduct!.itemPrice * _currentQty).currency.format()}',
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
+            ),
+          ],
+        ),
+      );
 }
 
 class StrongDivider extends StatelessWidget {
@@ -460,17 +458,15 @@ class StrongDivider extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: verticalPadding),
-      child: Divider(
-        style: DividerThemeData(
-          horizontalMargin: EdgeInsets.zero,
-          decoration: BoxDecoration(
-            color: color,
+  Widget build(BuildContext context) => Padding(
+        padding: EdgeInsets.symmetric(vertical: verticalPadding),
+        child: Divider(
+          style: DividerThemeData(
+            horizontalMargin: EdgeInsets.zero,
+            decoration: BoxDecoration(
+              color: color,
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }

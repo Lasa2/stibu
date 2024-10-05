@@ -10,7 +10,7 @@ Future<Result<int, String>> newCustomerId() async {
       databaseId: Customers.databaseId,
       collectionId: Customers.collectionInfo.$id,
       queries: [
-        Query.orderDesc("id"),
+        Query.orderDesc('id'),
         Query.limit(1),
       ],
     );
@@ -19,7 +19,7 @@ Future<Result<int, String>> newCustomerId() async {
         doc.documents.isEmpty ? 0 : doc.documents.first.data['id'] as int;
     return Success(lastId + 1);
   } on AppwriteException catch (e) {
-    return Failure(e.message ?? "Failed to generate customer ID");
+    return Failure(e.message ?? 'Failed to generate customer ID');
   }
 }
 
@@ -81,7 +81,7 @@ Future<Result<String, String>> newExpenseNumber([DateTime? date]) async {
 
     return Success(newId);
   } on AppwriteException catch (e) {
-    return Failure(e.message ?? "Failed to generate expense number");
+    return Failure(e.message ?? 'Failed to generate expense number');
   }
 }
 
@@ -93,7 +93,7 @@ Future<Result<String, String>> newInvoiceNumber([DateTime? date]) async {
       databaseId: Invoices.databaseId,
       collectionId: Invoices.collectionInfo.$id,
       queries: [
-        Query.orderDesc("invoiceNumber"),
+        Query.orderDesc('invoiceNumber'),
         Query.limit(1),
       ],
     );
@@ -126,6 +126,6 @@ Future<Result<String, String>> newInvoiceNumber([DateTime? date]) async {
 
     return Success(newId);
   } on AppwriteException catch (e) {
-    return Failure(e.message ?? "Failed to generate new ID");
+    return Failure(e.message ?? 'Failed to generate new ID');
   }
 }

@@ -24,63 +24,61 @@ class _ProductKeyPageState extends State<ProductKeyPage> {
   final productKeyController = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
-    return NavigationView(
-      appBar: buildNavigationAppBar(context),
-      content: ScaffoldPage(
-        header: const PageHeader(
-          title: Text('Enter your product key'),
-        ),
-        content: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Column(
-              children: [
-                TextBox(
-                  controller: productKeyController,
-                  placeholder: 'Product key',
-                ),
-                const SizedBox(height: 16.0),
-                Button(
-                  onPressed: () async {
-                    final appwrite = getIt<AppwriteClient>();
+  Widget build(BuildContext context) => NavigationView(
+        appBar: buildNavigationAppBar(context),
+        content: ScaffoldPage(
+          header: const PageHeader(
+            title: Text('Enter your product key'),
+          ),
+          content: Padding(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                children: [
+                  TextBox(
+                    controller: productKeyController,
+                    placeholder: 'Product key',
+                  ),
+                  const SizedBox(height: 16),
+                  Button(
+                    onPressed: () async {
+                      final appwrite = getIt<AppwriteClient>();
 
-                    final result = await appwrite.functions.createExecution(
-                      functionId: '66e340510031daaffc90',
-                      method: ExecutionMethod.gET,
-                      headers: {
-                        'product-key': productKeyController.text.trim(),
-                      },
-                    );
-
-                    final map =
-                        jsonDecode(result.responseBody) as Map<String, dynamic>;
-
-                    if (map['status'] != 200) {
-                      if (!context.mounted) return;
-                      displayInfoBar(
-                        context,
-                        builder: (context, close) => InfoBar(
-                          title: const Text('Invalid product key'),
-                          content: const Text(
-                            'The product key you entered is invalid. Please try again.',
-                          ),
-                          severity: InfoBarSeverity.error,
-                          onClose: close,
-                        ),
+                      final result = await appwrite.functions.createExecution(
+                        functionId: '66e340510031daaffc90',
+                        method: ExecutionMethod.gET,
+                        headers: {
+                          'product-key': productKeyController.text.trim(),
+                        },
                       );
-                    } else {
-                      widget.onFinish?.call();
-                    }
-                  },
-                  child: const Text('Continue'),
-                ),
-              ],
+
+                      final map = jsonDecode(result.responseBody)
+                          as Map<String, dynamic>;
+
+                      if (map['status'] != 200) {
+                        if (!context.mounted) return;
+                        await displayInfoBar(
+                          context,
+                          builder: (context, close) => InfoBar(
+                            title: const Text('Invalid product key'),
+                            content: const Text(
+                              'The product key you entered is invalid. Please try again.',
+                            ),
+                            severity: InfoBarSeverity.error,
+                            onClose: close,
+                          ),
+                        );
+                      } else {
+                        widget.onFinish?.call();
+                      }
+                    },
+                    child: const Text('Continue'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }

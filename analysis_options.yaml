@@ -14,6 +14,7 @@ analyzer:
     - lib/**.g.dart
     - lib/**.freezed.dart
     - lib/l10n/generated/**
+    - lib/appwrite.models.dart
   errors:
     todo: ignore
 linter:
@@ -33,8 +34,35 @@ linter:
     - avoid_void_async
     - cancel_subscriptions
     - cascade_invocations
-    - prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
+    - avoid_equals_and_hash_code_on_mutable_classes
+    - avoid_positional_boolean_parameters
+    - cast_nullable_to_non_nullable
+    - combinators_ordering
+    - discarded_futures
+    - prefer_single_quotes
+    - join_return_with_assignment
+    - leading_newlines_in_multiline_strings
+    - no_literal_bool_comparisons
+    - only_throw_errors
+    - prefer_asserts_in_initializer_lists
+    - prefer_asserts_with_message
+    - prefer_const_declarations
+    - prefer_const_constructors
+    - prefer_const_literals_to_create_immutables
+    - prefer_constructors_over_static_methods
+    - prefer_expression_function_bodies
+    - prefer_final_in_for_each
+    - prefer_final_locals
+    - prefer_foreach
+    - prefer_if_elements_to_conditional_expressions
+    - prefer_int_literals
+    - prefer_null_aware_method_calls
+    - unawaited_futures
+    - unnecessary_await_in_return
+    - unnecessary_breaks
+    - unnecessary_lambdas
+    - unnecessary_null_checks
+    - unnecessary_parenthesis
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

@@ -42,7 +42,7 @@ class NoTransitionRoute extends CustomRoute {
 // ignore: constant_identifier_names
 const CustomerTab = EmptyShellRoute('CustomerTab');
 
-@AutoRouterConfig(replaceInRouteName: "Page,Route")
+@AutoRouterConfig(replaceInRouteName: 'Page,Route')
 class AppRouter extends RootStackRouter {
   @override
   List<AutoRoute> get routes => [
@@ -58,17 +58,17 @@ class AppRouter extends RootStackRouter {
           guards: [AuthGuard()],
         ),
         NoTransitionRoute(
-          path: "/",
+          path: '/',
           page: NavigationScaffoldRoute.page,
           guards: [AuthGuard(), OnboardingGuard(), ValidProductKeyGuard()],
           children: [
             NoTransitionRoute(
-              path: "dashboard",
+              path: 'dashboard',
               page: DashboardRoute.page,
               initial: true,
             ),
             NoTransitionRoute(
-              path: "customers",
+              path: 'customers',
               page: CustomerTab,
               children: [
                 NoTransitionRoute(
@@ -82,7 +82,7 @@ class AppRouter extends RootStackRouter {
               ],
             ),
             NoTransitionRoute(
-              path: "invoices",
+              path: 'invoices',
               page: InvoiceListRoute.page,
             ),
             NoTransitionRoute(
@@ -95,7 +95,7 @@ class AppRouter extends RootStackRouter {
               page: CalendarRoute.page,
             ),
             NoTransitionRoute(
-              path: "settings",
+              path: 'settings',
               page: SettingsRoute.page,
             ),
           ],
@@ -113,13 +113,13 @@ class ValidProductKeyGuard extends AutoRouteGuard {
 
     try {
       final user = await appwrite.account.get();
-      final validProductKey = user.labels.contains("validProductKey");
+      final validProductKey = user.labels.contains('validProductKey');
 
       log.info('ValidProductKeyGuard: validProductKey=$validProductKey');
       if (validProductKey) {
         resolver.next(true);
       } else {
-        resolver.redirect(
+        await resolver.redirect(
           ProductKeyRoute(
             onFinish: () {
               resolver.next(true);
@@ -151,7 +151,7 @@ class OnboardingGuard extends AutoRouteGuard {
       if (onboardingCompleted) {
         resolver.next(true);
       } else {
-        resolver.redirect(
+        await resolver.redirect(
           OnboardingRoute(
             onFinish: () {
               resolver.next(true);
@@ -174,7 +174,7 @@ class AuthGuard extends AutoRouteGuard {
   ) async {
     final auth = getIt<Authentication>();
 
-    log.info("AuthGuard: isAuthenticated=${auth.isAuthenticated.value}");
+    log.info('AuthGuard: isAuthenticated=${auth.isAuthenticated.value}');
 
     if (auth.isAuthenticated.value) {
       resolver.next(true);
@@ -187,7 +187,7 @@ class AuthGuard extends AutoRouteGuard {
         }
       });
 
-      resolver.redirect(
+      await resolver.redirect(
         AuthenticationRoute(
           onAuthenticated: () {
             resolver.next(true);

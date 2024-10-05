@@ -10,41 +10,40 @@ Products createUnlistedProduct(
   int id,
   String title,
   Currency itemPrice,
-) {
-  return Products(
-    id: id,
-    itemPrice: itemPrice.asInt,
-    qtyLimit: 99,
-    originalItemPrice: 0,
-    formattedItemPrice: itemPrice.format(),
-    formattedOriginalItemPrice: Currency.zero.format(),
-    hasSalePrice: false,
-    launchDate: DateTime.now().toUtc(),
-    endSaleDate: DateTime.now().toUtc(),
-    beginSaleDate: DateTime.now().toUtc(),
-    slug: title.toLowerCase().replaceAll(' ', '-'),
-    images: [],
-    title: title,
-    description: '',
-    inventoryStatus: 'unlisted',
-    culture: 'de-de',
-    color: [],
-    canBePurchased: false,
-    exclusiveTo: [],
-    categorySlugs: [],
-    alternateId: null,
-    replacementForItemId: null,
-    hoverImage: null,
-    metaDescription: null,
-    metaTitle: null,
-    isCommissionable: false,
-    excludeFrom: [],
-    languages: [],
-    qualifier: [],
-    lifeCycleStates: [],
-    offeringType: 'product',
-  );
-}
+) =>
+    Products(
+      id: id,
+      itemPrice: itemPrice.asInt,
+      qtyLimit: 99,
+      originalItemPrice: 0,
+      formattedItemPrice: itemPrice.format(),
+      formattedOriginalItemPrice: const Currency.zero().format(),
+      hasSalePrice: false,
+      launchDate: DateTime.now().toUtc(),
+      endSaleDate: DateTime.now().toUtc(),
+      beginSaleDate: DateTime.now().toUtc(),
+      slug: title.toLowerCase().replaceAll(' ', '-'),
+      images: [],
+      title: title,
+      description: '',
+      inventoryStatus: 'unlisted',
+      culture: 'de-de',
+      color: [],
+      canBePurchased: false,
+      exclusiveTo: [],
+      categorySlugs: [],
+      alternateId: null,
+      replacementForItemId: null,
+      hoverImage: null,
+      metaDescription: null,
+      metaTitle: null,
+      isCommissionable: false,
+      excludeFrom: [],
+      languages: [],
+      qualifier: [],
+      lifeCycleStates: [],
+      offeringType: 'product',
+    );
 
 final _unescape = HtmlUnescape();
 
@@ -64,8 +63,8 @@ Products _productsFromJson(Map<String, dynamic> json) => Products(
       title: json['title'],
       description: _unescape
           .convert(json['description'])
-          .replaceAll("<br />", "")
-          .replaceAll("<br/>", "\n"),
+          .replaceAll('<br />', '')
+          .replaceAll('<br/>', '\n'),
       inventoryStatus: json['inventoryStatus'],
       culture: json['culture'],
       color: List<String>.unmodifiable(json['color']),
@@ -88,32 +87,32 @@ Products _productsFromJson(Map<String, dynamic> json) => Products(
     );
 
 const _headers = {
-  "User-Agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0",
+  'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0',
 };
 
 Future<Result<List<Products>, String>> getCurrentProducts() async {
   try {
-    final uri = Uri.https("az-api.stampinup.de", "/de-de/products", {
-      "page": "1",
-      "pageSize": "9999",
-      "category": "/shop-products",
+    final uri = Uri.https('az-api.stampinup.de', '/de-de/products', {
+      'page': '1',
+      'pageSize': '9999',
+      'category': '/shop-products',
     });
 
     final response = await http.get(uri, headers: _headers);
 
     if (response.statusCode != 200) {
-      return Failure("Failed to fetch products");
+      return Failure('Failed to fetch products');
     }
 
     final Map<String, dynamic> data = jsonDecode(response.body);
 
     return Success(
-      (data["products"] as List).map((product) {
+      (data['products'] as List).map((product) {
         try {
           return _productsFromJson(product);
         } catch (e) {
-          throw Exception("Failed to parse product: $e on $product");
+          throw Exception('Failed to parse product: $e on $product');
         }
       }).toList(),
     );

@@ -9,42 +9,40 @@ class InvoiceInfoCard extends StatelessWidget {
   const InvoiceInfoCard({super.key, required this.invoice});
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: SizedBox(
-        height: 150,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    invoice.name,
-                    style: FluentTheme.of(context).typography.subtitle,
-                  ),
-                  const Spacer(),
-                  Text(invoice.notes ?? ''),
-                ],
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text('ID: ${invoice.invoiceNumber}'),
-                  Text(invoice.date.formatDate()),
-                  const Spacer(),
-                  Text(invoice.amount.currency.format()),
-                ],
-              ),
-            ],
+  Widget build(BuildContext context) => Card(
+        child: SizedBox(
+          height: 150,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      invoice.name,
+                      style: FluentTheme.of(context).typography.subtitle,
+                    ),
+                    const Spacer(),
+                    Text(invoice.notes ?? ''),
+                  ],
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('ID: ${invoice.invoiceNumber}'),
+                    Text(invoice.date.formatDate()),
+                    const Spacer(),
+                    Text(invoice.amount.currency.format()),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }

@@ -39,7 +39,8 @@ class _CalendarPageState extends State<CalendarPage> {
       // load events for day
       final appwrite = getIt<AppwriteClient>();
 
-      appwrite.databases.listDocuments(
+      unawaited(
+        appwrite.databases.listDocuments(
         databaseId: CalendarEvents.databaseId,
         collectionId: CalendarEvents.collectionInfo.$id,
         queries: [
@@ -60,7 +61,7 @@ class _CalendarPageState extends State<CalendarPage> {
         ],
       ).then((response) {
         final List<CalendarEvents> events = response.documents
-            .map<CalendarEvents>((e) => CalendarEvents.fromAppwrite(e))
+              .map<CalendarEvents>(CalendarEvents.fromAppwrite)
             .toList();
 
         if (mounted) {
@@ -68,18 +69,17 @@ class _CalendarPageState extends State<CalendarPage> {
             _events[day] = events;
           });
         }
-      });
+        }),
+      );
     }
     return events ?? [];
   }
 
-  Widget cellBuilder(context, day, focusedDay) {
-    return CalendarCell(
-      day: day,
-      focusedDay: focusedDay,
-      selectedDay: _selectedDay,
-    );
-  }
+  Widget cellBuilder(context, day, focusedDay) => CalendarCell(
+        day: day,
+        focusedDay: focusedDay,
+        selectedDay: _selectedDay,
+      );
 
   @override
   void initState() {
@@ -92,8 +92,8 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   @override
-  void dispose() {
-    _subscription?.cancel();
+  Future<void> dispose() async {
+    await _subscription?.cancel();
     super.dispose();
   }
 
@@ -110,7 +110,7 @@ class _CalendarPageState extends State<CalendarPage> {
             CommandBarButton(
               icon: const Icon(FluentIcons.add),
               label: const Text('New Event'),
-              onPressed: () => displayNewEventDialog(context),
+              onPressed: () async => displayNewEventDialog(context),
             ),
           ],
         ),
@@ -150,7 +150,7 @@ class _CalendarPageState extends State<CalendarPage> {
                           bottom: 8,
                           child: Row(
                             children: [
-                              for (var event in events)
+                              for (final event in events)
                                 // dots for multiple events
                                 Container(
                                   margin: const EdgeInsets.only(right: 4),
@@ -158,7 +158,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                     color: event.type == Type.plain
                                         ? Colors.blue
                                         : Colors.red,
-                                    borderRadius: BorderRadius.circular(4.0),
+                                    borderRadius: BorderRadius.circular(4),
                                   ),
                                   width: 4,
                                   height: 4,
@@ -172,10 +172,10 @@ class _CalendarPageState extends State<CalendarPage> {
                         bottom: 1,
                         child: Column(
                           children: [
-                            for (var event in events)
+                            for (final event in events)
                               Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4.0),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   event.title,
@@ -201,9 +201,9 @@ class _CalendarPageState extends State<CalendarPage> {
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 300),
               child: ListView(
-                children: _getEventsForDay(_selectedDay).map((event) {
-                  return EventListEntry(event: event);
-                }).toList(),
+                children: _getEventsForDay(_selectedDay)
+                    .map((event) => EventListEntry(event: event))
+                    .toList(),
               ),
             ),
         ],
@@ -222,7 +222,7 @@ class EventListEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final participants = <Widget>[];
-    for (var participant
+    for (final participant
         in event.participants ?? <CalendarEventParticipants>[]) {
       participants.add(
         ListTile(
@@ -247,13 +247,15 @@ class EventListEntry extends StatelessWidget {
         leading: const Icon(FluentIcons.more),
         items: [
           MenuFlyoutItem(
-            text: const Text("Edit"),
+            text: const Text('Edit'),
             onPressed: () async => displayEditEventDialog(context, event),
           ),
           MenuFlyoutItem(
-            text: const Text("Delete"),
-            onPressed: () =>
-                event.delete().then((value) => context.mounted ? showResultInfo(context, value) : null),
+            text: const Text('Delete'),
+            onPressed: () async => event.delete().then(
+                  (value) =>
+                      context.mounted ? showResultInfo(context, value) : null,
+                ),
           ),
         ],
       ),
@@ -295,22 +297,20 @@ class CalendarCell extends StatelessWidget {
   bool get selected => isSameDay(day, selectedDay);
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      padding: EdgeInsets.zero,
-      borderRadius: BorderRadius.zero,
-      borderColor: selected ? Colors.blue : null,
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: Text(
-          day.day.toString(),
-          style: TextStyle(
-            color: isToday ? Colors.blue : Colors.black,
-            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+  Widget build(BuildContext context) => Card(
+        margin: EdgeInsets.zero,
+        padding: EdgeInsets.zero,
+        borderRadius: BorderRadius.zero,
+        borderColor: selected ? Colors.blue : null,
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: Text(
+            day.day.toString(),
+            style: TextStyle(
+              color: isToday ? Colors.blue : Colors.black,
+              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }

@@ -24,7 +24,7 @@ Future<Customers?> _showCustomerCreateDialog(BuildContext context) async =>
         context: context,
         builder: (context) => CustomerInputDialog(
           id: result.success,
-          title: "Create Customer",
+          title: 'Create Customer',
         ),
       ).then((customer) async {
         if (customer != null) {
@@ -42,7 +42,7 @@ Future<Customers?> _showCustomerCreateDialog(BuildContext context) async =>
                 showResultInfo(
                   context,
                   result,
-                  successMessage: "Customer created",
+                  successMessage: 'Customer created',
                 );
                 return result.isSuccess ? customer : null;
               });
@@ -58,7 +58,7 @@ Future<Customers?> _showCustomerEditDialog(
   final updatedCustomer = await showDialog<Customers>(
     context: context,
     builder: (context) => CustomerInputDialog(
-      title: "Edit Customer",
+      title: 'Edit Customer',
       id: customer.id,
       name: customer.name,
       email: customer.email,
@@ -73,7 +73,7 @@ Future<Customers?> _showCustomerEditDialog(
   if (updatedCustomer != null) {
     return updatedCustomer.update().then((result) {
       if (!context.mounted) return null;
-      showResultInfo(context, result, successMessage: "Customer updated");
+      showResultInfo(context, result, successMessage: 'Customer updated');
       return result.isSuccess ? updatedCustomer : null;
     });
   }
@@ -112,7 +112,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
   @override
   void initState() {
     super.initState();
-    _loadCustomers();
+    unawaited(_loadCustomers());
     _subscription =
         getIt<RealtimeSubscriptions>().customerUpdates.listen((event) {
       switch (event.type) {
@@ -121,7 +121,6 @@ class _CustomerListPageState extends State<CustomerListPage> {
             _totalcustomers += 1;
             _customers.add(event.item);
           });
-          break;
         case RealtimeUpdateType.update:
           final index = _customers.indexWhere((e) => e.id == event.item.id);
           if (index != -1) {
@@ -129,7 +128,6 @@ class _CustomerListPageState extends State<CustomerListPage> {
               _customers[index] = event.item;
             });
           }
-          break;
         case RealtimeUpdateType.delete:
           final index = _customers.indexWhere((e) => e.id == event.item.id);
           if (index != -1) {
@@ -138,14 +136,13 @@ class _CustomerListPageState extends State<CustomerListPage> {
               _customers.removeAt(index);
             });
           }
-          break;
       }
     });
   }
 
   @override
-  void dispose() {
-    _subscription?.cancel();
+  Future<void> dispose() async {
+    await _subscription?.cancel();
     super.dispose();
   }
 
@@ -169,7 +166,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
       header: PageHeader(
         title: const BreadcrumbBar(
           items: [
-            BreadcrumbItem(label: Text("Customers"), value: 0),
+            BreadcrumbItem(label: Text('Customers'), value: 0),
           ],
         ),
         commandBar: CommandBar(
@@ -191,7 +188,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
               CommandBarButton(
                 icon: const Icon(FluentIcons.edit),
                 label: const Text('Edit'),
-                onPressed: () =>
+                onPressed: () async =>
                     _showCustomerEditDialog(context, _customers[selectedIndex!])
                         .then(
                   (result) => setState(() {
@@ -226,7 +223,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
                   : _customers.length,
               itemBuilder: (context, index) {
                 if (index >= _customers.length) {
-                  _loadCustomers();
+                  unawaited(_loadCustomers());
                   return const Center(child: ProgressBar());
                 }
 
@@ -236,9 +233,9 @@ class _CustomerListPageState extends State<CustomerListPage> {
                   customerName: customer.name,
                   customerAddress: customer.address,
                   isSelected: selectedIndex == index,
-                  onPressed: () {
+                  onPressed: () async {
                     if (!largeScreen) {
-                      context.navigateTo(CustomerDetailRoute(id: customer.$id));
+                      await context.navigateTo(CustomerDetailRoute(id: customer.$id));
                       return;
                     }
                     if (selectedIndex == index) return;
@@ -268,14 +265,12 @@ class CustomerListDetail extends StatelessWidget {
   const CustomerListDetail({super.key, required this.customer});
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CustomerInfoCard(customer: customer),
-        const Expanded(child: Placeholder()),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Column(
+        children: [
+          CustomerInfoCard(customer: customer),
+          const Expanded(child: Placeholder()),
+        ],
+      );
 }
 
 class CustomerListEntry extends StatelessWidget {
@@ -295,45 +290,43 @@ class CustomerListEntry extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(2.5),
-      child: ListTile.selectable(
-        selected: isSelected,
-        tileColor: WidgetStateProperty.resolveWith((states) {
-          if (states.isHovered) {
-            return FluentTheme.of(context).accentColor.withOpacity(0.1);
-          }
-          return FluentTheme.of(context)
-              .resources
-              .cardBackgroundFillColorDefault;
-        }),
-        leading: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.blue,
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(2.5),
+        child: ListTile.selectable(
+          selected: isSelected,
+          tileColor: WidgetStateProperty.resolveWith((states) {
+            if (states.isHovered) {
+              return FluentTheme.of(context).accentColor.withOpacity(0.1);
+            }
+            return FluentTheme.of(context)
+                .resources
+                .cardBackgroundFillColorDefault;
+          }),
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.blue,
+            ),
+            child: Center(
+              child: Text(customerId.toString()),
+            ),
           ),
-          child: Center(
-            child: Text(customerId.toString()),
-          ),
-        ),
-        title: Text(customerName),
-        subtitle: Text(customerAddress),
-        onPressed: onPressed,
-        trailing: IconButton(
-          icon: const Icon(FluentIcons.chevron_right),
-          onPressed: null,
-          focusable: false,
-          iconButtonMode: IconButtonMode.large,
-          style: ButtonStyle(
-            foregroundColor: WidgetStateProperty.all(
-              FluentTheme.of(context).resources.textFillColorPrimary,
+          title: Text(customerName),
+          subtitle: Text(customerAddress),
+          onPressed: onPressed,
+          trailing: IconButton(
+            icon: const Icon(FluentIcons.chevron_right),
+            onPressed: null,
+            focusable: false,
+            iconButtonMode: IconButtonMode.large,
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.all(
+                FluentTheme.of(context).resources.textFillColorPrimary,
+              ),
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }

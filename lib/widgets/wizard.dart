@@ -134,33 +134,31 @@ class _WizardState extends State<Wizard> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        buildOverviewRow(context),
-        Expanded(
-          child: widget.pages[_currentPage].content,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (_currentPage > 0)
-              Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: Button(
-                  onPressed: _previousPage,
-                  child: const Text('Previous'),
+  Widget build(BuildContext context) => Column(
+        children: [
+          buildOverviewRow(context),
+          Expanded(
+            child: widget.pages[_currentPage].content,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (_currentPage > 0)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Button(
+                    onPressed: _previousPage,
+                    child: const Text('Previous'),
+                  ),
+                ),
+              Button(
+                onPressed: _nextPage,
+                child: Text(
+                  _currentPage < widget.pages.length - 1 ? 'Next' : 'Finish',
                 ),
               ),
-            Button(
-              onPressed: _nextPage,
-              child: Text(
-                _currentPage < widget.pages.length - 1 ? 'Next' : 'Finish',
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+            ],
+          ),
+        ],
+      );
 }

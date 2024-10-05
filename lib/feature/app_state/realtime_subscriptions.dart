@@ -12,14 +12,13 @@ enum RealtimeUpdateType { create, update, delete }
 
 extension RealtimeUpdateTypeExtension on RealtimeUpdateType {
   static const _values = {
-    RealtimeUpdateType.create: "create",
-    RealtimeUpdateType.update: "update",
-    RealtimeUpdateType.delete: "delete",
+    RealtimeUpdateType.create: 'create',
+    RealtimeUpdateType.update: 'update',
+    RealtimeUpdateType.delete: 'delete',
   };
 
-  static RealtimeUpdateType fromString(String value) {
-    return _values.entries.firstWhere((entry) => entry.value == value).key;
-  }
+  static RealtimeUpdateType fromString(String value) =>
+      _values.entries.firstWhere((entry) => entry.value == value).key;
 }
 
 class RealtimeUpdate<T> {
@@ -33,7 +32,7 @@ RealtimeUpdate<T> _realtimeUpdateFromMessage<T>(
   RealtimeMessage message,
   T Function(Document doc) fromAppwrite,
 ) {
-  final event = message.events.first.split(".").last;
+  final event = message.events.first.split('.').last;
   final eventType = RealtimeUpdateTypeExtension.fromString(event);
 
   return RealtimeUpdate(
@@ -47,7 +46,7 @@ Future<RealtimeUpdate<T>> _realtimeUpdateFromMessageWithFetch<T>(
   T Function(Document doc) fromAppwrite,
   Future<Result<T, String>> Function(String id) fetch,
 ) async {
-  final event = message.events.first.split(".").last;
+  final event = message.events.first.split('.').last;
   final eventType = RealtimeUpdateTypeExtension.fromString(event);
 
   if (eventType == RealtimeUpdateType.delete) {
@@ -58,7 +57,7 @@ Future<RealtimeUpdate<T>> _realtimeUpdateFromMessageWithFetch<T>(
   final itemId = Document.fromMap(message.payload).$id;
   final item = await fetch(itemId);
   if (item.isFailure) {
-    log.warning("Failed to fetch item $itemId: ${item.failure}");
+    log.warning('Failed to fetch item $itemId: ${item.failure}');
     return RealtimeUpdate(
       eventType,
       fromAppwrite(Document.fromMap(message.payload)),
@@ -106,21 +105,21 @@ class RealtimeSubscriptions {
 
   late final Map<String, void Function(RealtimeMessage message)>
       _realtimeListeners = {
-    "databases.${Customers.databaseId}.collections.${Customers.collectionInfo.$id}.documents":
+    'databases.${Customers.databaseId}.collections.${Customers.collectionInfo.$id}.documents':
         (message) => _customerUpdates.add(
               _realtimeUpdateFromMessage<Customers>(
                 message,
                 Customers.fromAppwrite,
               ),
             ),
-    "databases.${Invoices.databaseId}.collections.${Invoices.collectionInfo.$id}.documents":
+    'databases.${Invoices.databaseId}.collections.${Invoices.collectionInfo.$id}.documents':
         (message) => _invoicesUpdates.add(
               _realtimeUpdateFromMessage<Invoices>(
                 message,
                 Invoices.fromAppwrite,
               ),
             ),
-    "databases.${Orders.databaseId}.collections.${Orders.collectionInfo.$id}.documents":
+    'databases.${Orders.databaseId}.collections.${Orders.collectionInfo.$id}.documents':
         (message) async => _ordersUpdates.add(
               await _realtimeUpdateFromMessageWithFetch<Orders>(
                 message,
@@ -128,14 +127,14 @@ class RealtimeSubscriptions {
                 Orders.get,
               ),
             ),
-    "databases.${Expenses.databaseId}.collections.${Expenses.collectionInfo.$id}.documents":
+    'databases.${Expenses.databaseId}.collections.${Expenses.collectionInfo.$id}.documents':
         (message) => _expensesUpdates.add(
               _realtimeUpdateFromMessage<Expenses>(
                 message,
                 Expenses.fromAppwrite,
               ),
             ),
-    "databases.${CalendarEvents.databaseId}.collections.${CalendarEvents.collectionInfo.$id}.documents":
+    'databases.${CalendarEvents.databaseId}.collections.${CalendarEvents.collectionInfo.$id}.documents':
         (message) => _calendarEventsUpdates.add(
               _realtimeUpdateFromMessage<CalendarEvents>(
                 message,

@@ -26,70 +26,68 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   String? password;
 
   @override
-  Widget build(BuildContext context) {
-    return NavigationView(
-      appBar: buildNavigationAppBar(context),
-      content: ScaffoldPage(
-        content: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: TabView(
-                currentIndex: currentIndex,
-                showScrollButtons: false,
-                shortcutsEnabled: false,
-                onNewPressed: null,
-                closeButtonVisibility: CloseButtonVisibilityMode.never,
-                onChanged: (index) {
-                  setState(() {
-                    currentIndex = index;
-                  });
-                },
-                onReorder: null,
-                tabs: [
-                  Tab(
-                    text: const Text('Login'),
-                    body: Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: Column(
-                        children: [
-                          Card(
-                            borderColor: Colors.transparent,
-                            borderRadius: BorderRadius.zero,
-                            child: LoginTab(
-                              onAuthenticated: widget.onAuthenticated,
+  Widget build(BuildContext context) => NavigationView(
+        appBar: buildNavigationAppBar(context),
+        content: ScaffoldPage(
+          content: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: TabView(
+                  currentIndex: currentIndex,
+                  showScrollButtons: false,
+                  shortcutsEnabled: false,
+                  onNewPressed: null,
+                  closeButtonVisibility: CloseButtonVisibilityMode.never,
+                  onChanged: (index) {
+                    setState(() {
+                      currentIndex = index;
+                    });
+                  },
+                  onReorder: null,
+                  tabs: [
+                    Tab(
+                      text: const Text('Login'),
+                      body: Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Column(
+                          children: [
+                            Card(
+                              borderColor: Colors.transparent,
+                              borderRadius: BorderRadius.zero,
+                              child: LoginTab(
+                                onAuthenticated: widget.onAuthenticated,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Tab(
-                    text: const Text('Create Account'),
-                    body: Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: Column(
-                        children: [
-                          Card(
-                            borderColor: Colors.transparent,
-                            borderRadius: BorderRadius.zero,
-                            child: CreateAccountTab(
-                              onAuthenticated: widget.onAuthenticated,
+                    Tab(
+                      text: const Text('Create Account'),
+                      body: Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Column(
+                          children: [
+                            Card(
+                              borderColor: Colors.transparent,
+                              borderRadius: BorderRadius.zero,
+                              child: CreateAccountTab(
+                                onAuthenticated: widget.onAuthenticated,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class CreateAccountTab extends StatefulWidget {
@@ -115,7 +113,7 @@ class _CreateAccountTabState extends State<CreateAccountTab> {
           await getIt<Authentication>().createAccount(email!, password!, name!);
 
       if (!context.mounted) return;
-      showResultInfo(context, result);
+      await showResultInfo(context, result);
 
       if (result.isSuccess) {
         widget.onAuthenticated();
@@ -124,83 +122,81 @@ class _CreateAccountTabState extends State<CreateAccountTab> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: TextFormBox(
-              initialValue: name,
-              placeholder: 'Name',
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
+  Widget build(BuildContext context) => Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: TextFormBox(
+                initialValue: name,
+                placeholder: 'Name',
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                autofocus: true,
+                keyboardType: TextInputType.name,
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your name';
+                  }
+                  return null;
+                },
+                onSaved: (newValue) => name = newValue,
               ),
-              autofocus: true,
-              keyboardType: TextInputType.name,
-              textInputAction: TextInputAction.next,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your name';
-                }
-                return null;
-              },
-              onSaved: (newValue) => name = newValue,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: TextFormBox(
-              initialValue: email,
-              placeholder: 'Email',
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: TextFormBox(
+                initialValue: email,
+                placeholder: 'Email',
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  }
+                  return null;
+                },
+                onSaved: (newValue) => email = newValue,
               ),
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
-                }
-                return null;
-              },
-              onSaved: (newValue) => email = newValue,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: TextFormBox(
-              initialValue: password,
-              placeholder: 'Password',
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: TextFormBox(
+                initialValue: password,
+                placeholder: 'Password',
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                obscureText: true,
+                keyboardType: TextInputType.visiblePassword,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (value) async => onCreateAccount(context),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+                  return null;
+                },
+                onSaved: (newValue) => password = newValue,
               ),
-              obscureText: true,
-              keyboardType: TextInputType.visiblePassword,
-              textInputAction: TextInputAction.done,
-              onFieldSubmitted: (value) => onCreateAccount(context),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your password';
-                }
-                return null;
-              },
-              onSaved: (newValue) => password = newValue,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Button(
-              onPressed: () => onCreateAccount(context),
-              child: const Text('Create Account'),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Button(
+                onPressed: () async => onCreateAccount(context),
+                child: const Text('Create Account'),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 }
 
 class LoginTab extends StatefulWidget {
@@ -224,7 +220,7 @@ class _LoginTabState extends State<LoginTab> {
       final result = await getIt<Authentication>().login(email!, password!);
 
       if (!context.mounted) return;
-      showResultInfo(context, result);
+      await showResultInfo(context, result);
 
       if (result.isSuccess) {
         widget.onAuthenticated();
@@ -233,62 +229,60 @@ class _LoginTabState extends State<LoginTab> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: TextFormBox(
-              initialValue: email,
-              placeholder: 'Email',
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
+  Widget build(BuildContext context) => Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: TextFormBox(
+                initialValue: email,
+                placeholder: 'Email',
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                autofocus: true,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  }
+                  return null;
+                },
+                onSaved: (newValue) => email = newValue,
               ),
-              autofocus: true,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
-                }
-                return null;
-              },
-              onSaved: (newValue) => email = newValue,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: TextFormBox(
-              initialValue: password,
-              placeholder: 'Password',
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: TextFormBox(
+                initialValue: password,
+                placeholder: 'Password',
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                obscureText: true,
+                keyboardType: TextInputType.visiblePassword,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (value) async => onLogin(context),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+                  return null;
+                },
+                onSaved: (newValue) => password = newValue,
               ),
-              obscureText: true,
-              keyboardType: TextInputType.visiblePassword,
-              textInputAction: TextInputAction.done,
-              onFieldSubmitted: (value) => onLogin(context),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your password';
-                }
-                return null;
-              },
-              onSaved: (newValue) => password = newValue,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Button(
-              onPressed: () => onLogin(context),
-              child: const Text('Login'),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Button(
+                onPressed: () async => onLogin(context),
+                child: const Text('Login'),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 }

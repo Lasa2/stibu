@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/feature/app_state/account.dart';
@@ -30,20 +32,24 @@ class ThemeProvider with ChangeNotifier {
     _accentColor = color;
     notifyListeners();
     final appwrite = getIt<AppwriteClient>();
-    appwrite.account.getPrefs().then((preferences) {
+    unawaited(
+      appwrite.account.getPrefs().then((preferences) {
       preferences.data['accentColor'] = color.value;
       appwrite.account.updatePrefs(prefs: preferences.data);
-    });
+      }),
+    );
   }
 
   set themeMode(ThemeMode mode) {
     _themeMode = mode;
     notifyListeners();
     final appwrite = getIt<AppwriteClient>();
-    appwrite.account.getPrefs().then((preferences) {
+    unawaited(
+      appwrite.account.getPrefs().then((preferences) {
       preferences.data['themeMode'] = mode.index;
       appwrite.account.updatePrefs(prefs: preferences.data);
-    });
+      }),
+    );
   }
 
   ThemeProvider() {
@@ -52,10 +58,10 @@ class ThemeProvider with ChangeNotifier {
     getIt<Authentication>().isAuthenticated.listen((isAuthenticated) async {
       if (isAuthenticated) {
         final preferences = await appwrite.account.getPrefs();
-        if (preferences.data.containsKey('themeMode') == true) {
+        if (preferences.data.containsKey('themeMode')) {
           _themeMode = ThemeMode.values[preferences.data['themeMode']];
         }
-        if (preferences.data.containsKey('accentColor') == true) {
+        if (preferences.data.containsKey('accentColor')) {
           _accentColor = Color(preferences.data['accentColor']).toAccentColor();
         }
       }

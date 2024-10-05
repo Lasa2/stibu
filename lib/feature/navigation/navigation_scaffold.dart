@@ -46,7 +46,7 @@ var items = <Object>[
     route: CustomerTab(),
   ),
   const RouteDestination(
-    title: "Orders",
+    title: 'Orders',
     icon: FluentIcons.invoice,
     route: OrderListRoute(),
   ),
@@ -80,14 +80,13 @@ var footerItems = <Object>[
   ),
 ];
 
-List<RouteDestination> flatten(List<Object> items) {
-  return items.whereType<RouteDestination>().expand((element) {
-    if (element.items != null) {
-      return [element, ...element.items!];
-    }
-    return [element];
-  }).toList();
-}
+List<RouteDestination> flatten(List<Object> items) =>
+    items.whereType<RouteDestination>().expand((element) {
+      if (element.items != null) {
+        return [element, ...element.items!];
+      }
+      return [element];
+    }).toList();
 
 @RoutePage()
 class NavigationScaffoldPage extends StatefulWidget {
@@ -107,40 +106,39 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
     List<Object> items,
     int selectedIndex,
     Widget child,
-  ) {
-    return items.map<NavigationPaneItem>((element) {
-      if (element is RouteDestination) {
-        if (element.items == null) {
-          return PaneItem(
-            icon: Icon(element.icon),
-            title: Text(element.title),
-            body: child,
-            trailing: element.trailing,
-            infoBadge: element.infoBadge,
-            mouseCursor: element.mouseCursor,
-            tileColor: element.tileColor,
-            selectedTileColor: element.selectedTileColor,
-            enabled: element.enabled,
-          );
-        } else {
-          return PaneItemExpander(
-            icon: Icon(element.icon),
-            title: Text(element.title),
-            body: child,
-            items: buildItems(element.items!, selectedIndex, child),
-            trailing: element.trailing ?? PaneItemExpander.kDefaultTrailing,
-            infoBadge: element.infoBadge,
-            mouseCursor: element.mouseCursor,
-            tileColor: element.tileColor,
-            selectedTileColor: element.selectedTileColor,
-          );
+  ) =>
+      items.map<NavigationPaneItem>((element) {
+        if (element is RouteDestination) {
+          if (element.items == null) {
+            return PaneItem(
+              icon: Icon(element.icon),
+              title: Text(element.title),
+              body: child,
+              trailing: element.trailing,
+              infoBadge: element.infoBadge,
+              mouseCursor: element.mouseCursor,
+              tileColor: element.tileColor,
+              selectedTileColor: element.selectedTileColor,
+              enabled: element.enabled,
+            );
+          } else {
+            return PaneItemExpander(
+              icon: Icon(element.icon),
+              title: Text(element.title),
+              body: child,
+              items: buildItems(element.items!, selectedIndex, child),
+              trailing: element.trailing ?? PaneItemExpander.kDefaultTrailing,
+              infoBadge: element.infoBadge,
+              mouseCursor: element.mouseCursor,
+              tileColor: element.tileColor,
+              selectedTileColor: element.selectedTileColor,
+            );
+          }
+        } else if (element is NavigationPaneItem) {
+          return element;
         }
-      } else if (element is NavigationPaneItem) {
-        return element;
-      }
-      throw Exception('Invalid item type');
-    }).toList();
-  }
+        throw Exception('Invalid item type');
+      }).toList();
 
   User? user;
   Image? avatar;
@@ -174,12 +172,10 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return AutoTabsRouter(
-      routes: routeDestinations.map((e) => e.route).toList(),
-      homeIndex: 0,
-      builder: (context, child) {
-        return NavigationView(
+  Widget build(BuildContext context) => AutoTabsRouter(
+        routes: routeDestinations.map((e) => e.route).toList(),
+        homeIndex: 0,
+        builder: (context, child) => NavigationView(
           appBar: buildNavigationAppBar(context),
           pane: NavigationPane(
             selected: context.tabsRouter.activeIndex,
@@ -189,16 +185,14 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
               height: 78,
               child: ListTile(
                 leading: avatar,
-                title: Text(user?.name ?? "User"),
-                subtitle: Text(user?.email ?? ""),
+                title: Text(user?.name ?? 'User'),
+                subtitle: Text(user?.email ?? ''),
               ),
             ),
             items: buildItems(items, context.tabsRouter.activeIndex, child),
             footerItems:
                 buildItems(footerItems, context.tabsRouter.activeIndex, child),
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
 }

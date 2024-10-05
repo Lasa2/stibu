@@ -5,7 +5,7 @@ class Currency implements Comparable<Currency> {
 
   Currency(this._value);
 
-  static Currency get zero => Currency(0);
+  const Currency.zero() : _value = 0;
 
   double get asDouble => _value / 100;
   int get asInt => _value;

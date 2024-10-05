@@ -41,140 +41,138 @@ class _CustomerInputDialogState extends State<CustomerInputDialog> {
   late String? _city = widget.city;
 
   @override
-  Widget build(BuildContext context) {
-    return ContentDialog(
-      title: Text(widget.title),
-      actions: [
-        Button(
-          onPressed: () {
-            if (_formKey.currentState?.validate() ?? false) {
-              _formKey.currentState?.save();
+  Widget build(BuildContext context) => ContentDialog(
+        title: Text(widget.title),
+        actions: [
+          Button(
+            onPressed: () {
+              if (_formKey.currentState?.validate() ?? false) {
+                _formKey.currentState?.save();
 
-              if (widget.customer != null) {
-                final customer = widget.customer!.copyWith(
-                  name: _name,
-                  email: _email?.isNotEmpty == true ? _email : null,
-                  phone: _phone?.isNotEmpty == true ? _phone : null,
-                  street: _street?.isNotEmpty == true ? _street : null,
-                  zip: _zip,
-                  city: _city?.isNotEmpty == true ? _city : null,
-                );
+                if (widget.customer != null) {
+                  final customer = widget.customer!.copyWith(
+                    name: _name,
+                    email: _email?.isNotEmpty == true ? _email : null,
+                    phone: _phone?.isNotEmpty == true ? _phone : null,
+                    street: _street?.isNotEmpty == true ? _street : null,
+                    zip: _zip,
+                    city: _city?.isNotEmpty == true ? _city : null,
+                  );
 
-                Navigator.of(context).pop(customer);
-              } else {
-                final customer = Customers(
-                  id: _id,
-                  name: _name!,
-                  email: _email?.isNotEmpty == true ? _email : null,
-                  phone: _phone?.isNotEmpty == true ? _phone : null,
-                  street: _street?.isNotEmpty == true ? _street : null,
-                  zip: _zip?.isNotEmpty == true ? _zip : null,
-                  city: _city?.isNotEmpty == true ? _city : null,
-                );
+                  Navigator.of(context).pop(customer);
+                } else {
+                  final customer = Customers(
+                    id: _id,
+                    name: _name!,
+                    email: _email?.isNotEmpty == true ? _email : null,
+                    phone: _phone?.isNotEmpty == true ? _phone : null,
+                    street: _street?.isNotEmpty == true ? _street : null,
+                    zip: _zip?.isNotEmpty == true ? _zip : null,
+                    city: _city?.isNotEmpty == true ? _city : null,
+                  );
 
-                Navigator.of(context).pop(customer);
+                  Navigator.of(context).pop(customer);
+                }
               }
-            }
-          },
-          child: const Text('Save'),
+            },
+            child: const Text('Save'),
+          ),
+          Button(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+        content: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            children: [
+              InfoLabel(
+                label: 'Customer ID',
+                child: TextFormBox(
+                  initialValue: _id.toString(),
+                  decoration: const BoxDecoration(
+                    border: Border(bottom: BorderSide(color: Colors.grey)),
+                  ),
+                  placeholder: 'ID',
+                  readOnly: true,
+                ),
+              ),
+              InfoLabel(
+                label: 'Name',
+                child: TextFormBox(
+                  initialValue: _name,
+                  decoration: const BoxDecoration(
+                    border: Border(bottom: BorderSide(color: Colors.grey)),
+                  ),
+                  placeholder: 'Name',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a name';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => _name = value,
+                ),
+              ),
+              InfoLabel(
+                label: 'Email',
+                child: TextFormBox(
+                  initialValue: _email,
+                  decoration: const BoxDecoration(
+                    border: Border(bottom: BorderSide(color: Colors.grey)),
+                  ),
+                  placeholder: 'Email',
+                  keyboardType: TextInputType.emailAddress,
+                  onSaved: (value) => _email = value,
+                ),
+              ),
+              InfoLabel(
+                label: 'Phone',
+                child: TextFormBox(
+                  initialValue: _phone,
+                  decoration: const BoxDecoration(
+                    border: Border(bottom: BorderSide(color: Colors.grey)),
+                  ),
+                  placeholder: 'Phone',
+                  onChanged: (value) => _phone = value,
+                ),
+              ),
+              InfoLabel(
+                label: 'Street',
+                child: TextFormBox(
+                  initialValue: _street,
+                  decoration: const BoxDecoration(
+                    border: Border(bottom: BorderSide(color: Colors.grey)),
+                  ),
+                  placeholder: 'Street',
+                  onSaved: (value) => _street = value,
+                ),
+              ),
+              InfoLabel(
+                label: 'ZIP',
+                child: TextFormBox(
+                  initialValue: _zip,
+                  placeholder: 'ZIP',
+                  showCursor: false,
+                  onSaved: (value) => _zip = value,
+                ),
+              ),
+              InfoLabel(
+                label: 'City',
+                child: TextFormBox(
+                  initialValue: _city,
+                  decoration: const BoxDecoration(
+                    border: Border(bottom: BorderSide(color: Colors.grey)),
+                  ),
+                  placeholder: 'City',
+                  onSaved: (value) => _city = value,
+                ),
+              ),
+            ],
+          ),
         ),
-        Button(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Cancel'),
-        ),
-      ],
-      content: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          children: [
-            InfoLabel(
-              label: 'Customer ID',
-              child: TextFormBox(
-                initialValue: _id.toString(),
-                decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Colors.grey)),
-                ),
-                placeholder: 'ID',
-                readOnly: true,
-              ),
-            ),
-            InfoLabel(
-              label: 'Name',
-              child: TextFormBox(
-                initialValue: _name,
-                decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Colors.grey)),
-                ),
-                placeholder: 'Name',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a name';
-                  }
-                  return null;
-                },
-                onSaved: (value) => _name = value,
-              ),
-            ),
-            InfoLabel(
-              label: 'Email',
-              child: TextFormBox(
-                initialValue: _email,
-                decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Colors.grey)),
-                ),
-                placeholder: 'Email',
-                keyboardType: TextInputType.emailAddress,
-                onSaved: (value) => _email = value,
-              ),
-            ),
-            InfoLabel(
-              label: 'Phone',
-              child: TextFormBox(
-                initialValue: _phone,
-                decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Colors.grey)),
-                ),
-                placeholder: 'Phone',
-                onChanged: (value) => _phone = value,
-              ),
-            ),
-            InfoLabel(
-              label: 'Street',
-              child: TextFormBox(
-                initialValue: _street,
-                decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Colors.grey)),
-                ),
-                placeholder: 'Street',
-                onSaved: (value) => _street = value,
-              ),
-            ),
-            InfoLabel(
-              label: 'ZIP',
-              child: TextFormBox(
-                initialValue: _zip,
-                placeholder: 'ZIP',
-                showCursor: false,
-                onSaved: (value) => _zip = value,
-              ),
-            ),
-            InfoLabel(
-              label: 'City',
-              child: TextFormBox(
-                initialValue: _city,
-                decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Colors.grey)),
-                ),
-                placeholder: 'City',
-                onSaved: (value) => _city = value,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+      );
 }

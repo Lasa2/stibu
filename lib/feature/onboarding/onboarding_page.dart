@@ -17,68 +17,66 @@ class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key, this.onFinish});
 
   @override
-  Widget build(BuildContext context) {
-    return NavigationView(
-      appBar: buildNavigationAppBar(context),
-      content: ScaffoldPage(
-        content: Wizard(
-          onFinish: () async {
-            final appwrite = getIt<AppwriteClient>();
+  Widget build(BuildContext context) => NavigationView(
+        appBar: buildNavigationAppBar(context),
+        content: ScaffoldPage(
+          content: Wizard(
+            onFinish: () async {
+              final appwrite = getIt<AppwriteClient>();
 
-            final preferences = await appwrite.account.getPrefs();
+              final preferences = await appwrite.account.getPrefs();
 
-            preferences.data['onboardingCompleted'] = true;
+              preferences.data['onboardingCompleted'] = true;
 
-            await appwrite.account.updatePrefs(prefs: preferences.data);
+              await appwrite.account.updatePrefs(prefs: preferences.data);
 
-            onFinish?.call();
-          },
-          pages: [
-            const WizardStep(
-              title: 'Welcome to Stibu',
-              content: Column(
-                children: [
-                  Text(
-                    'Welcome to Stibu, the best way to manage your tasks!',
-                  ),
-                  SizedBox(height: 16.0),
-                  Text(
-                    'This wizard will guide you through the basic features of Stibu.',
-                  ),
-                ],
+              onFinish?.call();
+            },
+            pages: [
+              const WizardStep(
+                title: 'Welcome to Stibu',
+                content: Column(
+                  children: [
+                    Text(
+                      'Welcome to Stibu, the best way to manage your tasks!',
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'This wizard will guide you through the basic features of Stibu.',
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const WizardStep(
-              title: 'Enter Product Key',
-              content: ProductKeyTab(),
-            ),
-            WizardStep(
-              title: 'Select accent color and theme mode',
-              content: ThemeAndAccentColorSelection(
-                onAccentColorChanged: (color) {
-                  getIt<ThemeProvider>().accentColor = color;
-                },
-                onThemeModeChanged: (mode) {
-                  getIt<ThemeProvider>().themeMode = mode;
-                },
+              const WizardStep(
+                title: 'Enter Product Key',
+                content: ProductKeyTab(),
               ),
-            ),
-            WizardStep(
-              title: "That's it!",
-              content: Column(
-                children: [
-                  Text(
-                    "You're all set! Click Finish to start using Stibu.",
-                    style: FluentTheme.of(context).typography.title,
-                  ),
-                ],
+              WizardStep(
+                title: 'Select accent color and theme mode',
+                content: ThemeAndAccentColorSelection(
+                  onAccentColorChanged: (color) {
+                    getIt<ThemeProvider>().accentColor = color;
+                  },
+                  onThemeModeChanged: (mode) {
+                    getIt<ThemeProvider>().themeMode = mode;
+                  },
+                ),
               ),
-            ),
-          ],
+              WizardStep(
+                title: "That's it!",
+                content: Column(
+                  children: [
+                    Text(
+                      "You're all set! Click Finish to start using Stibu.",
+                      style: FluentTheme.of(context).typography.title,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class ProductKeyTab extends StatefulWidget {
@@ -96,91 +94,89 @@ class _ProductKeyTabState extends State<ProductKeyTab> {
   bool readOnly = false;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400),
-        child: Form(
-          key: formKey,
-          child: Column(
-            children: [
-              TextFormBox(
-                readOnly: readOnly,
-                controller: productKeyController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a product key';
-                  }
-                  return null;
-                },
-                placeholder: 'Product key',
-              ),
-              const SizedBox(height: 16.0),
-              if (readOnly)
-                const Text(
-                  'Product key confirmed!',
-                ),
-              if (!readOnly)
-                Button(
-                  onPressed: () async {
-                    if (formKey.currentState!.validate()) {
-                      final productKey = productKeyController.text.trim();
-
-                      final appwrite = getIt<AppwriteClient>();
-
-                      final result = await appwrite.functions.createExecution(
-                        functionId: '66e340510031daaffc90',
-                        method: ExecutionMethod.gET,
-                        headers: {
-                          'product-key': productKey,
-                        },
-                      );
-
-                      if (result.responseStatusCode != 200) {
-                        if (!context.mounted) return;
-                        displayInfoBar(
-                          context,
-                          builder: (context, close) => InfoBar(
-                            title: const Text('Server error'),
-                            content: Text(result.responseBody),
-                            severity: InfoBarSeverity.error,
-                            onClose: close,
-                          ),
-                        );
-                        return;
-                      }
-
-                      final map = jsonDecode(result.responseBody)
-                          as Map<String, dynamic>;
-
-                      if (map['status'] != 200) {
-                        if (!context.mounted) return;
-                        displayInfoBar(
-                          context,
-                          builder: (context, close) => InfoBar(
-                            title: const Text('Invalid product key'),
-                            content: const Text(
-                              'The product key you entered is invalid. Please try again.',
-                            ),
-                            severity: InfoBarSeverity.error,
-                            onClose: close,
-                          ),
-                        );
-                      } else {
-                        setState(() => readOnly = true);
-                        widget.onFinish?.call();
-                      }
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Form(
+            key: formKey,
+            child: Column(
+              children: [
+                TextFormBox(
+                  readOnly: readOnly,
+                  controller: productKeyController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a product key';
                     }
+                    return null;
                   },
-                  child: const Text('Confirm'),
+                  placeholder: 'Product key',
                 ),
-            ],
+                const SizedBox(height: 16),
+                if (readOnly)
+                  const Text(
+                    'Product key confirmed!',
+                  ),
+                if (!readOnly)
+                  Button(
+                    onPressed: () async {
+                      if (formKey.currentState!.validate()) {
+                        final productKey = productKeyController.text.trim();
+
+                        final appwrite = getIt<AppwriteClient>();
+
+                        final result = await appwrite.functions.createExecution(
+                          functionId: '66e340510031daaffc90',
+                          method: ExecutionMethod.gET,
+                          headers: {
+                            'product-key': productKey,
+                          },
+                        );
+
+                        if (result.responseStatusCode != 200) {
+                          if (!context.mounted) return;
+                          await displayInfoBar(
+                            context,
+                            builder: (context, close) => InfoBar(
+                              title: const Text('Server error'),
+                              content: Text(result.responseBody),
+                              severity: InfoBarSeverity.error,
+                              onClose: close,
+                            ),
+                          );
+                          return;
+                        }
+
+                        final map = jsonDecode(result.responseBody)
+                            as Map<String, dynamic>;
+
+                        if (map['status'] != 200) {
+                          if (!context.mounted) return;
+                          await displayInfoBar(
+                            context,
+                            builder: (context, close) => InfoBar(
+                              title: const Text('Invalid product key'),
+                              content: const Text(
+                                'The product key you entered is invalid. Please try again.',
+                              ),
+                              severity: InfoBarSeverity.error,
+                              onClose: close,
+                            ),
+                          );
+                        } else {
+                          setState(() => readOnly = true);
+                          widget.onFinish?.call();
+                        }
+                      }
+                    },
+                    child: const Text('Confirm'),
+                  ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class ThemeAndAccentColorSelection extends StatefulWidget {
@@ -206,61 +202,59 @@ class _ThemeAndAccentColorSelectionState
   ThemeMode themeMode = getIt<ThemeProvider>().themeMode;
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          Text(
-            'Select an accent color for Stibu.',
-            style: FluentTheme.of(context).typography.title,
-          ),
-          const SizedBox(height: 16.0),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final color in colors)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: GestureDetector(
-                    onTap: () => widget.onAccentColorChanged?.call(color),
-                    child: Container(
-                      width: 32.0,
-                      height: 32.0,
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(4.0),
+  Widget build(BuildContext context) => Center(
+        child: Column(
+          children: [
+            Text(
+              'Select an accent color for Stibu.',
+              style: FluentTheme.of(context).typography.title,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final color in colors)
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: GestureDetector(
+                      onTap: () => widget.onAccentColorChanged?.call(color),
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          Text(
-            'Select a theme mode for Stibu.',
-            style: FluentTheme.of(context).typography.title,
-          ),
-          const SizedBox(height: 16.0),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ComboBox<ThemeMode>(
-              value: themeMode,
-              items: ThemeMode.values
-                  .map(
-                    (e) => ComboBoxItem<ThemeMode>(
-                      key: Key(e.toString()),
-                      value: e,
-                      child: Text(e.toString().split('.').last),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (value) {
-                setState(() => themeMode = value!);
-                widget.onThemeModeChanged?.call(value!);
-              },
+              ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
+            Text(
+              'Select a theme mode for Stibu.',
+              style: FluentTheme.of(context).typography.title,
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: ComboBox<ThemeMode>(
+                value: themeMode,
+                items: ThemeMode.values
+                    .map(
+                      (e) => ComboBoxItem<ThemeMode>(
+                        key: Key(e.toString()),
+                        value: e,
+                        child: Text(e.toString().split('.').last),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  setState(() => themeMode = value!);
+                  widget.onThemeModeChanged?.call(value!);
+                },
+              ),
+            ),
+          ],
+        ),
+      );
 }

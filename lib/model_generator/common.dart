@@ -1,5 +1,4 @@
-String generateCommon() {
-  return '''
+String generateCommon() => '''
 import 'package:collection/collection.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
@@ -210,4 +209,3 @@ class Relationship {
   });
 }
 ''';
-}

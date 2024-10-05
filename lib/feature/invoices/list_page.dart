@@ -30,7 +30,7 @@ Future<Invoices?> _showInvoiceCreateDialog(BuildContext context) async {
       await displayInfoBar(
         context,
         builder: (context, close) => InfoBar(
-          title: const Text("Error"),
+          title: const Text('Error'),
           content: Text(newInvoiceId.failure),
           severity: InfoBarSeverity.error,
         ),
@@ -52,7 +52,7 @@ Future<Invoices?> _showInvoiceCreateDialog(BuildContext context) async {
       await displayInfoBar(
         context,
         builder: (context, close) => InfoBar(
-          title: const Text("Error"),
+          title: const Text('Error'),
           content: Text(result.failure),
           severity: InfoBarSeverity.error,
         ),
@@ -61,8 +61,8 @@ Future<Invoices?> _showInvoiceCreateDialog(BuildContext context) async {
       await displayInfoBar(
         context,
         builder: (context, close) => const InfoBar(
-          title: Text("Success"),
-          content: Text("Invoice created"),
+          title: Text('Success'),
+          content: Text('Invoice created'),
           severity: InfoBarSeverity.success,
         ),
       );
@@ -93,7 +93,7 @@ Future<Invoices?> _showInvoiceEditDialog(
       await displayInfoBar(
         context,
         builder: (context, close) => InfoBar(
-          title: const Text("Error"),
+          title: const Text('Error'),
           content: Text(result.failure),
           severity: InfoBarSeverity.error,
         ),
@@ -102,8 +102,8 @@ Future<Invoices?> _showInvoiceEditDialog(
       await displayInfoBar(
         context,
         builder: (context, close) => const InfoBar(
-          title: Text("Success"),
-          content: Text("Customer updated"),
+          title: Text('Success'),
+          content: Text('Customer updated'),
           severity: InfoBarSeverity.success,
         ),
       );
@@ -144,7 +144,7 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
   @override
   void initState() {
     super.initState();
-    _loadInvoices();
+    unawaited(_loadInvoices());
     _subscription =
         getIt<RealtimeSubscriptions>().invoicesUpdates.listen((invoices) {
       switch (invoices.type) {
@@ -153,7 +153,6 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
             _totalInvoices += 1;
             _invoices.add(invoices.item);
           });
-          break;
         case RealtimeUpdateType.update:
           final index = _invoices.indexWhere((e) => e.$id == invoices.item.$id);
           if (index != -1) {
@@ -161,7 +160,6 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
               _invoices[index] = invoices.item;
             });
           }
-          break;
         case RealtimeUpdateType.delete:
           final index = _invoices.indexWhere((e) => e.$id == invoices.item.$id);
           if (index != -1) {
@@ -170,14 +168,13 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
               _invoices.removeAt(index);
             });
           }
-          break;
       }
     });
   }
 
   @override
-  void dispose() {
-    _subscription?.cancel();
+  Future<void> dispose() async {
+    await _subscription?.cancel();
     super.dispose();
   }
 
@@ -198,7 +195,7 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
 
     return ScaffoldPage(
       header: PageHeader(
-        title: const Text("Invoices"),
+        title: const Text('Invoices'),
         commandBar: CommandBar(
           mainAxisAlignment: MainAxisAlignment.end,
           primaryItems: [
@@ -274,7 +271,7 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
                   : _invoices.length,
               itemBuilder: (context, index) {
                 if (index >= _invoices.length) {
-                  _loadInvoices();
+                  unawaited(_loadInvoices());
                   return const Center(child: ProgressBar());
                 }
 
@@ -315,37 +312,35 @@ class InvoiceListEntry extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(2.5),
-      child: ListTile.selectable(
-        selected: selected,
-        onPressed: onPressed,
-        tileColor: WidgetStateProperty.resolveWith((states) {
-          if (states.isHovered) {
-            return FluentTheme.of(context).accentColor.withOpacity(0.1);
-          }
-          return FluentTheme.of(context)
-              .resources
-              .cardBackgroundFillColorDefault;
-        }),
-        leading: Container(
-          height: 40,
-          decoration: BoxDecoration(
-            color: FluentTheme.of(context).accentColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(5),
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(2.5),
+        child: ListTile.selectable(
+          selected: selected,
+          onPressed: onPressed,
+          tileColor: WidgetStateProperty.resolveWith((states) {
+            if (states.isHovered) {
+              return FluentTheme.of(context).accentColor.withOpacity(0.1);
+            }
+            return FluentTheme.of(context)
+                .resources
+                .cardBackgroundFillColorDefault;
+          }),
+          leading: Container(
+            height: 40,
+            decoration: BoxDecoration(
+              color: FluentTheme.of(context).accentColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Center(child: Text(invoice.invoiceNumber)),
+            ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(child: Text(invoice.invoiceNumber)),
-          ),
+          title: Text(invoice.name),
+          subtitle: Text(invoice.date.formatDate()),
+          trailing: Text(invoice.amount.currency.format()),
         ),
-        title: Text(invoice.name),
-        subtitle: Text(invoice.date.formatDate()),
-        trailing: Text(invoice.amount.currency.format()),
-      ),
-    );
-  }
+      );
 }
 
 class InvoiceListDetail extends StatelessWidget {
@@ -354,14 +349,12 @@ class InvoiceListDetail extends StatelessWidget {
   const InvoiceListDetail({super.key, required this.invoice});
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        InvoiceInfoCard(
-          invoice: invoice,
-        ),
-        const Expanded(child: Placeholder()),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Column(
+        children: [
+          InvoiceInfoCard(
+            invoice: invoice,
+          ),
+          const Expanded(child: Placeholder()),
+        ],
+      );
 }

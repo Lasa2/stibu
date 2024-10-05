@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:result_type/result_type.dart';
 import 'package:rxdart/rxdart.dart';
@@ -11,12 +13,14 @@ class Authentication {
   Authentication() {
     final appwrite = getIt<AppwriteClient>();
 
-    appwrite.account.get().then((account) {
-      log.info("Got account: ${account.name}");
+    unawaited(
+      appwrite.account.get().then((account) {
+        log.info('Got account: ${account.name}');
       _isAuthenticated.add(true);
     }).catchError((e) {
-      log.warning("Failed to get account: $e");
-    });
+        log.warning('Failed to get account: $e');
+      }),
+    );
   }
 
   Future<Result<void, String>> login(String email, String password) async {
@@ -27,18 +31,18 @@ class Authentication {
       _isAuthenticated.add(true);
       return Success(null);
     } on AppwriteException catch (e) {
-      return Failure(e.message ?? "Failed to login");
+      return Failure(e.message ?? 'Failed to login');
     }
   }
 
   Future<Result<void, String>> logout() async {
     final appwrite = getIt<AppwriteClient>();
     try {
-      await appwrite.account.deleteSession(sessionId: "current");
+      await appwrite.account.deleteSession(sessionId: 'current');
       _isAuthenticated.add(false);
       return Success(null);
     } on AppwriteException catch (e) {
-      return Failure(e.message ?? "Failed to logout");
+      return Failure(e.message ?? 'Failed to logout');
     }
   }
 
@@ -57,7 +61,7 @@ class Authentication {
       );
       return Success(null);
     } on AppwriteException catch (e) {
-      return Failure(e.message ?? "Failed to create Account");
+      return Failure(e.message ?? 'Failed to create Account');
     }
   }
 }

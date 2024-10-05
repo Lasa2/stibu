@@ -6,9 +6,9 @@ import 'package:stibu/common/datetime_formatter.dart';
 import 'package:stibu/common/models_extensions.dart';
 
 Future<Document> generateBasicInvoiceWithOrder(Invoices invoice) async {
-  assert(invoice.order != null);
-  assert(invoice.order!.products != null);
-  assert(invoice.order!.coupons != null);
+  assert(invoice.order != null, 'Order must not be null');
+  assert(invoice.order!.products != null, 'Products must not be null');
+  assert(invoice.order!.coupons != null, 'Coupons must not be null');
 
   final pdf = Document();
 
@@ -198,7 +198,7 @@ Future<Document> generateBasicInvoiceWithOrder(Invoices invoice) async {
 }
 
 Future<Document> generateBasicInvoiceWithoutOrder(Invoices invoice) async {
-  assert(invoice.order == null);
+  assert(invoice.order == null, 'Order must be null');
 
   final pdf = Document();
 
@@ -210,7 +210,7 @@ Future<Document> generateBasicInvoiceWithoutOrder(Invoices invoice) async {
       pageFormat: PdfPageFormat.a4,
       orientation: PageOrientation.portrait,
       build: (context) {
-        TextStyle defaultTextStyle =
+        final TextStyle defaultTextStyle =
             TextStyle(fontSize: 10, font: font, fontBold: fontBold);
 
         return SizedBox(

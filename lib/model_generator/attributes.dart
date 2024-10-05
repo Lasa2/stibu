@@ -50,7 +50,7 @@ class AttributeInfoInteger extends AttributeInfo {
 }
 
 class AttributeInfoEmail extends AttributeInfo {
-  String get email => "email";
+  String get email => 'email';
   @override
   Type get type => String;
 
@@ -267,7 +267,7 @@ String generateField(AttributeInfo attribute) {
 String generateRelationshipField(AttributeInfoRelationship attribute) {
   final name = attribute.name;
 
-  String field = '''
+  final String field = '''
 final Relationship ${name}Relation = Relationship(
     required: ${attribute.required},
     array: ${attribute.array},
@@ -280,8 +280,7 @@ final Relationship ${name}Relation = Relationship(
   );
   ''';
 
-  field += 'final ${attribute.typeAsString}? $name;';
-  return field;
+  return '$field final ${attribute.typeAsString}? $name;';
 }
 
 String generateConstructorField(AttributeInfo attribute) {
@@ -476,19 +475,16 @@ String generateRelationshipFromAppwriteField(
   throw Exception('Invalid relationship type');
 }
 
-bool isListType(AttributeInfo attribute) {
-  return attribute.array ||
-      attribute is AttributeInfoRelationship &&
-          (attribute.relationType == RelationshipType.manyToMany ||
-              (attribute.relationType == RelationshipType.oneToMany &&
-                  attribute.side == Side.parent) ||
-              (attribute.relationType == RelationshipType.manyToOne &&
-                  attribute.side == Side.child));
-}
+bool isListType(AttributeInfo attribute) =>
+    attribute.array ||
+    attribute is AttributeInfoRelationship &&
+        (attribute.relationType == RelationshipType.manyToMany ||
+            (attribute.relationType == RelationshipType.oneToMany &&
+                attribute.side == Side.parent) ||
+            (attribute.relationType == RelationshipType.manyToOne &&
+                attribute.side == Side.child));
 
-bool containsList(List<AttributeInfo> attributes) {
-  return attributes.any(isListType);
-}
+bool containsList(List<AttributeInfo> attributes) => attributes.any(isListType);
 
 String generateEqualsFields(AttributeInfo attribute) {
   final name = attribute.name;

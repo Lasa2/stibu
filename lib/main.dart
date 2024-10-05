@@ -25,7 +25,7 @@ Future<void> main(List<String> args) async {
 
   final deviceLocale = PlatformDispatcher.instance.locale;
   Intl.defaultLocale = deviceLocale.toLanguageTag();
-  initializeDateFormatting(deviceLocale.toLanguageTag());
+  await initializeDateFormatting(deviceLocale.toLanguageTag());
 
   await initializeDateFormatting();
 
@@ -41,13 +41,13 @@ Future<void> main(List<String> args) async {
           .setEndPointRealtime('wss://appwrite.vee.icu/v1/realtime'),
     ),
   );
-  GetIt.I.registerLazySingleton<Authentication>(() => Authentication());
+  GetIt.I.registerLazySingleton<Authentication>(Authentication.new);
   GetIt.I.registerLazySingleton<RealtimeSubscriptions>(
-    () => RealtimeSubscriptions(),
+    RealtimeSubscriptions.new,
   );
-  GetIt.I.registerLazySingleton<ThemeProvider>(() => ThemeProvider());
+  GetIt.I.registerLazySingleton<ThemeProvider>(ThemeProvider.new);
 
-  registerProtocolHandler("stibu");
+  registerProtocolHandler('stibu');
 
   Logger.root.level = Level.ALL; // defaults to Level.INFO
 
@@ -84,23 +84,21 @@ class _StibuAppState extends State<StibuApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: themeProvider,
-      builder: (context, child) => FluentApp.router(
-        debugShowCheckedModeBanner: false,
-        title: 'Stibu',
-        theme: themeProvider.lightTheme,
-        darkTheme: themeProvider.darkTheme,
-        themeMode: themeProvider.themeMode,
-        routerConfig: router.config(
-          reevaluateListenable:
-              ReevaluateListenable.stream(auth.isAuthenticated),
-          navigatorObservers: () => [RouteLogger()],
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: themeProvider,
+        builder: (context, child) => FluentApp.router(
+          debugShowCheckedModeBanner: false,
+          title: 'Stibu',
+          theme: themeProvider.lightTheme,
+          darkTheme: themeProvider.darkTheme,
+          themeMode: themeProvider.themeMode,
+          routerConfig: router.config(
+            reevaluateListenable:
+                ReevaluateListenable.stream(auth.isAuthenticated),
+            navigatorObservers: () => [RouteLogger()],
+          ),
+          localizationsDelegates: Lang.localizationsDelegates,
+          supportedLocales: Lang.supportedLocales,
         ),
-        localizationsDelegates: Lang.localizationsDelegates,
-        supportedLocales: Lang.supportedLocales,
-      ),
-    );
-  }
+      );
 }

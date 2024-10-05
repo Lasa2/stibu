@@ -15,7 +15,7 @@ Future<Expenses?> _showExpenseCreateDialog(BuildContext context) async {
   final expense = await showDialog<Expenses>(
     context: context,
     builder: (context) => const ExpenseInputDialog(
-      title: "Create Expense",
+      title: 'Create Expense',
     ),
   );
 
@@ -25,7 +25,7 @@ Future<Expenses?> _showExpenseCreateDialog(BuildContext context) async {
       await displayInfoBar(
         context,
         builder: (context, close) => InfoBar(
-          title: const Text("Error"),
+          title: const Text('Error'),
           content: Text(expenseNumber.failure),
           severity: InfoBarSeverity.error,
         ),
@@ -44,7 +44,7 @@ Future<Expenses?> _showExpenseCreateDialog(BuildContext context) async {
       await displayInfoBar(
         context,
         builder: (context, close) => InfoBar(
-          title: const Text("Error"),
+          title: const Text('Error'),
           content: Text(result.failure),
           severity: InfoBarSeverity.error,
         ),
@@ -65,7 +65,7 @@ Future<Expenses?> _showExpenseEditDialog(
   final newExpense = await showDialog<Expenses>(
     context: context,
     builder: (context) => ExpenseInputDialog(
-      title: "Edit Expense",
+      title: 'Edit Expense',
       expense: expense,
     ),
   );
@@ -78,7 +78,7 @@ Future<Expenses?> _showExpenseEditDialog(
       await displayInfoBar(
         context,
         builder: (context, close) => InfoBar(
-          title: const Text("Error"),
+          title: const Text('Error'),
           content: Text(result.failure),
           severity: InfoBarSeverity.error,
         ),
@@ -124,7 +124,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
   @override
   void initState() {
     super.initState();
-    _loadExpenses();
+    unawaited(_loadExpenses());
     _expensesSubscription =
         getIt<RealtimeSubscriptions>().expensesUpdates.listen((update) {
       switch (update.type) {
@@ -133,7 +133,6 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
             _totalExpenses++;
             _expenses.add(update.item);
           });
-          break;
         case RealtimeUpdateType.update:
           setState(() {
             final index = _expenses.indexWhere((e) => e.$id == update.item.$id);
@@ -141,21 +140,19 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
               _expenses[index] = update.item;
             }
           });
-          break;
         case RealtimeUpdateType.delete:
           final index = _expenses.indexWhere((e) => e.$id == update.item.$id);
           setState(() {
             _totalExpenses--;
             _expenses.removeAt(index);
           });
-          break;
       }
     });
   }
 
   @override
-  void dispose() {
-    _expensesSubscription?.cancel();
+  Future<void> dispose() async {
+    await _expensesSubscription?.cancel();
     super.dispose();
   }
 
@@ -181,7 +178,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
             CommandBarButton(
               icon: const Icon(FluentIcons.add),
               label: const Text('New expense'),
-              onPressed: () async => await _showExpenseCreateDialog(context),
+              onPressed: () async => _showExpenseCreateDialog(context),
             ),
             if (_selectedIndex != null && _expenses[_selectedIndex!].canUpdate)
               CommandBarButton(
@@ -204,7 +201,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
                   : _expenses.length,
               itemBuilder: (context, index) {
                 if (index >= _expenses.length) {
-                  _loadExpenses();
+                  unawaited(_loadExpenses());
                   return const Center(
                     child: ProgressBar(),
                   );
@@ -243,37 +240,35 @@ class ExpenseListEntry extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(2.5),
-      child: ListTile.selectable(
-        selected: selected,
-        onPressed: onPressed,
-        tileColor: WidgetStateProperty.resolveWith((states) {
-          if (states.isHovered) {
-            return FluentTheme.of(context).accentColor.withOpacity(0.1);
-          }
-          return FluentTheme.of(context)
-              .resources
-              .cardBackgroundFillColorDefault;
-        }),
-        leading: Container(
-          height: 40,
-          decoration: BoxDecoration(
-            color: FluentTheme.of(context).accentColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Center(
-              child: Text(expense.expenseNumber),
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(2.5),
+        child: ListTile.selectable(
+          selected: selected,
+          onPressed: onPressed,
+          tileColor: WidgetStateProperty.resolveWith((states) {
+            if (states.isHovered) {
+              return FluentTheme.of(context).accentColor.withOpacity(0.1);
+            }
+            return FluentTheme.of(context)
+                .resources
+                .cardBackgroundFillColorDefault;
+          }),
+          leading: Container(
+            height: 40,
+            decoration: BoxDecoration(
+              color: FluentTheme.of(context).accentColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Center(
+                child: Text(expense.expenseNumber),
+              ),
             ),
           ),
+          title: Text(expense.name),
+          subtitle: Text(expense.date.formatDate()),
+          trailing: Text(expense.amount.currency.format()),
         ),
-        title: Text(expense.name),
-        subtitle: Text(expense.date.formatDate()),
-        trailing: Text(expense.amount.currency.format()),
-      ),
-    );
-  }
+      );
 }

@@ -9,24 +9,25 @@ class RealtimeListener {
 
   set subscription(RealtimeSubscription? value) {
     if (value != null) {
-      _subscription?.close();
+      // _subscription?.close(); TODO; rewrite this to use the close method
       _subscription = value;
 
       // start listening to the new subscription
       _subscription?.stream.listen((message) {
         final messageChannels = Set.from(message.channels);
         final intersection = messageChannels.intersection(channels);
-        log..info("Received message for on channel $intersection")
-        ..info("Event: ${message.events.first}")
-        ..info("Message: ${message.payload}");
+        log
+          ..info('Received message for on channel $intersection')
+          ..info('Event: ${message.events.first}')
+          ..info('Message: ${message.payload}');
 
         // check if the message is for any of the channels we are listening to
-        for (var channel in intersection) {
+        for (final channel in intersection) {
           _listeners[channel]?.call(message);
         }
       });
     } else {
-      _subscription?.close();
+      // _subscription?.close();
       _subscription = value;
     }
   }
@@ -52,9 +53,7 @@ class RealtimeListener {
   }
 
   void removeSubscriptions(List<String> channels) {
-    for (var channel in channels) {
-      _listeners.remove(channel);
-    }
+    channels.forEach(_listeners.remove);
     subscription = _realtime.subscribe(_listeners.keys.toList());
   }
 

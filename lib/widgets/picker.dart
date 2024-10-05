@@ -27,16 +27,14 @@ class _FormTimePickerState extends State<FormTimePicker> {
   late DateTime? _selected = widget.selected;
 
   @override
-  Widget build(BuildContext context) {
-    return FormField<DateTime>(
-      initialValue: _selected,
-      autovalidateMode: widget.autovalidateMode,
-      onSaved: (value) {
-        widget.onSaved?.call(_selected);
-      },
-      validator: widget.validator,
-      builder: (formState) {
-        return Column(
+  Widget build(BuildContext context) => FormField<DateTime>(
+        initialValue: _selected,
+        autovalidateMode: widget.autovalidateMode,
+        onSaved: (value) {
+          widget.onSaved?.call(_selected);
+        },
+        validator: widget.validator,
+        builder: (formState) => Column(
           children: [
             TimePicker(
               hourFormat: HourFormat.HH,
@@ -59,10 +57,8 @@ class _FormTimePickerState extends State<FormTimePicker> {
                     ),
               ),
           ],
-        );
-      },
-    );
-  }
+        ),
+      );
 }
 
 class FormDatePicker extends StatefulWidget {
@@ -89,23 +85,21 @@ class FormDatePicker extends StatefulWidget {
 
 class _FormDatePickerState extends State<FormDatePicker> {
   @override
-  Widget build(BuildContext context) {
-    return FormField<DateTime>(
-      initialValue: widget.initialValue ?? DateTime.now(),
-      autovalidateMode: widget.autovalidateMode,
-      onSaved: (value) {
-        if (value != null) {
-          widget.onSaved?.call(value);
-        }
-      },
-      validator: (value) {
-        if (value == null) {
-          return 'Please select a date';
-        }
-        return widget.validator?.call(value);
-      },
-      builder: (formState) {
-        return Column(
+  Widget build(BuildContext context) => FormField<DateTime>(
+        initialValue: widget.initialValue ?? DateTime.now(),
+        autovalidateMode: widget.autovalidateMode,
+        onSaved: (value) {
+          if (value != null) {
+            widget.onSaved?.call(value);
+          }
+        },
+        validator: (value) {
+          if (value == null) {
+            return 'Please select a date';
+          }
+          return widget.validator?.call(value);
+        },
+        builder: (formState) => Column(
           children: [
             DatePicker(
               header: widget.header,
@@ -124,8 +118,6 @@ class _FormDatePickerState extends State<FormDatePicker> {
                     ),
               ),
           ],
-        );
-      },
-    );
-  }
+        ),
+      );
 }

@@ -39,7 +39,10 @@ class CustomPageHeader extends StatelessWidget {
   /// If the screen is small, the padding is 12.0, otherwise it defaults to
   /// [kPageDefaultVerticalPadding]
   static double horizontalPadding(BuildContext context) {
-    assert(debugCheckHasMediaQuery(context));
+    assert(
+      debugCheckHasMediaQuery(context),
+      'A context with media query is required',
+    );
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isSmallScreen = screenWidth < 640.0;
     final horizontalPadding =
@@ -49,14 +52,17 @@ class CustomPageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasFluentTheme(context));
+    assert(
+      debugCheckHasFluentTheme(context),
+      'A context with FluentTheme is required',
+    );
     final theme = FluentTheme.of(context);
     final horizontalPadding =
         padding ?? CustomPageHeader.horizontalPadding(context);
 
     return Padding(
       padding: EdgeInsetsDirectional.only(
-        bottom: 18.0,
+        bottom: 18,
         start: leading != null ? 0 : horizontalPadding,
       ),
       child: Row(
@@ -64,17 +70,17 @@ class CustomPageHeader extends StatelessWidget {
           if (leading != null) leading!,
           Expanded(
             child: DefaultTextStyle.merge(
-              style: theme.typography.title!,
+              style: theme.typography.title,
               child: title ?? const SizedBox(),
             ),
           ),
           SizedBox(width: horizontalPadding),
           if (commandBar != null) ...[
             ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 160.0),
+              constraints: const BoxConstraints(minWidth: 160),
               child: Align(
                 alignment: AlignmentDirectional.centerEnd,
-                child: commandBar!,
+                child: commandBar,
               ),
             ),
             SizedBox(width: horizontalPadding),

@@ -12,7 +12,7 @@ extension OrderProductsExtension on OrderProducts {
 extension ProductsExtension on Products {
   String? get imageUrl => images.isEmpty
       ? null
-      : "https://res.cloudinary.com/stampin-up/image/upload/q_auto:best,f_auto/bo_1px_solid_rgb:cccccc/w_3200,q_60,f_auto,d_missing_image.png/v1/prod/images/default-source/product-image/${images.first}";
+      : 'https://res.cloudinary.com/stampin-up/image/upload/q_auto:best,f_auto/bo_1px_solid_rgb:cccccc/w_3200,q_60,f_auto,d_missing_image.png/v1/prod/images/default-source/product-image/${images.first}';
 }
 
 extension CurrencyExtensions on int {
@@ -27,17 +27,17 @@ extension CustomersExtensions on Customers {
 extension OrdersExtensions on Orders {
   Currency get productsTotal =>
       products?.fold<Currency>(
-        Currency.zero,
+        const Currency.zero(),
         (value, product) => value + product.total,
       ) ??
-      Currency.zero;
+      const Currency.zero();
 
   Currency get couponsTotal =>
       coupons?.fold<Currency>(
-        Currency.zero,
+        const Currency.zero(),
         (value, coupon) => value + coupon.amount.currency,
       ) ??
-      Currency.zero;
+      const Currency.zero();
 
   Currency get total => productsTotal - couponsTotal;
 
@@ -60,12 +60,12 @@ extension OrdersExtensions on Orders {
         collectionId: Invoices.collectionInfo.$id,
         documentId: ID.unique(),
         data: {
-          "invoiceNumber": invoiceId.success,
+          'invoiceNumber': invoiceId.success,
           'date': date?.toIso8601String() ?? DateTime.now().toIso8601String(),
-          "name": "Invoice ${invoiceId.success}",
-          "amount": total.asInt,
-          "notes": note,
-          "order": $id,
+          'name': 'Invoice ${invoiceId.success}',
+          'amount': total.asInt,
+          'notes': note,
+          'order': $id,
         },
         permissions: permissions,
       );
@@ -77,24 +77,28 @@ extension OrdersExtensions on Orders {
         documentId: $id,
         permissions: permissions,
         data: {
-          'products': products?.map((product) {
-            return {
-              '\$id': product.$id,
-              '\$permissions': permissions,
-            };
-          }).toList(),
-          'coupons': coupons?.map((coupon) {
-            return {
-              '\$id': coupon.$id,
-              '\$permissions': permissions,
-            };
-          }).toList(),
+          'products': products
+              ?.map(
+                (product) => {
+                  '\$id': product.$id,
+                  '\$permissions': permissions,
+                },
+              )
+              .toList(),
+          'coupons': coupons
+              ?.map(
+                (coupon) => {
+                  '\$id': coupon.$id,
+                  '\$permissions': permissions,
+                },
+              )
+              .toList(),
         },
       );
 
       return Success(Invoices.fromAppwrite(doc));
     } on AppwriteException catch (e) {
-      return Failure(e.message ?? "Failed to create invoice");
+      return Failure(e.message ?? 'Failed to create invoice');
     }
   }
 

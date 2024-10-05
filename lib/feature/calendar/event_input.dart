@@ -45,92 +45,90 @@ class _EventInputDialogState extends State<EventInputDialog> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return ContentDialog(
-      title: Text(widget.title),
-      constraints: const BoxConstraints(maxWidth: 650),
-      actions: [
-        Button(
-          onPressed: () async {
-            if (_formKey.currentState?.validate() ?? false) {
-              _formKey.currentState!.save();
+  Widget build(BuildContext context) => ContentDialog(
+        title: Text(widget.title),
+        constraints: const BoxConstraints(maxWidth: 650),
+        actions: [
+          Button(
+            onPressed: () async {
+              if (_formKey.currentState?.validate() ?? false) {
+                _formKey.currentState!.save();
 
-              final start = _startDate.mergeTime(_startTime);
-              final end = _endDate.mergeTime(_endTime);
+                final start = _startDate.mergeTime(_startTime);
+                final end = _endDate.mergeTime(_endTime);
 
-              late final CalendarEvents event;
-              if (widget.event != null) {
-                event = widget.event!.copyWith(
-                  start: start.toUtc(),
-                  end: end.toUtc(),
-                  title: _title,
-                  description: _description,
-                  participants: _participants,
-                  amount: _participants.isNotEmpty
-                      ? Currency.fromString(_amount!).asInt
-                      : null,
-                );
-              } else {
-                event = CalendarEvents(
-                  title: _title!,
-                  start: start.toUtc(),
-                  end: end.toUtc(),
-                  description: _description,
-                  type: _participants.isNotEmpty
-                      ? Type.withParticipants
-                      : Type.plain,
-                  participants: _participants,
-                  amount: _participants.isNotEmpty
-                      ? Currency.fromString(_amount!).asInt
-                      : null,
-                );
+                late final CalendarEvents event;
+                if (widget.event != null) {
+                  event = widget.event!.copyWith(
+                    start: start.toUtc(),
+                    end: end.toUtc(),
+                    title: _title,
+                    description: _description,
+                    participants: _participants,
+                    amount: _participants.isNotEmpty
+                        ? Currency.fromString(_amount!).asInt
+                        : null,
+                  );
+                } else {
+                  event = CalendarEvents(
+                    title: _title!,
+                    start: start.toUtc(),
+                    end: end.toUtc(),
+                    description: _description,
+                    type: _participants.isNotEmpty
+                        ? Type.withParticipants
+                        : Type.plain,
+                    participants: _participants,
+                    amount: _participants.isNotEmpty
+                        ? Currency.fromString(_amount!).asInt
+                        : null,
+                  );
+                }
+
+                Navigator.of(context).pop(event);
               }
-
-              Navigator.of(context).pop(event);
-            }
-          },
-          child: const Text('Save'),
-        ),
-        Button(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Cancel'),
-        ),
-      ],
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
-              child: TextFormBox(
-                placeholder: 'Title',
-                initialValue: _title,
-                onSaved: (value) => _title = value,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  return null;
-                },
-              ),
-            ),
-            Row(
-              children: [
-                FormField<DateTime>(
-                  initialValue: _startDate,
-                  onSaved: (value) => _startDate = value!,
+            },
+            child: const Text('Save'),
+          ),
+          Button(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+        content: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
+                child: TextFormBox(
+                  placeholder: 'Title',
+                  initialValue: _title,
+                  onSaved: (value) => _title = value,
                   validator: (value) {
-                    if (value == null) return 'Start date is required';
-                    if (value.isAfter(_endDate)) {
-                      return 'Start date must be before end date';
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a title';
                     }
                     return null;
                   },
-                  builder: (formState) {
-                    return Column(
+                ),
+              ),
+              Row(
+                children: [
+                  FormField<DateTime>(
+                    initialValue: _startDate,
+                    onSaved: (value) => _startDate = value!,
+                    validator: (value) {
+                      if (value == null) return 'Start date is required';
+                      if (value.isAfter(_endDate)) {
+                        return 'Start date must be before end date';
+                      }
+                      return null;
+                    },
+                    builder: (formState) => Column(
                       children: [
                         DatePicker(
                           header: 'Start date',
@@ -156,22 +154,20 @@ class _EventInputDialogState extends State<EventInputDialog> {
                                 .copyWith(color: Colors.red),
                           ),
                       ],
-                    );
-                  },
-                ),
-                const SizedBox(width: 8),
-                FormField<DateTime>(
-                  initialValue: _startTime,
-                  onSaved: (value) => _startTime = value!,
-                  validator: (value) {
-                    if (value == null) return 'Start time is required';
-                    if (value.isAfter(_endTime)) {
-                      return 'Start time must be before end time';
-                    }
-                    return null;
-                  },
-                  builder: (formState) {
-                    return Column(
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FormField<DateTime>(
+                    initialValue: _startTime,
+                    onSaved: (value) => _startTime = value!,
+                    validator: (value) {
+                      if (value == null) return 'Start time is required';
+                      if (value.isAfter(_endTime)) {
+                        return 'Start time must be before end time';
+                      }
+                      return null;
+                    },
+                    builder: (formState) => Column(
                       children: [
                         TimePicker(
                           header: 'Start time',
@@ -199,25 +195,23 @@ class _EventInputDialogState extends State<EventInputDialog> {
                                 .copyWith(color: Colors.red),
                           ),
                       ],
-                    );
-                  },
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                FormField<DateTime>(
-                  initialValue: _endDate,
-                  onSaved: (value) => _endDate = value!,
-                  validator: (value) {
-                    if (value == null) return 'End date is required';
-                    if (value.isBefore(_startDate)) {
-                      return 'End date must be after start date';
-                    }
-                    return null;
-                  },
-                  builder: (formState) {
-                    return Column(
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  FormField<DateTime>(
+                    initialValue: _endDate,
+                    onSaved: (value) => _endDate = value!,
+                    validator: (value) {
+                      if (value == null) return 'End date is required';
+                      if (value.isBefore(_startDate)) {
+                        return 'End date must be after start date';
+                      }
+                      return null;
+                    },
+                    builder: (formState) => Column(
                       children: [
                         DatePicker(
                           header: 'End date',
@@ -243,22 +237,20 @@ class _EventInputDialogState extends State<EventInputDialog> {
                                 .copyWith(color: Colors.red),
                           ),
                       ],
-                    );
-                  },
-                ),
-                const SizedBox(width: 8),
-                FormField<DateTime>(
-                  initialValue: _endTime,
-                  onSaved: (value) => _endTime = value!,
-                  validator: (value) {
-                    if (value == null) return 'End time is required';
-                    if (value.isBefore(_startTime)) {
-                      return 'End time must be after start time';
-                    }
-                    return null;
-                  },
-                  builder: (formState) {
-                    return Column(
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FormField<DateTime>(
+                    initialValue: _endTime,
+                    onSaved: (value) => _endTime = value!,
+                    validator: (value) {
+                      if (value == null) return 'End time is required';
+                      if (value.isBefore(_startTime)) {
+                        return 'End time must be after start time';
+                      }
+                      return null;
+                    },
+                    builder: (formState) => Column(
                       children: [
                         TimePicker(
                           header: 'End time',
@@ -286,84 +278,82 @@ class _EventInputDialogState extends State<EventInputDialog> {
                                 .copyWith(color: Colors.red),
                           ),
                       ],
-                    );
-                  },
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
+                child: TextFormBox(
+                  placeholder: 'Description',
+                  onSaved: (value) => value?.isEmpty ?? true
+                      ? _description = null
+                      : _description = value,
                 ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
-              child: TextFormBox(
-                placeholder: 'Description',
-                onSaved: (value) => value?.isEmpty ?? true
-                    ? _description = null
-                    : _description = value,
               ),
-            ),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
-              child: CustomerAutoSuggest(
-                filteredCustomers: _participants
-                    .map((e) => e.customer)
-                    .whereType<Customers>()
-                    .toList(),
-                onSelected: (customer) {
-                  setState(() {
-                    _participants.add(
-                      CalendarEventParticipants(
-                        customer: customer,
-                        status: Status.pending,
-                      ),
-                    );
-                  });
-                },
-              ),
-            ),
-            for (final participant in _participants)
-              ListTile(
-                title: Text(participant.customer?.name ?? 'Unknown'),
-                trailing: ComboBox<Status>(
-                  value: participant.status,
-                  items: Status.values
-                      .map(
-                        (e) => ComboBoxItem(
-                          value: e,
-                          child: Text(e.name),
-                        ),
-                      )
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
+                child: CustomerAutoSuggest(
+                  filteredCustomers: _participants
+                      .map((e) => e.customer)
+                      .whereType<Customers>()
                       .toList(),
-                  onChanged: (value) {
-                    final index = _participants.indexOf(participant);
+                  onSelected: (customer) {
                     setState(() {
-                      _participants[index] =
-                          participant.copyWith(status: value);
+                      _participants.add(
+                        CalendarEventParticipants(
+                          customer: customer,
+                          status: Status.pending,
+                        ),
+                      );
                     });
                   },
                 ),
               ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
-              child: TextFormBox(
-                initialValue: _amount,
-                placeholder: 'Price',
-                onSaved: (value) => _amount = value,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (_participants.isEmpty) return null;
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a price';
-                  }
-                  return null;
-                },
+              for (final participant in _participants)
+                ListTile(
+                  title: Text(participant.customer?.name ?? 'Unknown'),
+                  trailing: ComboBox<Status>(
+                    value: participant.status,
+                    items: Status.values
+                        .map(
+                          (e) => ComboBoxItem(
+                            value: e,
+                            child: Text(e.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      final index = _participants.indexOf(participant);
+                      setState(() {
+                        _participants[index] =
+                            participant.copyWith(status: value);
+                      });
+                    },
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
+                child: TextFormBox(
+                  initialValue: _amount,
+                  placeholder: 'Price',
+                  onSaved: (value) => _amount = value,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  validator: (value) {
+                    if (_participants.isEmpty) return null;
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a price';
+                    }
+                    return null;
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class CustomerAutoSuggest extends StatefulWidget {
@@ -391,23 +381,26 @@ class _CustomerAutoSuggestState extends State<CustomerAutoSuggest> {
     _debounce = Timer(const Duration(milliseconds: 50), () {
       final appwrite = getIt<AppwriteClient>();
 
-      appwrite.databases.listDocuments(
+      unawaited(
+        appwrite.databases.listDocuments(
         databaseId: Customers.databaseId,
         collectionId: Customers.collectionInfo.$id,
         queries: [
           Query.search('name', query),
         ],
       ).then((result) {
-        final items = result.documents.map((e) => Customers.fromAppwrite(e));
-        final newItems = items.where((element) {
-          return !widget.filteredCustomers.any((e) => e.$id == element.$id) &&
-              !_customers.any((e) => e.$id == element.$id);
-        });
+          final items = result.documents.map(Customers.fromAppwrite);
+          final newItems = items.where(
+            (element) =>
+                !widget.filteredCustomers.any((e) => e.$id == element.$id) &&
+                !_customers.any((e) => e.$id == element.$id),
+          );
 
         setState(() {
           _customers.addAll(newItems);
         });
-      });
+        }),
+      );
     });
   }
 
@@ -419,40 +412,38 @@ class _CustomerAutoSuggestState extends State<CustomerAutoSuggest> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return AutoSuggestBox<Customers>(
-      controller: _controller,
-      placeholder: 'Search for customers',
-      textInputAction: TextInputAction.search,
-      onSelected: (item) {
-        setState(() {
-          widget.filteredCustomers.add(item.value as Customers);
-          _customers.remove(item.value);
-        });
-        widget.onSelected?.call(item.value as Customers);
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          _controller.clear();
-        });
-      },
-      onChanged: (text, reason) {
-        if (reason == TextChangedReason.userInput) {
-          _loadCustomers(text);
-        }
-      },
-      items: _customers
-          .map(
-            (e) => AutoSuggestBoxItem(
-              label: e.name,
-              value: e,
-            ),
-          )
-          .toList(),
-    );
-  }
+  Widget build(BuildContext context) => AutoSuggestBox<Customers>(
+        controller: _controller,
+        placeholder: 'Search for customers',
+        textInputAction: TextInputAction.search,
+        onSelected: (item) {
+          setState(() {
+            widget.filteredCustomers.add(item.value!);
+            _customers.remove(item.value);
+          });
+          widget.onSelected?.call(item.value!);
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            _controller.clear();
+          });
+        },
+        onChanged: (text, reason) {
+          if (reason == TextChangedReason.userInput) {
+            _loadCustomers(text);
+          }
+        },
+        items: _customers
+            .map(
+              (e) => AutoSuggestBoxItem(
+                label: e.name,
+                value: e,
+              ),
+            )
+            .toList(),
+      );
 }
 
-void displayNewEventDialog(BuildContext context) {
-  showDialog<CalendarEvents>(
+Future<void> displayNewEventDialog(BuildContext context) async {
+  await showDialog<CalendarEvents>(
     context: context,
     builder: (context) => const EventInputDialog(
       title: 'New Event',
@@ -479,14 +470,14 @@ void displayNewEventDialog(BuildContext context) {
         );
       } on AppwriteException catch (e) {
         if (!context.mounted) return;
-        showResultInfo(context, Failure(e.message ?? 'Failed to create event'));
+        await showResultInfo(context, Failure(e.message ?? 'Failed to create event'));
       }
     }
   });
 }
 
-void displayEditEventDialog(BuildContext context, CalendarEvents event) {
-  showDialog<CalendarEvents>(
+Future<void> displayEditEventDialog(BuildContext context, CalendarEvents event) async {
+  await showDialog<CalendarEvents>(
     context: context,
     builder: (context) => EventInputDialog(
       title: 'Edit Event',

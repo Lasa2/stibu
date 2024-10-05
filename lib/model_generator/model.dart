@@ -1,32 +1,28 @@
 import 'package:stibu/model_generator/attributes.dart';
 import 'package:stibu/model_generator/collections.dart';
 
-String capitalize(String text) {
-  return text[0].toUpperCase() + text.substring(1);
-}
+String capitalize(String text) => text[0].toUpperCase() + text.substring(1);
 
-String generateEnums(List<AttributeInfo> attributeInfos) {
-  return attributeInfos
-      .whereType<AttributeInfoEnum>()
-      .map(
-        (e) => '''
+String generateEnums(List<AttributeInfo> attributeInfos) => attributeInfos
+    .whereType<AttributeInfoEnum>()
+    .map(
+      (e) => '''
 enum ${capitalize(e.name)} {
   ${e.elements.map((v) => '$v,').join('\n\t')}
 }
   ''',
-      )
-      .join('\n\n');
-}
+    )
+    .join('\n\n');
 
 String generateClass(CollectionInfo collection) {
   final className = capitalize(collection.name);
   final List<AttributeInfo> attributeInfos = collection.attributes
     ..sort((a, b) => a.name.compareTo(b.name));
 
-  final asserts =
-      attributeInfos.expand((e) => generateAsserts(e)).join(',\n\t\t\t\t');
+  final asserts = attributeInfos.expand(generateAsserts).join(',\n\t\t\t\t');
 
-  return '''${generateEnums(attributeInfos)}
+  return '''
+${generateEnums(attributeInfos)}
 class $className extends AppwriteModel<$className> {
   static const collectionInfo = CollectionInfo(
     \$id: '${collection.$id}',

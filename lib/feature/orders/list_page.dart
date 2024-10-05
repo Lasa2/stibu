@@ -47,7 +47,6 @@ class _OrderListPageState extends State<OrderListPage> {
         setState(() {
           _orders.add(item);
         });
-        break;
       case RealtimeUpdateType.update:
         final index = _orders.indexWhere((e) => e.$id == item.$id);
         if (index != -1) {
@@ -55,17 +54,15 @@ class _OrderListPageState extends State<OrderListPage> {
             _orders[index] = item;
           });
         }
-        break;
       case RealtimeUpdateType.delete:
         _orders.removeWhere((e) => e.$id == item.$id);
-        break;
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _loadOrders();
+    unawaited(_loadOrders());
 
     final realtime = getIt<RealtimeSubscriptions>();
     _orderSubscription = realtime.ordersUpdates
@@ -73,8 +70,8 @@ class _OrderListPageState extends State<OrderListPage> {
   }
 
   @override
-  void dispose() {
-    _orderSubscription?.cancel();
+  Future<void> dispose() async {
+    await _orderSubscription?.cancel();
     super.dispose();
   }
 
@@ -105,20 +102,20 @@ class _OrderListPageState extends State<OrderListPage> {
               CommandBarButton(
                 icon: const Icon(FluentIcons.delete),
                 label: const Text('Delete'),
-                onPressed: () {
+                onPressed: () async {
                   final index = selectedIndex;
                   setState(() {
                     selectedIndex = null;
                   });
 
-                  _orders[index!].delete().then((value) {
+                  await _orders[index!].delete().then((value) {
                     context.mounted
                         ? showResultInfo(context, value).then((_) {
-                      if (value.isFailure) {
-                        setState(() {
-                          selectedIndex = index;
-                        });
-                      }
+                            if (value.isFailure) {
+                              setState(() {
+                                selectedIndex = index;
+                              });
+                            }
                           })
                         : null;
                   });
@@ -137,7 +134,7 @@ class _OrderListPageState extends State<OrderListPage> {
                   : _orders.length,
               itemBuilder: (context, index) {
                 if (index >= _orders.length) {
-                  _loadOrders();
+                  unawaited(_loadOrders());
                   return const Center(child: ProgressBar());
                 }
 
@@ -176,14 +173,10 @@ class _OrderListPageState extends State<OrderListPage> {
   }
 }
 
-Future<Orders?> displayNewOrderDialog(BuildContext context) async {
-  return await showDialog(
-    context: context,
-    builder: (context) {
-      return const NewOrderDialog();
-    },
-  );
-}
+Future<Orders?> displayNewOrderDialog(BuildContext context) async => showDialog(
+      context: context,
+      builder: (context) => const NewOrderDialog(),
+    );
 
 class NewOrderDialog extends StatefulWidget {
   const NewOrderDialog({
@@ -209,96 +202,96 @@ class _NewOrderDialogState extends State<NewOrderDialog> {
     _debounce = Timer(const Duration(milliseconds: 50), () {
       final appwrite = getIt<AppwriteClient>();
 
-      appwrite.databases.listDocuments(
+      unawaited(
+        appwrite.databases.listDocuments(
         databaseId: Customers.databaseId,
         collectionId: Customers.collectionInfo.$id,
         queries: [
           Query.search('name', query),
         ],
       ).then((result) {
-        final items = result.documents.map((e) => Customers.fromAppwrite(e));
+          final items = result.documents.map(Customers.fromAppwrite);
         final newItems =
             items.where((e) => !_customers.any((c) => c.$id == e.$id));
         setState(() {
           _customers.addAll(newItems);
         });
-      });
+        }),
+      );
     });
   }
 
   @override
-  Widget build(BuildContext context) {
-    return ContentDialog(
-      title: const Text('New Order'),
-      actions: [
-        Button(
-          onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              _formKey.currentState!.save();
+  Widget build(BuildContext context) => ContentDialog(
+        title: const Text('New Order'),
+        actions: [
+          Button(
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                _formKey.currentState!.save();
 
-              final order = Orders(
-                customerId: selectedCustomer!.id,
-                customerName: selectedCustomer!.name,
-                date: selectedDate.toUtc(),
-              );
+                final order = Orders(
+                  customerId: selectedCustomer!.id,
+                  customerName: selectedCustomer!.name,
+                  date: selectedDate.toUtc(),
+                );
 
-              final result = await order.create();
+                final result = await order.create();
 
-              if (!context.mounted) return;
-              await showResultInfo(context, result);
+                if (!context.mounted) return;
+                await showResultInfo(context, result);
 
-              if (!context.mounted) return;
-              Navigator.of(context).pop(order);
-            }
-          },
-          child: const Text('Save'),
+                if (!context.mounted) return;
+                Navigator.of(context).pop(order);
+              }
+            },
+            child: const Text('Save'),
+          ),
+          Button(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+        content: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              FormDatePicker(
+                header: 'Select Order Date',
+                initialValue: selectedDate,
+                onSaved: (value) => selectedDate = value,
+              ),
+              const SizedBox(height: 16),
+              AutoSuggestBox<Customers>.form(
+                placeholder: 'Select Customer',
+                textInputAction: TextInputAction.search,
+                onSelected: (item) {
+                  selectedCustomer = item.value;
+                },
+                onChanged: (text, reason) {
+                  if (reason == TextChangedReason.userInput) {
+                    _loadCustomers(text);
+                  }
+                },
+                items: _customers
+                    .map(
+                      (e) => AutoSuggestBoxItem(
+                        label: e.name,
+                        value: e,
+                      ),
+                    )
+                    .toList(),
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a customer';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
         ),
-        Button(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Cancel'),
-        ),
-      ],
-      content: Form(
-        key: _formKey,
-        child: ListView(
-          children: [
-            FormDatePicker(
-              header: 'Select Order Date',
-              initialValue: selectedDate,
-              onSaved: (value) => selectedDate = value,
-            ),
-            const SizedBox(height: 16),
-            AutoSuggestBox<Customers>.form(
-              placeholder: 'Select Customer',
-              textInputAction: TextInputAction.search,
-              onSelected: (item) {
-                selectedCustomer = item.value;
-              },
-              onChanged: (text, reason) {
-                if (reason == TextChangedReason.userInput) {
-                  _loadCustomers(text);
-                }
-              },
-              items: _customers
-                  .map(
-                    (e) => AutoSuggestBoxItem(
-                      label: e.name,
-                      value: e,
-                    ),
-                  )
-                  .toList(),
-              validator: (value) {
-                if (value == null) {
-                  return 'Please select a customer';
-                }
-                return null;
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+      );
 }

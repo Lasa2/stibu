@@ -88,7 +88,6 @@ class FormDatePicker extends StatefulWidget {
 }
 
 class _FormDatePickerState extends State<FormDatePicker> {
-
   @override
   Widget build(BuildContext context) {
     return FormField<DateTime>(

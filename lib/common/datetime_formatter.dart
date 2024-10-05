@@ -38,12 +38,36 @@ extension DateTimeStipTime on DateTime {
 
   DateTime stripDate({Cuttoff cuttoff = Cuttoff.minute}) => isUtc
       ? DateTime.utc(0, 0, 0, hour, minute, second, millisecond, microsecond)
-      : DateTime(0, 0, 0, hour, minute, cuttoff == Cuttoff.minute ? 0 : second,
-          cuttoff == Cuttoff.second ? 0 : millisecond, 0);
+      : DateTime(
+          0,
+          0,
+          0,
+          hour,
+          minute,
+          cuttoff == Cuttoff.minute ? 0 : second,
+          cuttoff == Cuttoff.second ? 0 : millisecond,
+          0,
+        );
 
   DateTime mergeTime(DateTime time) => isUtc
-      ? DateTime.utc(year, month, day, time.hour, time.minute, time.second,
-          time.millisecond, time.microsecond)
-      : DateTime(year, month, day, time.hour, time.minute, time.second,
-          time.millisecond, time.microsecond);
+      ? DateTime.utc(
+          year,
+          month,
+          day,
+          time.hour,
+          time.minute,
+          time.second,
+          time.millisecond,
+          time.microsecond,
+        )
+      : DateTime(
+          year,
+          month,
+          day,
+          time.hour,
+          time.minute,
+          time.second,
+          time.millisecond,
+          time.microsecond,
+        );
 }

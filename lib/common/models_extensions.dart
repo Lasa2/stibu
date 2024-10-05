@@ -27,18 +27,24 @@ extension CustomersExtensions on Customers {
 extension OrdersExtensions on Orders {
   Currency get productsTotal =>
       products?.fold<Currency>(
-          Currency.zero, (value, product) => value + product.total) ??
+        Currency.zero,
+        (value, product) => value + product.total,
+      ) ??
       Currency.zero;
 
   Currency get couponsTotal =>
       coupons?.fold<Currency>(
-          Currency.zero, (value, coupon) => value + coupon.amount.currency) ??
+        Currency.zero,
+        (value, coupon) => value + coupon.amount.currency,
+      ) ??
       Currency.zero;
 
   Currency get total => productsTotal - couponsTotal;
 
-  Future<Result<Invoices, String>> createInvoice(
-      {DateTime? date, String? note}) async {
+  Future<Result<Invoices, String>> createInvoice({
+    DateTime? date,
+    String? note,
+  }) async {
     final appwrite = getIt<AppwriteClient>();
     try {
       final invoiceId = await newInvoiceNumber(date);
@@ -50,39 +56,41 @@ extension OrdersExtensions on Orders {
       ];
 
       final doc = await appwrite.databases.createDocument(
-          databaseId: Invoices.databaseId,
-          collectionId: Invoices.collectionInfo.$id,
-          documentId: ID.unique(),
-          data: {
-            "invoiceNumber": invoiceId.success,
-            'date': date?.toIso8601String() ?? DateTime.now().toIso8601String(),
-            "name": "Invoice ${invoiceId.success}",
-            "amount": total.asInt,
-            "notes": note,
-            "order": $id,
-          },
-          permissions: permissions);
+        databaseId: Invoices.databaseId,
+        collectionId: Invoices.collectionInfo.$id,
+        documentId: ID.unique(),
+        data: {
+          "invoiceNumber": invoiceId.success,
+          'date': date?.toIso8601String() ?? DateTime.now().toIso8601String(),
+          "name": "Invoice ${invoiceId.success}",
+          "amount": total.asInt,
+          "notes": note,
+          "order": $id,
+        },
+        permissions: permissions,
+      );
 
       // Set order, orderProducts and orderCoupons permissions to read-only
       await appwrite.databases.updateDocument(
-          databaseId: Orders.databaseId,
-          collectionId: Orders.collectionInfo.$id,
-          documentId: $id,
-          permissions: permissions,
-          data: {
-            'products': products?.map((product) {
-              return {
-                '\$id': product.$id,
-                '\$permissions': permissions,
-              };
-            }).toList(),
-            'coupons': coupons?.map((coupon) {
-              return {
-                '\$id': coupon.$id,
-                '\$permissions': permissions,
-              };
-            }).toList(),
-          });
+        databaseId: Orders.databaseId,
+        collectionId: Orders.collectionInfo.$id,
+        documentId: $id,
+        permissions: permissions,
+        data: {
+          'products': products?.map((product) {
+            return {
+              '\$id': product.$id,
+              '\$permissions': permissions,
+            };
+          }).toList(),
+          'coupons': coupons?.map((coupon) {
+            return {
+              '\$id': coupon.$id,
+              '\$permissions': permissions,
+            };
+          }).toList(),
+        },
+      );
 
       return Success(Invoices.fromAppwrite(doc));
     } on AppwriteException catch (e) {
@@ -133,7 +141,8 @@ extension OrdersExtensions on Orders {
 
   Future<Result<Orders, String>> deleteProduct(OrderProducts product) async {
     final newProducts = copyWith(
-        products: products?.where((p) => p.$id != product.$id).toList());
+      products: products?.where((p) => p.$id != product.$id).toList(),
+    );
 
     final order = await copyWith(products: newProducts.products).update();
     if (order.isFailure) return Failure(order.failure);

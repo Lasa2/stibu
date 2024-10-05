@@ -59,26 +59,28 @@ class CustomPageHeader extends StatelessWidget {
         bottom: 18.0,
         start: leading != null ? 0 : horizontalPadding,
       ),
-      child: Row(children: [
-        if (leading != null) leading!,
-        Expanded(
-          child: DefaultTextStyle.merge(
-            style: theme.typography.title!,
-            child: title ?? const SizedBox(),
-          ),
-        ),
-        SizedBox(width: horizontalPadding),
-        if (commandBar != null) ...[
-          ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 160.0),
-            child: Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: commandBar!,
+      child: Row(
+        children: [
+          if (leading != null) leading!,
+          Expanded(
+            child: DefaultTextStyle.merge(
+              style: theme.typography.title!,
+              child: title ?? const SizedBox(),
             ),
           ),
           SizedBox(width: horizontalPadding),
+          if (commandBar != null) ...[
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 160.0),
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: commandBar!,
+              ),
+            ),
+            SizedBox(width: horizontalPadding),
+          ],
         ],
-      ]),
+      ),
     );
   }
 }

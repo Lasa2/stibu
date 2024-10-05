@@ -69,16 +69,17 @@ class AppRouter extends RootStackRouter {
             ),
             NoTransitionRoute(
               path: "customers",
-              page: CustomerTab, children: [
-              NoTransitionRoute(
-                path: '',
-                page: CustomerListRoute.page,
-              ),
-              NoTransitionRoute(
-                path: ':id',
-                page: CustomerDetailRoute.page,
-              ),
-            ]
+              page: CustomerTab,
+              children: [
+                NoTransitionRoute(
+                  path: '',
+                  page: CustomerListRoute.page,
+                ),
+                NoTransitionRoute(
+                  path: ':id',
+                  page: CustomerDetailRoute.page,
+                ),
+              ],
             ),
             NoTransitionRoute(
               path: "invoices",
@@ -104,7 +105,8 @@ class AppRouter extends RootStackRouter {
 
 class ValidProductKeyGuard extends AutoRouteGuard {
   @override
-  void onNavigation(NavigationResolver resolver, StackRouter router) async {
+  Future<void> onNavigation(
+      NavigationResolver resolver, StackRouter router) async {
     final appwrite = getIt<AppwriteClient>();
 
     try {
@@ -115,11 +117,13 @@ class ValidProductKeyGuard extends AutoRouteGuard {
       if (validProductKey) {
         resolver.next(true);
       } else {
-        resolver.redirect(ProductKeyRoute(
-          onFinish: () {
-            resolver.next(true);
-          },
-        ));
+        resolver.redirect(
+          ProductKeyRoute(
+            onFinish: () {
+              resolver.next(true);
+            },
+          ),
+        );
       }
     } on AppwriteException catch (e) {
       log.warning(e.message);
@@ -130,7 +134,8 @@ class ValidProductKeyGuard extends AutoRouteGuard {
 
 class OnboardingGuard extends AutoRouteGuard {
   @override
-  void onNavigation(NavigationResolver resolver, StackRouter router) async {
+  Future<void> onNavigation(
+      NavigationResolver resolver, StackRouter router) async {
     final appwrite = getIt<AppwriteClient>();
 
     try {
@@ -142,11 +147,13 @@ class OnboardingGuard extends AutoRouteGuard {
       if (onboardingCompleted) {
         resolver.next(true);
       } else {
-        resolver.redirect(OnboardingRoute(
-          onFinish: () {
-            resolver.next(true);
-          },
-        ));
+        resolver.redirect(
+          OnboardingRoute(
+            onFinish: () {
+              resolver.next(true);
+            },
+          ),
+        );
       }
     } on AppwriteException catch (e) {
       log.warning(e.message);
@@ -157,7 +164,8 @@ class OnboardingGuard extends AutoRouteGuard {
 
 class AuthGuard extends AutoRouteGuard {
   @override
-  void onNavigation(NavigationResolver resolver, StackRouter router) async {
+  Future<void> onNavigation(
+      NavigationResolver resolver, StackRouter router) async {
     final auth = getIt<Authentication>();
 
     log.info("AuthGuard: isAuthenticated=${auth.isAuthenticated.value}");
@@ -173,12 +181,14 @@ class AuthGuard extends AutoRouteGuard {
         }
       });
 
-      resolver.redirect(AuthenticationRoute(
-        onAuthenticated: () {
-          resolver.next(true);
-          sub.cancel();
-        },
-      ));
+      resolver.redirect(
+        AuthenticationRoute(
+          onAuthenticated: () {
+            resolver.next(true);
+            sub.cancel();
+          },
+        ),
+      );
     }
   }
 }
@@ -197,6 +207,7 @@ class RouteLogger extends AutoRouteObserver {
   @override
   void didReplace({Route? newRoute, Route? oldRoute}) {
     log.info(
-        'Replaced: ${oldRoute?.settings.name} with ${newRoute?.settings.name}');
+      'Replaced: ${oldRoute?.settings.name} with ${newRoute?.settings.name}',
+    );
   }
 }

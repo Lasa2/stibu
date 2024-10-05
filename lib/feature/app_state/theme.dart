@@ -56,8 +56,7 @@ class ThemeProvider with ChangeNotifier {
           _themeMode = ThemeMode.values[preferences.data['themeMode']];
         }
         if (preferences.data.containsKey('accentColor') == true) {
-          _accentColor =
-              Color(preferences.data['accentColor']).toAccentColor();
+          _accentColor = Color(preferences.data['accentColor']).toAccentColor();
         }
       }
     });

@@ -176,10 +176,11 @@ class _OrderListPageState extends State<OrderListPage> {
 
 Future<Orders?> displayNewOrderDialog(BuildContext context) async {
   return await showDialog(
-      context: context,
-      builder: (context) {
-        return const NewOrderDialog();
-      });
+    context: context,
+    builder: (context) {
+      return const NewOrderDialog();
+    },
+  );
 }
 
 class NewOrderDialog extends StatefulWidget {
@@ -207,11 +208,12 @@ class _NewOrderDialogState extends State<NewOrderDialog> {
       final appwrite = getIt<AppwriteClient>();
 
       appwrite.databases.listDocuments(
-          databaseId: Customers.databaseId,
-          collectionId: Customers.collectionInfo.$id,
-          queries: [
-            Query.search('name', query),
-          ]).then((result) {
+        databaseId: Customers.databaseId,
+        collectionId: Customers.collectionInfo.$id,
+        queries: [
+          Query.search('name', query),
+        ],
+      ).then((result) {
         final items = result.documents.map((e) => Customers.fromAppwrite(e));
         final newItems =
             items.where((e) => !_customers.any((c) => c.$id == e.$id));
@@ -278,10 +280,12 @@ class _NewOrderDialogState extends State<NewOrderDialog> {
                 }
               },
               items: _customers
-                  .map((e) => AutoSuggestBoxItem(
-                        label: e.name,
-                        value: e,
-                      ))
+                  .map(
+                    (e) => AutoSuggestBoxItem(
+                      label: e.name,
+                      value: e,
+                    ),
+                  )
                   .toList(),
               validator: (value) {
                 if (value == null) {

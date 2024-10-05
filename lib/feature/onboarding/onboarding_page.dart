@@ -22,61 +22,62 @@ class OnboardingPage extends StatelessWidget {
       appBar: buildNavigationAppBar(context),
       content: ScaffoldPage(
         content: Wizard(
-            onFinish: () async {
-              final appwrite = getIt<AppwriteClient>();
+          onFinish: () async {
+            final appwrite = getIt<AppwriteClient>();
 
-              final preferences = await appwrite.account.getPrefs();
+            final preferences = await appwrite.account.getPrefs();
 
-              preferences.data['onboardingCompleted'] = true;
+            preferences.data['onboardingCompleted'] = true;
 
-              await appwrite.account.updatePrefs(prefs: preferences.data);
+            await appwrite.account.updatePrefs(prefs: preferences.data);
 
-              onFinish?.call();
-            },
-            pages: [
-              const WizardStep(
-                title: 'Welcome to Stibu',
-                content: Column(
-                  children: [
-                    Text(
-                      'Welcome to Stibu, the best way to manage your tasks!',
-                    ),
-                    SizedBox(height: 16.0),
-                    Text(
-                      'This wizard will guide you through the basic features of Stibu.',
-                    ),
-                  ],
-                ),
+            onFinish?.call();
+          },
+          pages: [
+            const WizardStep(
+              title: 'Welcome to Stibu',
+              content: Column(
+                children: [
+                  Text(
+                    'Welcome to Stibu, the best way to manage your tasks!',
+                  ),
+                  SizedBox(height: 16.0),
+                  Text(
+                    'This wizard will guide you through the basic features of Stibu.',
+                  ),
+                ],
               ),
-              const WizardStep(
-                title: 'Enter Product Key',
-                content: ProductKeyTab(),
+            ),
+            const WizardStep(
+              title: 'Enter Product Key',
+              content: ProductKeyTab(),
+            ),
+            WizardStep(
+              title: 'Select accent color and theme mode',
+              content: ThemeAndAccentColorSelection(
+                onAccentColorChanged: (color) {
+                  final themeProvider = getIt<ThemeProvider>();
+                  themeProvider.accentColor = color;
+                },
+                onThemeModeChanged: (mode) {
+                  final themeProvider = getIt<ThemeProvider>();
+                  themeProvider.themeMode = mode;
+                },
               ),
-              WizardStep(
-                title: 'Select accent color and theme mode',
-                content: ThemeAndAccentColorSelection(
-                  onAccentColorChanged: (color) {
-                    final themeProvider = getIt<ThemeProvider>();
-                    themeProvider.accentColor = color;
-                  },
-                  onThemeModeChanged: (mode) {
-                    final themeProvider = getIt<ThemeProvider>();
-                    themeProvider.themeMode = mode;
-                  },
-                ),
+            ),
+            WizardStep(
+              title: "That's it!",
+              content: Column(
+                children: [
+                  Text(
+                    "You're all set! Click Finish to start using Stibu.",
+                    style: FluentTheme.of(context).typography.title,
+                  ),
+                ],
               ),
-              WizardStep(
-                title: 'That\'s it!',
-                content: Column(
-                  children: [
-                    Text(
-                      'You\'re all set! Click Finish to start using Stibu.',
-                      style: FluentTheme.of(context).typography.title,
-                    ),
-                  ],
-                ),
-              ),
-            ]),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -140,13 +141,15 @@ class _ProductKeyTabState extends State<ProductKeyTab> {
 
                       if (result.responseStatusCode != 200) {
                         if (!context.mounted) return;
-                        displayInfoBar(context,
-                            builder: (context, close) => InfoBar(
-                                  title: const Text('Server error'),
-                                  content: Text(result.responseBody),
-                                  severity: InfoBarSeverity.error,
-                                  onClose: close,
-                                ));
+                        displayInfoBar(
+                          context,
+                          builder: (context, close) => InfoBar(
+                            title: const Text('Server error'),
+                            content: Text(result.responseBody),
+                            severity: InfoBarSeverity.error,
+                            onClose: close,
+                          ),
+                        );
                         return;
                       }
 
@@ -155,14 +158,17 @@ class _ProductKeyTabState extends State<ProductKeyTab> {
 
                       if (map['status'] != 200) {
                         if (!context.mounted) return;
-                        displayInfoBar(context,
-                            builder: (context, close) => InfoBar(
-                                  title: const Text('Invalid product key'),
-                                  content: const Text(
-                                      'The product key you entered is invalid. Please try again.'),
-                                  severity: InfoBarSeverity.error,
-                                  onClose: close,
-                                ));
+                        displayInfoBar(
+                          context,
+                          builder: (context, close) => InfoBar(
+                            title: const Text('Invalid product key'),
+                            content: const Text(
+                              'The product key you entered is invalid. Please try again.',
+                            ),
+                            severity: InfoBarSeverity.error,
+                            onClose: close,
+                          ),
+                        );
                       } else {
                         setState(() => readOnly = true);
                         widget.onFinish?.call();
@@ -183,8 +189,11 @@ class ThemeAndAccentColorSelection extends StatefulWidget {
   final void Function(AccentColor)? onAccentColorChanged;
   final void Function(ThemeMode)? onThemeModeChanged;
 
-  const ThemeAndAccentColorSelection(
-      {super.key, this.onAccentColorChanged, this.onThemeModeChanged});
+  const ThemeAndAccentColorSelection({
+    super.key,
+    this.onAccentColorChanged,
+    this.onThemeModeChanged,
+  });
 
   @override
   State<ThemeAndAccentColorSelection> createState() =>
@@ -194,7 +203,8 @@ class ThemeAndAccentColorSelection extends StatefulWidget {
 class _ThemeAndAccentColorSelectionState
     extends State<ThemeAndAccentColorSelection> {
   final colors = List.unmodifiable(
-      [...Colors.accentColors, SystemTheme.accentColor.accent.toAccentColor()]);
+    [...Colors.accentColors, SystemTheme.accentColor.accent.toAccentColor()],
+  );
   ThemeMode themeMode = getIt<ThemeProvider>().themeMode;
 
   @override
@@ -237,11 +247,13 @@ class _ThemeAndAccentColorSelectionState
             child: ComboBox<ThemeMode>(
               value: themeMode,
               items: ThemeMode.values
-                  .map((e) => ComboBoxItem<ThemeMode>(
-                        key: Key(e.toString()),
-                        value: e,
-                        child: Text(e.toString().split('.').last),
-                      ))
+                  .map(
+                    (e) => ComboBoxItem<ThemeMode>(
+                      key: Key(e.toString()),
+                      value: e,
+                      child: Text(e.toString().split('.').last),
+                    ),
+                  )
                   .toList(),
               onChanged: (value) {
                 setState(() => themeMode = value!);

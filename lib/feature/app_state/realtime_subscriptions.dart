@@ -60,7 +60,9 @@ Future<RealtimeUpdate<T>> _realtimeUpdateFromMessageWithFetch<T>(
   if (item.isFailure) {
     log.warning("Failed to fetch item $itemId: ${item.failure}");
     return RealtimeUpdate(
-        eventType, fromAppwrite(Document.fromMap(message.payload)));
+      eventType,
+      fromAppwrite(Document.fromMap(message.payload)),
+    );
   }
 
   return RealtimeUpdate(eventType, item.success);
@@ -105,25 +107,41 @@ class RealtimeSubscriptions {
   late final Map<String, void Function(RealtimeMessage message)>
       _realtimeListeners = {
     "databases.${Customers.databaseId}.collections.${Customers.collectionInfo.$id}.documents":
-        (message) => _customerUpdates.add(_realtimeUpdateFromMessage<Customers>(
-            message, Customers.fromAppwrite)),
+        (message) => _customerUpdates.add(
+              _realtimeUpdateFromMessage<Customers>(
+                message,
+                Customers.fromAppwrite,
+              ),
+            ),
     "databases.${Invoices.databaseId}.collections.${Invoices.collectionInfo.$id}.documents":
-        (message) => _invoicesUpdates.add(_realtimeUpdateFromMessage<Invoices>(
-            message, Invoices.fromAppwrite)),
+        (message) => _invoicesUpdates.add(
+              _realtimeUpdateFromMessage<Invoices>(
+                message,
+                Invoices.fromAppwrite,
+              ),
+            ),
     "databases.${Orders.databaseId}.collections.${Orders.collectionInfo.$id}.documents":
-        (message) async => _ordersUpdates
-                .add(await _realtimeUpdateFromMessageWithFetch<Orders>(
-              message,
-              Orders.fromAppwrite,
-              Orders.get,
-            )),
+        (message) async => _ordersUpdates.add(
+              await _realtimeUpdateFromMessageWithFetch<Orders>(
+                message,
+                Orders.fromAppwrite,
+                Orders.get,
+              ),
+            ),
     "databases.${Expenses.databaseId}.collections.${Expenses.collectionInfo.$id}.documents":
-        (message) => _expensesUpdates.add(_realtimeUpdateFromMessage<Expenses>(
-            message, Expenses.fromAppwrite)),
+        (message) => _expensesUpdates.add(
+              _realtimeUpdateFromMessage<Expenses>(
+                message,
+                Expenses.fromAppwrite,
+              ),
+            ),
     "databases.${CalendarEvents.databaseId}.collections.${CalendarEvents.collectionInfo.$id}.documents":
         (message) => _calendarEventsUpdates.add(
-            _realtimeUpdateFromMessage<CalendarEvents>(
-                message, CalendarEvents.fromAppwrite)),
+              _realtimeUpdateFromMessage<CalendarEvents>(
+                message,
+                CalendarEvents.fromAppwrite,
+              ),
+            ),
   };
 
   RealtimeSubscriptions() {

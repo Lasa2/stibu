@@ -18,45 +18,54 @@ import 'package:stibu/main.dart';
 
 Future<Invoices?> _showInvoiceCreateDialog(BuildContext context) async {
   final invoice = await showDialog<Invoices>(
-      context: context,
-      builder: (context) => const InvoiceInputDialog(
-            title: 'Create Invoice',
-          ));
+    context: context,
+    builder: (context) => const InvoiceInputDialog(
+      title: 'Create Invoice',
+    ),
+  );
 
   if (invoice != null) {
     final newInvoiceId = await newInvoiceNumber(invoice.date);
     if (newInvoiceId.isFailure && context.mounted) {
-      await displayInfoBar(context,
-          builder: (context, close) => InfoBar(
-                title: const Text("Error"),
-                content: Text(newInvoiceId.failure),
-                severity: InfoBarSeverity.error,
-              ));
+      await displayInfoBar(
+        context,
+        builder: (context, close) => InfoBar(
+          title: const Text("Error"),
+          content: Text(newInvoiceId.failure),
+          severity: InfoBarSeverity.error,
+        ),
+      );
       return null;
     }
     final user = await getIt<AppwriteClient>().account.get();
-    final result = await invoice
-        .copyWith(invoiceNumber: newInvoiceId.success, $permissions: [
-      Permission.read(Role.user(user.$id)),
-      Permission.update(Role.user(user.$id)),
-    ]).create();
+    final result = await invoice.copyWith(
+      invoiceNumber: newInvoiceId.success,
+      $permissions: [
+        Permission.read(Role.user(user.$id)),
+        Permission.update(Role.user(user.$id)),
+      ],
+    ).create();
 
     if (!context.mounted) return null;
 
     if (result.isFailure) {
-      await displayInfoBar(context,
-          builder: (context, close) => InfoBar(
-                title: const Text("Error"),
-                content: Text(result.failure),
-                severity: InfoBarSeverity.error,
-              ));
+      await displayInfoBar(
+        context,
+        builder: (context, close) => InfoBar(
+          title: const Text("Error"),
+          content: Text(result.failure),
+          severity: InfoBarSeverity.error,
+        ),
+      );
     } else {
-      await displayInfoBar(context,
-          builder: (context, close) => const InfoBar(
-                title: Text("Success"),
-                content: Text("Invoice created"),
-                severity: InfoBarSeverity.success,
-              ));
+      await displayInfoBar(
+        context,
+        builder: (context, close) => const InfoBar(
+          title: Text("Success"),
+          content: Text("Invoice created"),
+          severity: InfoBarSeverity.success,
+        ),
+      );
       return invoice;
     }
   }
@@ -64,13 +73,16 @@ Future<Invoices?> _showInvoiceCreateDialog(BuildContext context) async {
 }
 
 Future<Invoices?> _showInvoiceEditDialog(
-    BuildContext context, Invoices invoice) async {
+  BuildContext context,
+  Invoices invoice,
+) async {
   final updatedInvoice = await showDialog<Invoices>(
-      context: context,
-      builder: (context) => InvoiceInputDialog(
-            title: 'Edit Invoice',
-            invoice: invoice,
-          ));
+    context: context,
+    builder: (context) => InvoiceInputDialog(
+      title: 'Edit Invoice',
+      invoice: invoice,
+    ),
+  );
 
   if (updatedInvoice != null) {
     final result = await updatedInvoice.update();
@@ -78,19 +90,23 @@ Future<Invoices?> _showInvoiceEditDialog(
     if (!context.mounted) return null;
 
     if (result.isFailure) {
-      await displayInfoBar(context,
-          builder: (context, close) => InfoBar(
-                title: const Text("Error"),
-                content: Text(result.failure),
-                severity: InfoBarSeverity.error,
-              ));
+      await displayInfoBar(
+        context,
+        builder: (context, close) => InfoBar(
+          title: const Text("Error"),
+          content: Text(result.failure),
+          severity: InfoBarSeverity.error,
+        ),
+      );
     } else {
-      await displayInfoBar(context,
-          builder: (context, close) => const InfoBar(
-                title: Text("Success"),
-                content: Text("Customer updated"),
-                severity: InfoBarSeverity.success,
-              ));
+      await displayInfoBar(
+        context,
+        builder: (context, close) => const InfoBar(
+          title: Text("Success"),
+          content: Text("Customer updated"),
+          severity: InfoBarSeverity.success,
+        ),
+      );
       return updatedInvoice;
     }
   }
@@ -181,16 +197,34 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
     }
 
     return ScaffoldPage(
-        header: PageHeader(
-          title: const Text("Invoices"),
-          commandBar: CommandBar(
-            mainAxisAlignment: MainAxisAlignment.end,
-            primaryItems: [
+      header: PageHeader(
+        title: const Text("Invoices"),
+        commandBar: CommandBar(
+          mainAxisAlignment: MainAxisAlignment.end,
+          primaryItems: [
+            CommandBarButton(
+              icon: const Icon(FluentIcons.add),
+              label: const Text('New'),
+              onPressed: () async {
+                final result = await _showInvoiceCreateDialog(context);
+                if (result != null) {
+                  setState(() {
+                    selectInvoice = result;
+                  });
+                }
+              },
+            ),
+            if (largeScreen &&
+                selectedIndex != null &&
+                _invoices[selectedIndex!].canUpdate) ...[
               CommandBarButton(
-                icon: const Icon(FluentIcons.add),
-                label: const Text('New'),
+                icon: const Icon(FluentIcons.edit),
+                label: const Text('Edit'),
                 onPressed: () async {
-                  final result = await _showInvoiceCreateDialog(context);
+                  final result = await _showInvoiceEditDialog(
+                    context,
+                    _invoices[selectedIndex!],
+                  );
                   if (result != null) {
                     setState(() {
                       selectInvoice = result;
@@ -198,88 +232,73 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
                   }
                 },
               ),
-              if (largeScreen &&
-                  selectedIndex != null &&
-                  _invoices[selectedIndex!].canUpdate) ...[
-                CommandBarButton(
-                  icon: const Icon(FluentIcons.edit),
-                  label: const Text('Edit'),
-                  onPressed: () async {
-                    final result = await _showInvoiceEditDialog(
-                        context, _invoices[selectedIndex!]);
-                    if (result != null) {
-                      setState(() {
-                        selectInvoice = result;
-                      });
-                    }
-                  },
-                ),
-              ],
-                CommandBarButton(
-                  icon: const Icon(FluentIcons.print),
-                  label: const Text('Print'),
-                  onPressed: () async {
-                    final invoice = _invoices[selectedIndex!];
-
-                  if (invoice.canUpdate) {
-                    final appwrite = getIt<AppwriteClient>();
-                    final user = await appwrite.account.get();
-
-                    try {
-                      await appwrite.databases.updateDocument(
-                        databaseId: Invoices.collectionInfo.databaseId,
-                        collectionId: Invoices.collectionInfo.$id,
-                        documentId: invoice.$id,
-                        permissions: [Permission.read(Role.user(user.$id))],
-                      );
-                    } catch (e) {
-                      if (context.mounted) {
-                        await showResultInfo(context, Failure(e.toString()));
-                      }
-                      return;
-                    }
-                  }
-
-                  final result = await shareInvoice(invoice);
-                  if (context.mounted) await showResultInfo(context, result);
-                  },
-              )
             ],
-          ),
-        ),
-        content: Row(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: _totalInvoices > _invoices.length
-                    ? _invoices.length + 1
-                    : _invoices.length,
-                itemBuilder: (context, index) {
-                  if (index >= _invoices.length) {
-                    _loadInvoices();
-                    return const Center(child: ProgressBar());
-                  }
+            CommandBarButton(
+              icon: const Icon(FluentIcons.print),
+              label: const Text('Print'),
+              onPressed: () async {
+                final invoice = _invoices[selectedIndex!];
 
-                  final invoice = _invoices[index];
-                  return InvoiceListEntry(
-                    invoice: invoice,
-                    selected: selectedIndex == index,
-                    onPressed: () {
-                      if (selectedIndex == index) return;
-                      setState(() {
-                        selectedIndex = index;
-                      });
-                    },
-                  );
-                },
-              ),
+                if (invoice.canUpdate) {
+                  final appwrite = getIt<AppwriteClient>();
+                  final user = await appwrite.account.get();
+
+                  try {
+                    await appwrite.databases.updateDocument(
+                      databaseId: Invoices.collectionInfo.databaseId,
+                      collectionId: Invoices.collectionInfo.$id,
+                      documentId: invoice.$id,
+                      permissions: [Permission.read(Role.user(user.$id))],
+                    );
+                  } catch (e) {
+                    if (context.mounted) {
+                      await showResultInfo(context, Failure(e.toString()));
+                    }
+                    return;
+                  }
+                }
+
+                final result = await shareInvoice(invoice);
+                if (context.mounted) await showResultInfo(context, result);
+              },
             ),
-            if (largeScreen && selectedIndex != null)
-              Expanded(
-                child: InvoiceListDetail(invoice: _invoices[selectedIndex!]),
-              ),
           ],
-        ));
+        ),
+      ),
+      content: Row(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: _totalInvoices > _invoices.length
+                  ? _invoices.length + 1
+                  : _invoices.length,
+              itemBuilder: (context, index) {
+                if (index >= _invoices.length) {
+                  _loadInvoices();
+                  return const Center(child: ProgressBar());
+                }
+
+                final invoice = _invoices[index];
+                return InvoiceListEntry(
+                  invoice: invoice,
+                  selected: selectedIndex == index,
+                  onPressed: () {
+                    if (selectedIndex == index) return;
+                    setState(() {
+                      selectedIndex = index;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+          if (largeScreen && selectedIndex != null)
+            Expanded(
+              child: InvoiceListDetail(invoice: _invoices[selectedIndex!]),
+            ),
+        ],
+      ),
+    );
   }
 }
 
@@ -313,8 +332,9 @@ class InvoiceListEntry extends StatelessWidget {
         leading: Container(
           height: 40,
           decoration: BoxDecoration(
-              color: FluentTheme.of(context).accentColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(5)),
+            color: FluentTheme.of(context).accentColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(5),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(child: Text(invoice.invoiceNumber)),

@@ -58,7 +58,8 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
             if (snapshot.data!.isFailure) {
               return Center(
                 child: SingleChildScrollView(
-                    child: Text(snapshot.data!.failure.toString())),
+                  child: Text(snapshot.data!.failure.toString()),
+                ),
               );
             }
 
@@ -80,20 +81,22 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
                     placeholder: 'Search for a product',
                     onSelected: (item) => onProductAdded(item.value!, 1),
                     items: products
-                        .map((product) => AutoSuggestBoxItem<Products>(
-                              label: "${product.id} - ${product.title}",
-                              value: product,
-                              child: Tooltip(
-                                message: product.title,
-                                style: const TooltipThemeData(
-                                  waitDuration: Duration(milliseconds: 300),
-                                ),
-                                child: Text(
-                                  "${product.id} - ${product.title}",
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                        .map(
+                          (product) => AutoSuggestBoxItem<Products>(
+                            label: "${product.id} - ${product.title}",
+                            value: product,
+                            child: Tooltip(
+                              message: product.title,
+                              style: const TooltipThemeData(
+                                waitDuration: Duration(milliseconds: 300),
                               ),
-                            ))
+                              child: Text(
+                                "${product.id} - ${product.title}",
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        )
                         .toList(),
                   ),
                 ),
@@ -181,8 +184,9 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
                               alignment: Alignment.bottomCenter,
                               child: Container(
                                 decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.8),
-                                    borderRadius: BorderRadius.circular(4.0)),
+                                  color: Colors.white.withOpacity(0.8),
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
                                   product.title,
@@ -237,7 +241,7 @@ Future<void> showAddProductsDialog(BuildContext context, Orders order) async {
 
     final Map<int, OrderProducts> productsMap = {
       for (final product in order.products ?? <OrderProducts>[])
-        product.id: product
+        product.id: product,
     };
 
     for (final newProduct in result) {
@@ -255,8 +259,11 @@ Future<void> showAddProductsDialog(BuildContext context, Orders order) async {
     );
 
     await newOrder.update().then((value) {
-      showResultInfo(context, value,
-          successMessage: 'Added ${result.length} products to order');
+      showResultInfo(
+        context,
+        value,
+        successMessage: 'Added ${result.length} products to order',
+      );
     });
   }
 }
@@ -402,19 +409,22 @@ class _ProductSearchState extends State<ProductSearch> {
             child: _currentProduct == null
                 ? const Center(
                     child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('No product found'),
-                      ProgressBar(),
-                    ],
-                  ))
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('No product found'),
+                        ProgressBar(),
+                      ],
+                    ),
+                  )
                 : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(_currentProduct!.title,
-                            style: FluentTheme.of(context).typography.subtitle),
+                        Text(
+                          _currentProduct!.title,
+                          style: FluentTheme.of(context).typography.subtitle,
+                        ),
                         Text(
                           _currentProduct!.description,
                           overflow: TextOverflow.fade,
@@ -453,10 +463,11 @@ class StrongDivider extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: verticalPadding),
       child: Divider(
         style: DividerThemeData(
-            horizontalMargin: EdgeInsets.zero,
-            decoration: BoxDecoration(
-              color: color,
-            )),
+          horizontalMargin: EdgeInsets.zero,
+          decoration: BoxDecoration(
+            color: color,
+          ),
+        ),
       ),
     );
   }

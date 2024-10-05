@@ -29,14 +29,19 @@ Future<Customers?> _showCustomerCreateDialog(BuildContext context) async =>
         if (customer != null) {
           final user = await getIt<AppwriteClient>().account.get();
           return customer
-              .copyWith($permissions: [
-                Permission.read(Role.user(user.$id)),
-                Permission.update(Role.user(user.$id)),
-              ])
+              .copyWith(
+                $permissions: [
+                  Permission.read(Role.user(user.$id)),
+                  Permission.update(Role.user(user.$id)),
+                ],
+              )
               .create()
               .then((result) {
-                showResultInfo(context, result,
-                    successMessage: "Customer created");
+                showResultInfo(
+                  context,
+                  result,
+                  successMessage: "Customer created",
+                );
                 return result.isSuccess ? customer : null;
               });
         }
@@ -45,20 +50,23 @@ Future<Customers?> _showCustomerCreateDialog(BuildContext context) async =>
     });
 
 Future<Customers?> _showCustomerEditDialog(
-    BuildContext context, Customers customer) async {
+  BuildContext context,
+  Customers customer,
+) async {
   final updatedCustomer = await showDialog<Customers>(
-      context: context,
-      builder: (context) => CustomerInputDialog(
-            title: "Edit Customer",
-            id: customer.id,
-            name: customer.name,
-            email: customer.email,
-            phone: customer.phone,
-            street: customer.street,
-            zip: customer.zip,
-            city: customer.city,
-            customer: customer,
-          ));
+    context: context,
+    builder: (context) => CustomerInputDialog(
+      title: "Edit Customer",
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      street: customer.street,
+      zip: customer.zip,
+      city: customer.city,
+      customer: customer,
+    ),
+  );
 
   if (updatedCustomer != null) {
     return updatedCustomer.update().then((result) {
@@ -161,46 +169,50 @@ class _CustomerListPageState extends State<CustomerListPage> {
             BreadcrumbItem(label: Text("Customers"), value: 0),
           ],
         ),
-        commandBar:
-            CommandBar(mainAxisAlignment: MainAxisAlignment.end, primaryItems: [
-          CommandBarButton(
-            icon: const Icon(FluentIcons.add),
-            label: const Text('New'),
-            onPressed: () async {
-              final result = await _showCustomerCreateDialog(context);
-              if (result != null) {
-                setState(() {
-                  selectCustomer = result;
-                });
-              }
-            },
-          ),
-          if (largeScreen && selectedIndex != null) ...[
+        commandBar: CommandBar(
+          mainAxisAlignment: MainAxisAlignment.end,
+          primaryItems: [
             CommandBarButton(
-              icon: const Icon(FluentIcons.edit),
-              label: const Text('Edit'),
-              onPressed: () =>
-                  _showCustomerEditDialog(context, _customers[selectedIndex!])
-                      .then((result) => setState(() {
-                            selectCustomer = result;
-                          })),
+              icon: const Icon(FluentIcons.add),
+              label: const Text('New'),
+              onPressed: () async {
+                final result = await _showCustomerCreateDialog(context);
+                if (result != null) {
+                  setState(() {
+                    selectCustomer = result;
+                  });
+                }
+              },
             ),
-            // CommandBarButton(
-            //   icon: const Icon(FluentIcons.delete),
-            //   label: const Text('Anonymize'),
-            //   onPressed: () =>
-            //       _customers[selectedIndex!].anonymize().then((result) {
-            //     showResultInfo(context, result,
-            //         successMessage: "Customer anonymized");
-            //     if (result.isSuccess) {
-            //       setState(() {
-            //         selectedIndex = null;
-            //       });
-            //     }
-            //   }),
-            // ),
-          ]
-        ]),
+            if (largeScreen && selectedIndex != null) ...[
+              CommandBarButton(
+                icon: const Icon(FluentIcons.edit),
+                label: const Text('Edit'),
+                onPressed: () =>
+                    _showCustomerEditDialog(context, _customers[selectedIndex!])
+                        .then(
+                  (result) => setState(() {
+                    selectCustomer = result;
+                  }),
+                ),
+              ),
+              // CommandBarButton(
+              //   icon: const Icon(FluentIcons.delete),
+              //   label: const Text('Anonymize'),
+              //   onPressed: () =>
+              //       _customers[selectedIndex!].anonymize().then((result) {
+              //     showResultInfo(context, result,
+              //         successMessage: "Customer anonymized");
+              //     if (result.isSuccess) {
+              //       setState(() {
+              //         selectedIndex = null;
+              //       });
+              //     }
+              //   }),
+              // ),
+            ],
+          ],
+        ),
       ),
       content: Row(
         children: [
@@ -314,7 +326,8 @@ class CustomerListEntry extends StatelessWidget {
           iconButtonMode: IconButtonMode.large,
           style: ButtonStyle(
             foregroundColor: WidgetStateProperty.all(
-                FluentTheme.of(context).resources.textFillColorPrimary),
+              FluentTheme.of(context).resources.textFillColorPrimary,
+            ),
           ),
         ),
       ),

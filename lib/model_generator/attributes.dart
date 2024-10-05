@@ -178,7 +178,9 @@ class AttributeInfoEnum extends AttributeInfo {
 }
 
 AttributeInfo resolveAttributeInfo(
-    Map<String, dynamic> attribute, Map<String, String> collectionIdToName) {
+  Map<String, dynamic> attribute,
+  Map<String, String> collectionIdToName,
+) {
   final name = attribute['key'] as String;
   final required = attribute['required'] as bool;
   final array = attribute['array'] as bool;
@@ -188,11 +190,12 @@ AttributeInfo resolveAttributeInfo(
 
   if (format == 'enum') {
     return AttributeInfoEnum(
-        name: name,
-        required: required,
-        array: array,
-        defaultValue: defaultValue,
-        elements: List.from(attribute['elements'] as List<dynamic>));
+      name: name,
+      required: required,
+      array: array,
+      defaultValue: defaultValue,
+      elements: List.from(attribute['elements'] as List<dynamic>),
+    );
   }
   if (format == 'email') {
     return AttributeInfoEmail(
@@ -310,7 +313,8 @@ List<String> generateAsserts(AttributeInfo attribute) {
       asserts.add('assert($name.length <= ${attribute.size})');
     } else {
       asserts.add(
-          'assert($name == null || $name.isNotEmpty && $name.length <= ${attribute.size})');
+        'assert($name == null || $name.isNotEmpty && $name.length <= ${attribute.size})',
+      );
     }
   } else if (attribute is AttributeInfoInteger) {
     if (attribute.required) {
@@ -369,7 +373,8 @@ String generateToJsonField(AttributeInfo attribute) {
       return "'$name': ${attribute.array ? '$name.map((e) => e.name).toList()' : '$name.name'}";
     case 'Relationship':
       return generateRelationshipToJsonField(
-          attribute as AttributeInfoRelationship);
+        attribute as AttributeInfoRelationship,
+      );
     default:
       return "'$name': $name";
   }
@@ -407,7 +412,7 @@ String generateCopyWithField(AttributeInfo attribute) {
   if (attribute.defaultValue != null && attribute.defaultValue != '') {
     field += ' = $name';
   } else if (!attribute.required && attribute.type is String) {
-    field += ' = \'\'';
+    field += " = ''";
   }
 
   return '$field $name';
@@ -417,7 +422,7 @@ String generateCopyWithFieldAssignment(AttributeInfo attribute) {
   final name = attribute.name;
 
   if (!attribute.required && attribute.type is String) {
-    return '$name: $name == \'\' ? this.$name : $name';
+    return "$name: $name == '' ? this.$name : $name";
   }
 
   return '$name: $name ?? this.$name';
@@ -432,20 +437,21 @@ String generateFromAppwriteField(AttributeInfo attribute) {
   }
 
   final buildType = switch (type) {
-    'Enum' => '${capitalize(name)}.values.byName(doc.data[\'$name\'])',
-    'DateTime' => 'DateTime.parse(doc.data[\'$name\'])',
-    _ => 'doc.data[\'$name\']',
+    'Enum' => "${capitalize(name)}.values.byName(doc.data['$name'])",
+    'DateTime' => "DateTime.parse(doc.data['$name'])",
+    _ => "doc.data['$name']",
   };
 
   if (attribute.array) {
-    return '$name: List<$type>.unmodifiable(doc.data[\'$name\'].map((e) => $buildType))';
+    return "$name: List<$type>.unmodifiable(doc.data['$name'].map((e) => $buildType))";
   }
 
   return '$name: $buildType';
 }
 
 String generateRelationshipFromAppwriteField(
-    AttributeInfoRelationship attribute) {
+  AttributeInfoRelationship attribute,
+) {
   final name = attribute.name;
   final relatedClass = attribute.classAsString;
 
@@ -454,7 +460,7 @@ String generateRelationshipFromAppwriteField(
           attribute.side == Side.child ||
       attribute.relationType == RelationshipType.manyToOne &&
           attribute.side == Side.parent) {
-    return '$name: doc.data[\'$name\'] == null ? null : $relatedClass.fromAppwrite(Document.fromMap(doc.data[\'$name\']))';
+    return "$name: doc.data['$name'] == null ? null : $relatedClass.fromAppwrite(Document.fromMap(doc.data['$name']))";
   }
 
   if (attribute.relationType == RelationshipType.manyToMany ||
@@ -462,7 +468,7 @@ String generateRelationshipFromAppwriteField(
           attribute.side == Side.parent ||
       attribute.relationType == RelationshipType.manyToOne &&
           attribute.side == Side.child) {
-    return '$name: List<$relatedClass>.unmodifiable(doc.data[\'$name\'] == null ? [] : doc.data[\'$name\'].map((e) => $relatedClass.fromAppwrite(Document.fromMap(e))))';
+    return "$name: List<$relatedClass>.unmodifiable(doc.data['$name'] == null ? [] : doc.data['$name'].map((e) => $relatedClass.fromAppwrite(Document.fromMap(e))))";
   }
 
   throw Exception('Invalid relationship type');
@@ -515,14 +521,16 @@ String generateToAppwriteField(AttributeInfo attribute) {
       return "'$name': ${attribute.array ? '$name.map((e) => e.name).toList()' : '$name.name'}";
     case 'Relationship':
       return generateRelationshipToAppwriteField(
-          attribute as AttributeInfoRelationship);
+        attribute as AttributeInfoRelationship,
+      );
     default:
       return "'$name': $name";
   }
 }
 
 String generateRelationshipToAppwriteField(
-    AttributeInfoRelationship attribute) {
+  AttributeInfoRelationship attribute,
+) {
   final name = attribute.name;
 
   if (attribute.relationType == RelationshipType.oneToOne ||

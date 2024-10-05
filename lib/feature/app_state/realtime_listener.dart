@@ -32,7 +32,9 @@ class RealtimeListener {
   }
 
   void addSubscription(
-      String channel, Function(RealtimeMessage message) callback) {
+    String channel,
+    Function(RealtimeMessage message) callback,
+  ) {
     _listeners[channel] = callback;
     subscription = _realtime.subscribe(_listeners.keys.toList());
   }
@@ -43,7 +45,8 @@ class RealtimeListener {
   }
 
   void addSubscriptions(
-      Map<String, Function(RealtimeMessage message)> channels) {
+    Map<String, Function(RealtimeMessage message)> channels,
+  ) {
     _listeners.addAll(channels);
     subscription = _realtime.subscribe(_listeners.keys.toList());
   }

@@ -14,76 +14,56 @@ Future<void> generateCollectionInfo() async {
 
 Library getLibary() => Library((lib) => lib..body.add(getClass()));
 
-Class getClass() => Class((b) =>
-    b
-      ..name = 'CollectionInfo'
-      ..fields
-      .addAll(getFields())
-      ..constructors
-      .addAll(getConstructors()));
+Class getClass() => Class((b) => b
+  ..name = 'CollectionInfo'
+  ..fields.addAll(getFields())
+  ..constructors.addAll(getConstructors()));
 
 List<Field> getFields() => [
-  Field((b) =>
-      b
+      Field((b) => b
         ..name = '\$id'
         ..type = refer('String')
         ..modifier = FieldModifier.final$),
-  Field((b) =>
-      b
+      Field((b) => b
         ..name = '\$permissions'
         ..type = refer('List<String>')
         ..modifier = FieldModifier.final$),
-  Field((b) =>
-      b
+      Field((b) => b
         ..name = 'databaseId'
         ..type = refer('String')
         ..modifier = FieldModifier.final$),
-  Field((b) =>
-      b
+      Field((b) => b
         ..name = 'name'
         ..type = refer('String')
         ..modifier = FieldModifier.final$),
-  Field((b) =>
-      b
+      Field((b) => b
         ..name = 'enabled'
         ..type = refer('bool')
         ..modifier = FieldModifier.final$),
-  Field((b) =>
-      b
+      Field((b) => b
         ..name = 'documentSecurity'
         ..type = refer('bool')
         ..modifier = FieldModifier.final$),
-];
+    ];
 
-List<Constructor> getConstructors() => [Constructor((b) =>
-    b
-      ..requiredParameters
-      .add(Parameter((b) =>
-          b
-            ..name = '\$id'
-            ..toThis = true))
-      ..requiredParameters
-      .add(Parameter((b) =>
-          b
-            ..name = '\$permissions'
-            ..toThis = true))
-      ..requiredParameters
-      .add(Parameter((b) =>
-          b
-            ..name = 'databaseId'
-            ..toThis = true))
-      ..requiredParameters
-      .add(Parameter((b) =>
-          b
-            ..name = 'name'
-            ..toThis = true))
-      ..requiredParameters
-      .add(Parameter((b) =>
-          b
-            ..name = 'enabled'
-            ..toThis = true))
-      ..requiredParameters
-      .add(Parameter((b) =>
-          b
-            ..name = 'documentSecurity'
-            ..toThis = true)))];
+List<Constructor> getConstructors() => [
+      Constructor((b) => b
+        ..requiredParameters.add(Parameter((b) => b
+          ..name = '\$id'
+          ..toThis = true))
+        ..requiredParameters.add(Parameter((b) => b
+          ..name = '\$permissions'
+          ..toThis = true))
+        ..requiredParameters.add(Parameter((b) => b
+          ..name = 'databaseId'
+          ..toThis = true))
+        ..requiredParameters.add(Parameter((b) => b
+          ..name = 'name'
+          ..toThis = true))
+        ..requiredParameters.add(Parameter((b) => b
+          ..name = 'enabled'
+          ..toThis = true))
+        ..requiredParameters.add(Parameter((b) => b
+          ..name = 'documentSecurity'
+          ..toThis = true)))
+    ];

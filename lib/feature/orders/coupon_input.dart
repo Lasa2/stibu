@@ -85,15 +85,19 @@ class _CouponInputDialogState extends State<CouponInputDialog> {
               _formKey.currentState!.save();
 
               if (widget.coupon != null) {
-                Navigator.of(context).pop(widget.coupon!.copyWith(
-                  name: _name!,
-                  amount: _amount!,
-                ));
+                Navigator.of(context).pop(
+                  widget.coupon!.copyWith(
+                    name: _name!,
+                    amount: _amount!,
+                  ),
+                );
               } else {
-                Navigator.of(context).pop(OrderCoupons(
-                  name: _name!,
-                  amount: _amount!,
-                ));
+                Navigator.of(context).pop(
+                  OrderCoupons(
+                    name: _name!,
+                    amount: _amount!,
+                  ),
+                );
               }
             }
           },
@@ -111,24 +115,28 @@ Future<void> showAddCouponDialog(BuildContext context, Orders order) async =>
         title: 'Add Coupon',
         okText: 'Add',
       ),
-    ).then((coupon) async => coupon != null
-        ? await order.addCoupon(coupon).then(
-              (value) async => await showResultInfo(context, value),
-            )
-        : null);
+    ).then(
+      (coupon) async => coupon != null
+          ? await order.addCoupon(coupon).then(
+                (value) async => await showResultInfo(context, value),
+              )
+          : null,
+    );
 
 Future<void> showEditCouponDialog(
-        BuildContext context, OrderCoupons coupon, Orders order) async =>
+  BuildContext context,
+  OrderCoupons coupon,
+  Orders order,
+) async =>
     await showDialog<OrderCoupons>(
       context: context,
       builder: (context) => CouponInputDialog(
         title: 'Edit Coupon',
         okText: 'Save',
         coupon: coupon,
-        onDelete: (coupon) async =>
-            await order.deleteCoupon(coupon).then(
-                  (value) => showResultInfo(context, value),
-                ),
+        onDelete: (coupon) async => await order.deleteCoupon(coupon).then(
+              (value) => showResultInfo(context, value),
+            ),
       ),
     ).then((coupon) async {
       coupon != null

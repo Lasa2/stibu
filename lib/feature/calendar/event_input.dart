@@ -310,10 +310,12 @@ class _EventInputDialogState extends State<EventInputDialog> {
                     .toList(),
                 onSelected: (customer) {
                   setState(() {
-                    _participants.add(CalendarEventParticipants(
-                      customer: customer,
-                      status: Status.pending,
-                    ));
+                    _participants.add(
+                      CalendarEventParticipants(
+                        customer: customer,
+                        status: Status.pending,
+                      ),
+                    );
                   });
                 },
               ),
@@ -324,10 +326,12 @@ class _EventInputDialogState extends State<EventInputDialog> {
                 trailing: ComboBox<Status>(
                   value: participant.status,
                   items: Status.values
-                      .map((e) => ComboBoxItem(
-                            value: e,
-                            child: Text(e.name),
-                          ))
+                      .map(
+                        (e) => ComboBoxItem(
+                          value: e,
+                          child: Text(e.name),
+                        ),
+                      )
                       .toList(),
                   onChanged: (value) {
                     final index = _participants.indexOf(participant);
@@ -388,11 +392,12 @@ class _CustomerAutoSuggestState extends State<CustomerAutoSuggest> {
       final appwrite = getIt<AppwriteClient>();
 
       appwrite.databases.listDocuments(
-          databaseId: Customers.databaseId,
-          collectionId: Customers.collectionInfo.$id,
-          queries: [
-            Query.search('name', query),
-          ]).then((result) {
+        databaseId: Customers.databaseId,
+        collectionId: Customers.collectionInfo.$id,
+        queries: [
+          Query.search('name', query),
+        ],
+      ).then((result) {
         final items = result.documents.map((e) => Customers.fromAppwrite(e));
         final newItems = items.where((element) {
           return !widget.filteredCustomers.any((e) => e.$id == element.$id) &&
@@ -435,10 +440,12 @@ class _CustomerAutoSuggestState extends State<CustomerAutoSuggest> {
         }
       },
       items: _customers
-          .map((e) => AutoSuggestBoxItem(
-                label: e.name,
-                value: e,
-              ))
+          .map(
+            (e) => AutoSuggestBoxItem(
+              label: e.name,
+              value: e,
+            ),
+          )
           .toList(),
     );
   }

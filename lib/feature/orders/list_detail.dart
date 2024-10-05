@@ -38,19 +38,23 @@ class OrderInfoCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (order.invoice != null) ...[
-                  Text(order.invoice!.invoiceNumber,
-                      style: FluentTheme.of(context).typography.bodyStrong),
-                  Text(order.invoice!.date.formatDate(),
-                      style: FluentTheme.of(context).typography.caption),
+                  Text(
+                    order.invoice!.invoiceNumber,
+                    style: FluentTheme.of(context).typography.bodyStrong,
+                  ),
+                  Text(
+                    order.invoice!.date.formatDate(),
+                    style: FluentTheme.of(context).typography.caption,
+                  ),
                 ] else ...[
                   Container(
                     height: 40,
                     width: 90,
                     decoration: BoxDecoration(
-                        color: FluentTheme.of(context)
-                            .accentColor
-                            .withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(5)),
+                      color:
+                          FluentTheme.of(context).accentColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
                     child: const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Center(child: Text('Draft')),
@@ -164,57 +168,59 @@ class OrderProductsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      if (order.invoice == null)
-        CommandBar(
-          primaryItems: [
-            CommandBarButton(
-              icon: const Icon(FluentIcons.add),
-              label: const Text('Add product'),
-              onPressed: () async =>
-                  await showAddProductsDialog(context, order),
-            ),
-            CommandBarButton(
-              icon: const Icon(FluentIcons.add),
-              label: const Text('Add coupon'),
-              onPressed: () async => await showAddCouponDialog(context, order),
-            ),
-            CommandBarButton(
-              icon: const Icon(FluentIcons.save),
-              label: const Text('Create invoice'),
-              onPressed: () async => await createInvoice(context, order),
-            ),
-          ],
-        ),
-      Expanded(
-        child: order.products?.isEmpty ?? true
-            ? const Center(child: Text('No products added'))
-            : ListView.builder(
-                itemCount: order.products!.length,
-                itemBuilder: (context, index) {
-                  final product = order.products![index];
+    return Column(
+      children: [
+        if (order.invoice == null)
+          CommandBar(
+            primaryItems: [
+              CommandBarButton(
+                icon: const Icon(FluentIcons.add),
+                label: const Text('Add product'),
+                onPressed: () async =>
+                    await showAddProductsDialog(context, order),
+              ),
+              CommandBarButton(
+                icon: const Icon(FluentIcons.add),
+                label: const Text('Add coupon'),
+                onPressed: () async =>
+                    await showAddCouponDialog(context, order),
+              ),
+              CommandBarButton(
+                icon: const Icon(FluentIcons.save),
+                label: const Text('Create invoice'),
+                onPressed: () async => await createInvoice(context, order),
+              ),
+            ],
+          ),
+        Expanded(
+          child: order.products?.isEmpty ?? true
+              ? const Center(child: Text('No products added'))
+              : ListView.builder(
+                  itemCount: order.products!.length,
+                  itemBuilder: (context, index) {
+                    final product = order.products![index];
 
-                  return ListTile(
-                    onPressed: order.invoice == null
-                        ? () async =>
-                            await showProductEditDialog(context, product, order)
-                        : null,
-                    leading: Container(
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: FluentTheme.of(context)
-                            .accentColor
-                            .withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(
-                          child: Text(product.id.toString()),
+                    return ListTile(
+                      onPressed: order.invoice == null
+                          ? () async => await showProductEditDialog(
+                              context, product, order)
+                          : null,
+                      leading: Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: FluentTheme.of(context)
+                              .accentColor
+                              .withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(
+                            child: Text(product.id.toString()),
+                          ),
                         ),
                       ),
-                    ),
-                    title: Tooltip(
+                      title: Tooltip(
                         message: product.title,
                         displayHorizontally: false,
                         useMousePosition: false,
@@ -223,30 +229,34 @@ class OrderProductsList extends StatelessWidget {
                           preferBelow: true,
                           // waitDuration: Duration.zero,
                         ),
-                        child: Text(product.title)),
-                    subtitle: Text(
-                        "${product.quantity} x ${product.price.currency.format()}"),
-                    trailing: Text(product.total.format()),
-                  );
-                },
-              ),
-      ),
-      if (order.coupons?.isNotEmpty ?? false) ...[
+                        child: Text(product.title),
+                      ),
+                      subtitle: Text(
+                        "${product.quantity} x ${product.price.currency.format()}",
+                      ),
+                      trailing: Text(product.total.format()),
+                    );
+                  },
+                ),
+        ),
+        if (order.coupons?.isNotEmpty ?? false) ...[
+          const Divider(),
+          for (final coupon in order.coupons!)
+            ListTile(
+              title: Text(coupon.name),
+              trailing: Text(coupon.amount.currency.format()),
+              onPressed: order.invoice == null
+                  ? () async =>
+                      await showEditCouponDialog(context, coupon, order)
+                  : null,
+            ),
+        ],
         const Divider(),
-        for (final coupon in order.coupons!)
-          ListTile(
-            title: Text(coupon.name),
-            trailing: Text(coupon.amount.currency.format()),
-            onPressed: order.invoice == null
-                ? () async => await showEditCouponDialog(context, coupon, order)
-                : null,
-          ),
+        ListTile(
+          title: const Text('Total'),
+          trailing: Text(order.total.format()),
+        ),
       ],
-      const Divider(),
-      ListTile(
-        title: const Text('Total'),
-        trailing: Text(order.total.format()),
-      ),
-    ]);
+    );
   }
 }

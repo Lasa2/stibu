@@ -53,8 +53,10 @@ class CustomerInfoCard extends StatelessWidget {
                           padding: EdgeInsets.all(8.0),
                           child: Icon(FluentIcons.phone),
                         ),
-                        Text(customer.phone!,
-                            style: FluentTheme.of(context).typography.caption),
+                        Text(
+                          customer.phone!,
+                          style: FluentTheme.of(context).typography.caption,
+                        ),
                       ],
                     ),
                   const Spacer(),

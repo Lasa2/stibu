@@ -9,7 +9,7 @@ import 'package:stibu/model_generator/model.dart';
 class ModelBuilder implements Builder {
   @override
   Map<String, List<String>> get buildExtensions => {
-        'appwrite.json': ['lib/appwrite.models.dart', 'appwrite.example.json']
+        'appwrite.json': ['lib/appwrite.models.dart', 'appwrite.example.json'],
       };
 
   @override

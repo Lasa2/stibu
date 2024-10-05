@@ -59,14 +59,17 @@ class _ProductKeyPageState extends State<ProductKeyPage> {
 
                     if (map['status'] != 200) {
                       if (!context.mounted) return;
-                      displayInfoBar(context,
-                          builder: (context, close) => InfoBar(
-                                title: const Text('Invalid product key'),
-                                content: const Text(
-                                    'The product key you entered is invalid. Please try again.'),
-                                severity: InfoBarSeverity.error,
-                                onClose: close,
-                              ));
+                      displayInfoBar(
+                        context,
+                        builder: (context, close) => InfoBar(
+                          title: const Text('Invalid product key'),
+                          content: const Text(
+                            'The product key you entered is invalid. Please try again.',
+                          ),
+                          severity: InfoBarSeverity.error,
+                          onClose: close,
+                        ),
+                      );
                     } else {
                       widget.onFinish?.call();
                     }

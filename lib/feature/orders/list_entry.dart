@@ -37,8 +37,9 @@ class OrderListEntry extends StatelessWidget {
                 height: 40,
                 width: 90,
                 decoration: BoxDecoration(
-                    color: FluentTheme.of(context).accentColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(5)),
+                  color: FluentTheme.of(context).accentColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(5),
+                ),
                 child: const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Center(child: Text('Draft')),
@@ -48,17 +49,20 @@ class OrderListEntry extends StatelessWidget {
                 height: 40,
                 width: 90,
                 decoration: BoxDecoration(
-                    color: FluentTheme.of(context).accentColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(5)),
+                  color: FluentTheme.of(context).accentColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(5),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Center(child: Text(invoice!.invoiceNumber)),
                 ),
               ),
         title: Text(order.customerName),
-        subtitle: Text(invoice == null
-            ? order.date.formatDate()
-            : invoice!.date.formatDate()),
+        subtitle: Text(
+          invoice == null
+              ? order.date.formatDate()
+              : invoice!.date.formatDate(),
+        ),
         trailing: invoice == null
             ? Text(order.total.format())
             : Text(invoice!.amount.currency.format()),

@@ -29,6 +29,10 @@ linter:
   # producing the lint.
   rules:
     - require_trailing_commas
+    - avoid_escaping_inner_quotes
+    - avoid_void_async
+    - cancel_subscriptions
+    - cascade_invocations
     - prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
     # avoid_print: false  # Uncomment to disable the `avoid_print` rule
 

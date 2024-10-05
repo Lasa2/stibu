@@ -37,12 +37,13 @@ class CollectionInfo {
       name: map['name'],
       enabled: map['enabled'],
       documentSecurity: map['documentSecurity'],
-      attributes:
-          (map['attributes'] as List<dynamic>).map((e) => resolveAttributeInfo(
-            e as Map<String, dynamic>,
-            refer((map['name'] as String).capitalizeFirstLetter),
-            collectionIdToName,
-          )).toList(),
+      attributes: (map['attributes'] as List<dynamic>)
+          .map((e) => resolveAttributeInfo(
+                e as Map<String, dynamic>,
+                refer((map['name'] as String).capitalizeFirstLetter),
+                collectionIdToName,
+              ))
+          .toList(),
     );
   }
 }
@@ -78,20 +79,18 @@ class AttributeInfo {
   List<Field> getFields() {
     final fields = <Field>[];
 
-    fields.add(Field((b) =>
-        b
-          ..name = name
-          ..type = required ? typeReference : typeReference.nullable
-          ..modifier = FieldModifier.final$));
+    fields.add(Field((b) => b
+      ..name = name
+      ..type = required ? typeReference : typeReference.nullable
+      ..modifier = FieldModifier.final$));
 
     if (this is AttributeInfoRelationship) {
       final info = this as AttributeInfoRelationship;
 
-      fields.add(Field((b) =>
-          b
-            ..name = '${name}Relationship'
-            ..type = refer('Relationship')
-            ..assignment = Code('''Relationship(
+      fields.add(Field((b) => b
+        ..name = '${name}Relationship'
+        ..type = refer('Relationship')
+        ..assignment = Code('''Relationship(
           required: $required,
           array: $array,
           relatedCollection: '$name',
@@ -101,43 +100,39 @@ class AttributeInfo {
           onDelete: RelationshipOnDelete.${info.onDelete},
           side: RelationshipSide.${info.side},
         )''')
-            ..static = true
-            ..modifier = FieldModifier.final$));
+        ..static = true
+        ..modifier = FieldModifier.final$));
     }
 
     return fields;
   }
 
-  Parameter getConstructorParameter() => Parameter((b) =>
-      b
-        ..name = name
-        ..toThis = true
-        ..required = required);
+  Parameter getConstructorParameter() => Parameter((b) => b
+    ..name = name
+    ..toThis = true
+    ..required = required);
 
-  Parameter getDefaultFactoryParameter() => Parameter((b) =>
-      b
-        ..name = name
-        ..type = required ? typeReference : typeReference.nullable
-        ..defaultTo = required ? defaultTo : null);
+  Parameter getDefaultFactoryParameter() => Parameter((b) => b
+    ..name = name
+    ..type = required ? typeReference : typeReference.nullable
+    ..defaultTo = required ? defaultTo : null);
 
   Code getToJsonField() => Code("'$name': $name");
 
   List<Code> getConstructorAsserts() => <Code>[];
 
-  Parameter getCopyWithParameter() => Parameter((b) =>
-      b
-        ..name = name
-        ..type = refer('${reference.symbol}? Function()?'));
+  Parameter getCopyWithParameter() => Parameter((b) => b
+    ..name = name
+    ..type = refer('${reference.symbol}? Function()?'));
 
   Code getCopyWithField() => Code('$name: $name?.call()');
 
   Code getEqualCheck() =>
       array ? Code('eq($name, other.$name)') : Code('$name == other.$name');
 
-  Code getFromAppwriteField() =>
-      array
-          ? Code('$name: List<$type>.unmodifiable(doc.data[\'$name\'] ?? [])')
-          : Code('$name: doc.data[\'$name\']');
+  Code getFromAppwriteField() => array
+      ? Code('$name: List<$type>.unmodifiable(doc.data[\'$name\'] ?? [])')
+      : Code('$name: doc.data[\'$name\']');
 }
 
 class AttributeInfoString extends AttributeInfo {
@@ -324,10 +319,10 @@ class AttributeInfoRelationship extends AttributeInfo {
     required this.twoWayKey,
     required this.relatedClassReference,
   }) : _reference = resolveRelationshipType(
-         relationshipType,
-         side,
-         relatedClassReference,
-       );
+          relationshipType,
+          side,
+          relatedClassReference,
+        );
 
   @override
   Type get type => Relationship;
@@ -389,10 +384,9 @@ class AttributeInfoDateTime extends AttributeInfo {
   @override
   Reference get typeReference => refer('DateTime');
   @override
-  Code getToJsonField() =>
-      array
-          ? Code("'$name': $name.map((e) => e.toIso8601String()).toList()")
-          : Code("'$name': $name.toIso8601String()");
+  Code getToJsonField() => array
+      ? Code("'$name': $name.map((e) => e.toIso8601String()).toList()")
+      : Code("'$name': $name.toIso8601String()");
   @override
   List<Code> getConstructorAsserts() {
     final asserts = <Code>[];
@@ -416,12 +410,11 @@ class AttributeInfoDateTime extends AttributeInfo {
   }
 
   @override
-  Code getFromAppwriteField() =>
-      array
-          ? Code(
-            '$name: List<$type>.unmodifiable(doc.data[\'$name\']?.map((e) => DateTime.parse(e)) ?? [])',
-          )
-          : Code('''
+  Code getFromAppwriteField() => array
+      ? Code(
+          '$name: List<$type>.unmodifiable(doc.data[\'$name\']?.map((e) => DateTime.parse(e)) ?? [])',
+        )
+      : Code('''
           $name: doc.data['$name'] != null
               ? DateTime.parse(doc.data['$name'])
               : null,
@@ -437,27 +430,25 @@ class AttributeInfoEnum extends AttributeInfo {
     required this.values,
     required Reference classReference,
   }) : _reference = refer(
-         '${classReference.symbol}.${raw.key.capitalizeFirstLetter}',
-       );
+          '${classReference.symbol}.${raw.key.capitalizeFirstLetter}',
+        );
 
   @override
   Type get type => Enum;
   @override
   Reference get typeReference => _reference;
   @override
-  Code getToJsonField() =>
-      array
-          ? Code("'$name': $name.map((e) => e.name).toList()")
-          : Code("'$name': $name.name");
+  Code getToJsonField() => array
+      ? Code("'$name': $name.map((e) => e.name).toList()")
+      : Code("'$name': $name.name");
   @override
-  Code getFromAppwriteField() =>
-      array
-          ? Code(
-            '$name: List<$type>.unmodifiable(doc.data[\'$name\']?.map((e) => $typeReference.values.byName(e)) ?? [])',
-          )
-          : Code(
-            '$name: $typeReference.values.byName(doc.data[\'$name\']) ?? $typeReference.values.first',
-          );
+  Code getFromAppwriteField() => array
+      ? Code(
+          '$name: List<$type>.unmodifiable(doc.data[\'$name\']?.map((e) => $typeReference.values.byName(e)) ?? [])',
+        )
+      : Code(
+          '$name: $typeReference.values.byName(doc.data[\'$name\']) ?? $typeReference.values.first',
+        );
 }
 
 AttributeInfo resolveAttributeInfo(
@@ -472,7 +463,8 @@ AttributeInfo resolveAttributeInfo(
   final format = attribute['format'] as String?;
 
   if (format == 'email') {
-    return AttributeInfoEmail(raw: AttributeInfoRaw(
+    return AttributeInfoEmail(
+        raw: AttributeInfoRaw(
       key: key,
       required: required,
       array: array,
@@ -495,35 +487,45 @@ AttributeInfo resolveAttributeInfo(
 
   switch (attribute['type'] as String) {
     case 'string':
-      return AttributeInfoString(raw: AttributeInfoRaw(
-        key: key,
-        required: required,
-        array: array,
-        defaultValue: defaultValue,
-      ), size: attribute['size'] as int);
+      return AttributeInfoString(
+          raw: AttributeInfoRaw(
+            key: key,
+            required: required,
+            array: array,
+            defaultValue: defaultValue,
+          ),
+          size: attribute['size'] as int);
     case 'integer':
-      return AttributeInfoInt(raw: AttributeInfoRaw(
-        key: key,
-        required: required,
-        array: array,
-        defaultValue: defaultValue,
-      ), min: attribute['min'] as int, max: attribute['max'] as int);
+      return AttributeInfoInt(
+          raw: AttributeInfoRaw(
+            key: key,
+            required: required,
+            array: array,
+            defaultValue: defaultValue,
+          ),
+          min: attribute['min'] as int,
+          max: attribute['max'] as int);
     case 'double':
-      return AttributeInfoDouble(raw: AttributeInfoRaw(
-        key: key,
-        required: required,
-        array: array,
-        defaultValue: defaultValue,
-      ), min: attribute['min'] as double, max: attribute['max'] as double);
+      return AttributeInfoDouble(
+          raw: AttributeInfoRaw(
+            key: key,
+            required: required,
+            array: array,
+            defaultValue: defaultValue,
+          ),
+          min: attribute['min'] as double,
+          max: attribute['max'] as double);
     case 'boolean':
-      return AttributeInfoBool(raw: AttributeInfoRaw(
+      return AttributeInfoBool(
+          raw: AttributeInfoRaw(
         key: key,
         required: required,
         array: array,
         defaultValue: defaultValue,
       ));
     case 'datetime':
-      return AttributeInfoDateTime(raw: AttributeInfoRaw(
+      return AttributeInfoDateTime(
+          raw: AttributeInfoRaw(
         key: key,
         required: required,
         array: array,

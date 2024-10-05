@@ -20,7 +20,9 @@ class CollectionInfo {
   });
 
   factory CollectionInfo.fromMap(
-      Map<String, dynamic> map, Map<String, String> collectionIdToName) {
+    Map<String, dynamic> map,
+    Map<String, String> collectionIdToName,
+  ) {
     return CollectionInfo(
       $id: map['\$id'],
       $permissions: List.unmodifiable(map['\$permissions']),
@@ -29,8 +31,12 @@ class CollectionInfo {
       enabled: map['enabled'],
       documentSecurity: map['documentSecurity'],
       attributes: (map['attributes'] as List<dynamic>)
-          .map((e) => resolveAttributeInfo(
-              e as Map<String, dynamic>, collectionIdToName))
+          .map(
+            (e) => resolveAttributeInfo(
+              e as Map<String, dynamic>,
+              collectionIdToName,
+            ),
+          )
           .toList(),
     );
   }

@@ -40,25 +40,33 @@ class _CalendarPageState extends State<CalendarPage> {
       final appwrite = getIt<AppwriteClient>();
 
       appwrite.databases.listDocuments(
-          databaseId: CalendarEvents.databaseId,
-          collectionId: CalendarEvents.collectionInfo.$id,
-          queries: [
-            Query.between(
-                'start',
-                day.toIso8601String(),
-                day
-                    .add(const Duration(
-                        hours: 23, minutes: 59, seconds: 59, milliseconds: 999))
-                    .toIso8601String()),
-          ]).then((response) {
+        databaseId: CalendarEvents.databaseId,
+        collectionId: CalendarEvents.collectionInfo.$id,
+        queries: [
+          Query.between(
+            'start',
+            day.toIso8601String(),
+            day
+                .add(
+                  const Duration(
+                    hours: 23,
+                    minutes: 59,
+                    seconds: 59,
+                    milliseconds: 999,
+                  ),
+                )
+                .toIso8601String(),
+          ),
+        ],
+      ).then((response) {
         final List<CalendarEvents> events = response.documents
             .map<CalendarEvents>((e) => CalendarEvents.fromAppwrite(e))
             .toList();
 
         if (mounted) {
           setState(() {
-          _events[day] = events;
-        });
+            _events[day] = events;
+          });
         }
       });
     }
@@ -94,111 +102,113 @@ class _CalendarPageState extends State<CalendarPage> {
     final isLarge = isLargeScreen(context);
 
     return ScaffoldPage(
-        header: PageHeader(
-          title: const Text('Calendar'),
-          commandBar: CommandBar(
-              mainAxisAlignment: MainAxisAlignment.end,
-              primaryItems: [
-                CommandBarButton(
-                  icon: const Icon(FluentIcons.add),
-                  label: const Text('New Event'),
-                  onPressed: () => displayNewEventDialog(context),
-                ),
-              ]),
+      header: PageHeader(
+        title: const Text('Calendar'),
+        commandBar: CommandBar(
+          mainAxisAlignment: MainAxisAlignment.end,
+          primaryItems: [
+            CommandBarButton(
+              icon: const Icon(FluentIcons.add),
+              label: const Text('New Event'),
+              onPressed: () => displayNewEventDialog(context),
+            ),
+          ],
         ),
-        content: Row(
-          children: [
-            Expanded(
-              child: Material(
-                child: TableCalendar(
-                  locale: 'de_DE',
-                  rowHeight: 80,
-                  daysOfWeekHeight: 20,
-                  pageAnimationCurve: Curves.ease,
-                  firstDay: DateTime.utc(2010, 10, 16),
-                  lastDay: DateTime.utc(2030, 3, 14),
-                  focusedDay: _focusedDay,
-                  onDaySelected: (DateTime selectedDay, DateTime focusedDay) {
-                    setState(() {
-                      _selectedDay = selectedDay;
-                      // _focusedDay = focusedDay;
-                    });
-                  },
-                  onPageChanged: (DateTime focusedDay) {
-                    _focusedDay = focusedDay;
-                  },
-                  availableCalendarFormats: const {
-                    CalendarFormat.month: 'Month',
-                  },
-                  startingDayOfWeek: StartingDayOfWeek.monday,
-                  eventLoader: _getEventsForDay,
-                  pageJumpingEnabled: false,
-                  calendarBuilders: CalendarBuilders(
-                    markerBuilder: (context, day, List<CalendarEvents> events) {
-                      if (events.isNotEmpty) {
-                        if (events.length > 3) {
-                          return Positioned(
-                              bottom: 8,
-                              child: Row(
-                                children: [
-                                  for (var event in events)
-                                    // dots for multiple events
-                                    Container(
-                                      margin: const EdgeInsets.only(right: 4),
-                                      decoration: BoxDecoration(
-                                        color: event.type == Type.plain
-                                            ? Colors.blue
-                                            : Colors.red,
-                                        borderRadius:
-                                            BorderRadius.circular(4.0),
-                                      ),
-                                      width: 4,
-                                      height: 4,
-                                    ),
-                                ],
-                              ));
-                        }
-
+      ),
+      content: Row(
+        children: [
+          Expanded(
+            child: Material(
+              child: TableCalendar(
+                locale: 'de_DE',
+                rowHeight: 80,
+                daysOfWeekHeight: 20,
+                pageAnimationCurve: Curves.ease,
+                firstDay: DateTime.utc(2010, 10, 16),
+                lastDay: DateTime.utc(2030, 3, 14),
+                focusedDay: _focusedDay,
+                onDaySelected: (DateTime selectedDay, DateTime focusedDay) {
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    // _focusedDay = focusedDay;
+                  });
+                },
+                onPageChanged: (DateTime focusedDay) {
+                  _focusedDay = focusedDay;
+                },
+                availableCalendarFormats: const {
+                  CalendarFormat.month: 'Month',
+                },
+                startingDayOfWeek: StartingDayOfWeek.monday,
+                eventLoader: _getEventsForDay,
+                pageJumpingEnabled: false,
+                calendarBuilders: CalendarBuilders(
+                  markerBuilder: (context, day, List<CalendarEvents> events) {
+                    if (events.isNotEmpty) {
+                      if (events.length > 3) {
                         return Positioned(
-                          bottom: 1,
-                          child: Column(
+                          bottom: 8,
+                          child: Row(
                             children: [
                               for (var event in events)
+                                // dots for multiple events
                                 Container(
+                                  margin: const EdgeInsets.only(right: 4),
                                   decoration: BoxDecoration(
+                                    color: event.type == Type.plain
+                                        ? Colors.blue
+                                        : Colors.red,
                                     borderRadius: BorderRadius.circular(4.0),
                                   ),
-                                  child: Text(
-                                    event.title,
-                                  ),
+                                  width: 4,
+                                  height: 4,
                                 ),
                             ],
                           ),
                         );
                       }
-                      return const SizedBox.shrink();
-                    },
-                    defaultBuilder: cellBuilder,
-                    outsideBuilder: cellBuilder,
-                    disabledBuilder: cellBuilder,
-                    holidayBuilder: cellBuilder,
-                    selectedBuilder: cellBuilder,
-                    todayBuilder: cellBuilder,
-                  ),
+
+                      return Positioned(
+                        bottom: 1,
+                        child: Column(
+                          children: [
+                            for (var event in events)
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                                child: Text(
+                                  event.title,
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                  defaultBuilder: cellBuilder,
+                  outsideBuilder: cellBuilder,
+                  disabledBuilder: cellBuilder,
+                  holidayBuilder: cellBuilder,
+                  selectedBuilder: cellBuilder,
+                  todayBuilder: cellBuilder,
                 ),
               ),
             ),
-            if (isLarge)
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 300),
-                child: ListView(
-                  children: _getEventsForDay(_selectedDay).map((event) {
-                    return EventListEntry(event: event);
-                  }).toList(),
-                ),
+          ),
+          if (isLarge)
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 300),
+              child: ListView(
+                children: _getEventsForDay(_selectedDay).map((event) {
+                  return EventListEntry(event: event);
+                }).toList(),
               ),
-          ],
-        ));
+            ),
+        ],
+      ),
+    );
   }
 }
 

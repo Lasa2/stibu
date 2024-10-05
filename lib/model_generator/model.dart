@@ -6,11 +6,16 @@ String capitalize(String text) {
 }
 
 String generateEnums(List<AttributeInfo> attributeInfos) {
-  return attributeInfos.whereType<AttributeInfoEnum>().map((e) => '''
+  return attributeInfos
+      .whereType<AttributeInfoEnum>()
+      .map(
+        (e) => '''
 enum ${capitalize(e.name)} {
   ${e.elements.map((v) => '$v,').join('\n\t')}
 }
-  ''').join('\n\n');
+  ''',
+      )
+      .join('\n\n');
 }
 
 String generateClass(CollectionInfo collection) {

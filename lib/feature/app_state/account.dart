@@ -43,7 +43,10 @@ class Authentication {
   }
 
   Future<Result<void, String>> createAccount(
-      String email, String password, String name) async {
+    String email,
+    String password,
+    String name,
+  ) async {
     final appwrite = getIt<AppwriteClient>();
     try {
       await appwrite.account.create(

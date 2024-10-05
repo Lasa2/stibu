@@ -116,13 +116,14 @@ class _WizardState extends State<Wizard> {
 
     for (var i = 1; i < items.length; i += 2) {
       items.insert(
-          i,
-          Container(
-            margin: const EdgeInsets.only(top: 12),
-            width: 16,
-            height: 2,
-            color: theme.inactiveColor,
-          ));
+        i,
+        Container(
+          margin: const EdgeInsets.only(top: 12),
+          width: 16,
+          height: 2,
+          color: theme.inactiveColor,
+        ),
+      );
     }
 
     return Row(
@@ -154,7 +155,8 @@ class _WizardState extends State<Wizard> {
             Button(
               onPressed: _nextPage,
               child: Text(
-                  _currentPage < widget.pages.length - 1 ? 'Next' : 'Finish'),
+                _currentPage < widget.pages.length - 1 ? 'Next' : 'Finish',
+              ),
             ),
           ],
         ),

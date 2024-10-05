@@ -13,9 +13,10 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldPage.scrollable(
-        header: const PageHeader(
-          title: Text('Settings'),
-        ),
-        children: const []);
+      header: const PageHeader(
+        title: Text('Settings'),
+      ),
+      children: const [],
+    );
   }
 }

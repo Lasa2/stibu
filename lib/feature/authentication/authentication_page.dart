@@ -31,61 +31,62 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
       appBar: buildNavigationAppBar(context),
       content: ScaffoldPage(
         content: Center(
-            child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: TabView(
-              currentIndex: currentIndex,
-              showScrollButtons: false,
-              shortcutsEnabled: false,
-              onNewPressed: null,
-              closeButtonVisibility: CloseButtonVisibilityMode.never,
-              onChanged: (index) {
-                setState(() {
-                  currentIndex = index;
-                });
-              },
-              onReorder: null,
-              tabs: [
-                Tab(
-                  text: const Text('Login'),
-                  body: Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Column(
-                      children: [
-                        Card(
-                          borderColor: Colors.transparent,
-                          borderRadius: BorderRadius.zero,
-                          child: LoginTab(
-                            onAuthenticated: widget.onAuthenticated,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: TabView(
+                currentIndex: currentIndex,
+                showScrollButtons: false,
+                shortcutsEnabled: false,
+                onNewPressed: null,
+                closeButtonVisibility: CloseButtonVisibilityMode.never,
+                onChanged: (index) {
+                  setState(() {
+                    currentIndex = index;
+                  });
+                },
+                onReorder: null,
+                tabs: [
+                  Tab(
+                    text: const Text('Login'),
+                    body: Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Column(
+                        children: [
+                          Card(
+                            borderColor: Colors.transparent,
+                            borderRadius: BorderRadius.zero,
+                            child: LoginTab(
+                              onAuthenticated: widget.onAuthenticated,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Tab(
-                  text: const Text('Create Account'),
-                  body: Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Column(
-                      children: [
-                        Card(
-                          borderColor: Colors.transparent,
-                          borderRadius: BorderRadius.zero,
-                          child: CreateAccountTab(
-                            onAuthenticated: widget.onAuthenticated,
+                  Tab(
+                    text: const Text('Create Account'),
+                    body: Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Column(
+                        children: [
+                          Card(
+                            borderColor: Colors.transparent,
+                            borderRadius: BorderRadius.zero,
+                            child: CreateAccountTab(
+                              onAuthenticated: widget.onAuthenticated,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        )),
+        ),
       ),
     );
   }
@@ -106,7 +107,7 @@ class _CreateAccountTabState extends State<CreateAccountTab> {
   String? email;
   String? password;
 
-  void onCreateAccount(BuildContext context) async {
+  Future<void> onCreateAccount(BuildContext context) async {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
 
@@ -216,7 +217,7 @@ class _LoginTabState extends State<LoginTab> {
   String? email;
   String? password;
 
-  void onLogin(BuildContext context) async {
+  Future<void> onLogin(BuildContext context) async {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
 

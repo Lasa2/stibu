@@ -73,9 +73,7 @@ class _CustomerInputDialogState extends State<CustomerInputDialog> {
                 );
 
                 Navigator.of(context).pop(customer);
-
               }
-
             }
           },
           child: const Text('Save'),
@@ -90,91 +88,92 @@ class _CustomerInputDialogState extends State<CustomerInputDialog> {
       content: Form(
         key: _formKey,
         child: ListView(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-            children: [
-              InfoLabel(
-                label: 'Customer ID',
-                child: TextFormBox(
-                  initialValue: _id.toString(),
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey)),
-                  ),
-                  placeholder: 'ID',
-                  readOnly: true,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          children: [
+            InfoLabel(
+              label: 'Customer ID',
+              child: TextFormBox(
+                initialValue: _id.toString(),
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.grey)),
                 ),
+                placeholder: 'ID',
+                readOnly: true,
               ),
-              InfoLabel(
-                label: 'Name',
-                child: TextFormBox(
-                  initialValue: _name,
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey)),
-                  ),
-                  placeholder: 'Name',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => _name = value,
+            ),
+            InfoLabel(
+              label: 'Name',
+              child: TextFormBox(
+                initialValue: _name,
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.grey)),
                 ),
+                placeholder: 'Name',
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a name';
+                  }
+                  return null;
+                },
+                onSaved: (value) => _name = value,
               ),
-              InfoLabel(
-                label: 'Email',
-                child: TextFormBox(
-                  initialValue: _email,
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey)),
-                  ),
-                  placeholder: 'Email',
-                  keyboardType: TextInputType.emailAddress,
-                  onSaved: (value) => _email = value,
+            ),
+            InfoLabel(
+              label: 'Email',
+              child: TextFormBox(
+                initialValue: _email,
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.grey)),
                 ),
+                placeholder: 'Email',
+                keyboardType: TextInputType.emailAddress,
+                onSaved: (value) => _email = value,
               ),
-              InfoLabel(
-                label: 'Phone',
-                child: TextFormBox(
-                  initialValue: _phone,
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey)),
-                  ),
-                  placeholder: 'Phone',
-                  onChanged: (value) => _phone = value,
+            ),
+            InfoLabel(
+              label: 'Phone',
+              child: TextFormBox(
+                initialValue: _phone,
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.grey)),
                 ),
+                placeholder: 'Phone',
+                onChanged: (value) => _phone = value,
               ),
-              InfoLabel(
-                label: 'Street',
-                child: TextFormBox(
-                  initialValue: _street,
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey)),
-                  ),
-                  placeholder: 'Street',
-                  onSaved: (value) => _street = value,
+            ),
+            InfoLabel(
+              label: 'Street',
+              child: TextFormBox(
+                initialValue: _street,
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.grey)),
                 ),
+                placeholder: 'Street',
+                onSaved: (value) => _street = value,
               ),
-              InfoLabel(
-                label: 'ZIP',
-                child: TextFormBox(
-                  initialValue: _zip,
-                    placeholder: 'ZIP',
-                    showCursor: false,
-                  onSaved: (value) => _zip = value,
+            ),
+            InfoLabel(
+              label: 'ZIP',
+              child: TextFormBox(
+                initialValue: _zip,
+                placeholder: 'ZIP',
+                showCursor: false,
+                onSaved: (value) => _zip = value,
+              ),
+            ),
+            InfoLabel(
+              label: 'City',
+              child: TextFormBox(
+                initialValue: _city,
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.grey)),
                 ),
+                placeholder: 'City',
+                onSaved: (value) => _city = value,
               ),
-              InfoLabel(
-                label: 'City',
-                child: TextFormBox(
-                  initialValue: _city,
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey)),
-                  ),
-                  placeholder: 'City',
-                  onSaved: (value) => _city = value,
-                ),
-              ),
-            ]),
+            ),
+          ],
+        ),
       ),
     );
   }

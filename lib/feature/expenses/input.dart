@@ -46,12 +46,14 @@ class _ExpenseInputDialogState extends State<ExpenseInputDialog> {
 
                 if (!context.mounted) return;
                 if (expenseNumber.isFailure) {
-                  await displayInfoBar(context,
-                      builder: (context, close) => InfoBar(
-                            title: const Text("Error"),
-                            content: Text(expenseNumber.failure),
-                            severity: InfoBarSeverity.error,
-                          ));
+                  await displayInfoBar(
+                    context,
+                    builder: (context, close) => InfoBar(
+                      title: const Text("Error"),
+                      content: Text(expenseNumber.failure),
+                      severity: InfoBarSeverity.error,
+                    ),
+                  );
                   return;
                 }
                 expense = Expenses(
@@ -77,60 +79,61 @@ class _ExpenseInputDialogState extends State<ExpenseInputDialog> {
         ),
       ],
       content: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-            children: [
-              InfoLabel(
-                label: "Date",
-                child: DatePicker(
-                  selected: _date,
-                  onChanged: (value) => _date = value,
-                ),
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          children: [
+            InfoLabel(
+              label: "Date",
+              child: DatePicker(
+                selected: _date,
+                onChanged: (value) => _date = value,
               ),
-              InfoLabel(
-                label: "Name",
-                child: TextFormBox(
-                  initialValue: _name,
-                  placeholder: "Title",
-                  onSaved: (value) => _name = value,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
-                    }
-                    return null;
-                  },
-                ),
+            ),
+            InfoLabel(
+              label: "Name",
+              child: TextFormBox(
+                initialValue: _name,
+                placeholder: "Title",
+                onSaved: (value) => _name = value,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a name';
+                  }
+                  return null;
+                },
               ),
-              InfoLabel(
-                label: "Description",
-                child: TextFormBox(
-                  initialValue: _notes,
-                  placeholder: "Description",
-                  onSaved: (value) =>
-                      value?.isEmpty ?? true ? _notes = null : _notes = value,
-                ),
+            ),
+            InfoLabel(
+              label: "Description",
+              child: TextFormBox(
+                initialValue: _notes,
+                placeholder: "Description",
+                onSaved: (value) =>
+                    value?.isEmpty ?? true ? _notes = null : _notes = value,
               ),
-              InfoLabel(
-                label: "Amount",
-                child: NumberFormBox(
-                  initialValue: _amount?.toString(),
-                  placeholder: "Amount",
-                  showCursor: false,
-                  clearButton: false,
-                  mode: SpinButtonPlacementMode.none,
-                  onChanged: (_) {}, // required to show as enabled
-                  onSaved: (value) => _amount = double.parse(value!).toInt(),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter an amount';
-                    }
-                    return null;
-                  },
-                ),
+            ),
+            InfoLabel(
+              label: "Amount",
+              child: NumberFormBox(
+                initialValue: _amount?.toString(),
+                placeholder: "Amount",
+                showCursor: false,
+                clearButton: false,
+                mode: SpinButtonPlacementMode.none,
+                onChanged: (_) {}, // required to show as enabled
+                onSaved: (value) => _amount = double.parse(value!).toInt(),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an amount';
+                  }
+                  return null;
+                },
               ),
-            ],
-          )),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

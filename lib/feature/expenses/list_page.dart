@@ -22,12 +22,14 @@ Future<Expenses?> _showExpenseCreateDialog(BuildContext context) async {
   if (expense != null) {
     final expenseNumber = await newExpenseNumber(expense.date);
     if (expenseNumber.isFailure && context.mounted) {
-      await displayInfoBar(context,
-          builder: (context, close) => InfoBar(
-                title: const Text("Error"),
-                content: Text(expenseNumber.failure),
-                severity: InfoBarSeverity.error,
-              ));
+      await displayInfoBar(
+        context,
+        builder: (context, close) => InfoBar(
+          title: const Text("Error"),
+          content: Text(expenseNumber.failure),
+          severity: InfoBarSeverity.error,
+        ),
+      );
       return null;
     }
 
@@ -39,12 +41,14 @@ Future<Expenses?> _showExpenseCreateDialog(BuildContext context) async {
     if (!context.mounted) return null;
 
     if (result.isFailure) {
-      await displayInfoBar(context,
-          builder: (context, close) => InfoBar(
-                title: const Text("Error"),
-                content: Text(result.failure),
-                severity: InfoBarSeverity.error,
-              ));
+      await displayInfoBar(
+        context,
+        builder: (context, close) => InfoBar(
+          title: const Text("Error"),
+          content: Text(result.failure),
+          severity: InfoBarSeverity.error,
+        ),
+      );
       return null;
     }
 
@@ -55,7 +59,9 @@ Future<Expenses?> _showExpenseCreateDialog(BuildContext context) async {
 }
 
 Future<Expenses?> _showExpenseEditDialog(
-    BuildContext context, Expenses expense) async {
+  BuildContext context,
+  Expenses expense,
+) async {
   final newExpense = await showDialog<Expenses>(
     context: context,
     builder: (context) => ExpenseInputDialog(
@@ -69,12 +75,14 @@ Future<Expenses?> _showExpenseEditDialog(
     if (!context.mounted) return null;
 
     if (result.isFailure) {
-      await displayInfoBar(context,
-          builder: (context, close) => InfoBar(
-                title: const Text("Error"),
-                content: Text(result.failure),
-                severity: InfoBarSeverity.error,
-              ));
+      await displayInfoBar(
+        context,
+        builder: (context, close) => InfoBar(
+          title: const Text("Error"),
+          content: Text(result.failure),
+          severity: InfoBarSeverity.error,
+        ),
+      );
       return null;
     }
 
@@ -218,7 +226,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
                 );
               },
             ),
-          )
+          ),
         ],
       ),
     );
@@ -240,34 +248,35 @@ class ExpenseListEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(2.5),
-        child: ListTile.selectable(
-          selected: selected,
-          onPressed: onPressed,
-          tileColor: WidgetStateProperty.resolveWith((states) {
-            if (states.isHovered) {
-              return FluentTheme.of(context).accentColor.withOpacity(0.1);
-            }
-            return FluentTheme.of(context)
-                .resources
-                .cardBackgroundFillColorDefault;
-          }),
-          leading: Container(
-            height: 40,
-            decoration: BoxDecoration(
-              color: FluentTheme.of(context).accentColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Center(
-                child: Text(expense.expenseNumber),
-              ),
+      padding: const EdgeInsets.all(2.5),
+      child: ListTile.selectable(
+        selected: selected,
+        onPressed: onPressed,
+        tileColor: WidgetStateProperty.resolveWith((states) {
+          if (states.isHovered) {
+            return FluentTheme.of(context).accentColor.withOpacity(0.1);
+          }
+          return FluentTheme.of(context)
+              .resources
+              .cardBackgroundFillColorDefault;
+        }),
+        leading: Container(
+          height: 40,
+          decoration: BoxDecoration(
+            color: FluentTheme.of(context).accentColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Center(
+              child: Text(expense.expenseNumber),
             ),
           ),
-          title: Text(expense.name),
-          subtitle: Text(expense.date.formatDate()),
-          trailing: Text(expense.amount.currency.format()),
-        ));
+        ),
+        title: Text(expense.name),
+        subtitle: Text(expense.date.formatDate()),
+        trailing: Text(expense.amount.currency.format()),
+      ),
+    );
   }
 }

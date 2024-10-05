@@ -40,7 +40,7 @@ class InvoiceInfoCard extends StatelessWidget {
                   const Spacer(),
                   Text(invoice.amount.currency.format()),
                 ],
-              )
+              ),
             ],
           ),
         ),

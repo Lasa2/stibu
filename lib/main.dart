@@ -33,15 +33,18 @@ Future<void> main(List<String> args) async {
   await SystemTheme.accentColor.load();
 
   GetIt.I.registerSingleton<AppRouter>(AppRouter());
-  GetIt.I.registerLazySingleton<AppwriteClient>(() => AppwriteClient(
-    Client()
-        .setEndpoint('https://appwrite.vee.icu/v1')
-        .setProject('66ba8a48000da48dd442')
-        .setEndPointRealtime('wss://appwrite.vee.icu/v1/realtime'),
-  ));
+  GetIt.I.registerLazySingleton<AppwriteClient>(
+    () => AppwriteClient(
+      Client()
+          .setEndpoint('https://appwrite.vee.icu/v1')
+          .setProject('66ba8a48000da48dd442')
+          .setEndPointRealtime('wss://appwrite.vee.icu/v1/realtime'),
+    ),
+  );
   GetIt.I.registerLazySingleton<Authentication>(() => Authentication());
   GetIt.I.registerLazySingleton<RealtimeSubscriptions>(
-      () => RealtimeSubscriptions());
+    () => RealtimeSubscriptions(),
+  );
   GetIt.I.registerLazySingleton<ThemeProvider>(() => ThemeProvider());
 
   registerProtocolHandler("stibu");

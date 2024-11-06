@@ -16,8 +16,8 @@ class Authentication {
     unawaited(
       appwrite.account.get().then((account) {
         log.info('Got account: ${account.name}');
-      _isAuthenticated.add(true);
-    }).catchError((e) {
+        _isAuthenticated.add(true);
+      }).catchError((e) {
         log.warning('Failed to get account: $e');
       }),
     );

@@ -86,8 +86,8 @@ class _CouponInputDialogState extends State<CouponInputDialog> {
                 if (widget.coupon != null) {
                   Navigator.of(context).pop(
                     widget.coupon!.copyWith(
-                      name: _name,
-                      amount: _amount,
+                      name: () => _name!,
+                      amount: () => _amount!,
                     ),
                   );
                 } else {

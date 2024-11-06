@@ -1,23 +1,7 @@
 import 'package:code_builder/code_builder.dart';
-import 'package:dart_style/dart_style.dart';
-
-final _dartfmt = DartFormatter();
-
-Future<void> generateAppwriteModel() async {
-  final emitter = DartEmitter(allocator: Allocator(), orderDirectives: true);
-  final output = getLibary();
-
-  final formatted = _dartfmt.format('${output.accept(emitter)}');
-
-  print(formatted);
-}
-
-Library getLibary() => Library((lib) => lib
-  ..directives.add(Directive.import('package:flutter/foundation.dart'))
-  ..body.add(getClass()));
 
 Class getClass() => Class((b) => b
-  ..annotations.add(refer('immutable', 'package:flutter/foundation.dart'))
+  ..annotations.add(refer('immutable'))
   ..abstract = true
   ..name = 'AppwriteModel'
   ..types.add(refer('T'))
@@ -59,53 +43,65 @@ List<Field> getFields() => [
 List<Method> getPermisionHelpers() => [
       Method((b) => b
         ..name = 'canRead'
+        ..type = MethodType.getter
         ..returns = refer('bool')
         ..lambda = true
-        ..body = Code('\$permissions.any((e) => e.contains("read"));')),
+        ..body = Code('\$permissions.any((e) => e.contains(\'read\'))')),
       Method((b) => b
         ..name = 'canUpdate'
+        ..type = MethodType.getter
         ..returns = refer('bool')
         ..lambda = true
-        ..body = Code('\$permissions.any((e) => e.contains("update"));')),
+        ..body = Code('\$permissions.any((e) => e.contains(\'update\'))')),
       Method((b) => b
         ..name = 'canDelete'
+        ..type = MethodType.getter
         ..returns = refer('bool')
         ..lambda = true
-        ..body = Code('\$permissions.any((e) => e.contains("delete"));')),
+        ..body = Code('\$permissions.any((e) => e.contains(\'delete\'))')),
       Method((b) => b
         ..name = 'canReadUpdate'
+        ..type = MethodType.getter
         ..returns = refer('bool')
         ..lambda = true
-        ..body = Code('canRead && canUpdate;')),
+        ..body = Code('canRead && canUpdate')),
     ];
 
 List<Constructor> getConstructors() => [
       Constructor((b) => b
-        ..name = 'AppwriteModel'
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = '\$id'
-          ..type = refer('String')
-          ..toThis = true))
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = '\$collectionId'
-          ..type = refer('String')
-          ..toThis = true))
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = '\$databaseId'
-          ..type = refer('String')
-          ..toThis = true))
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = '\$createdAt'
-          ..type = refer('DateTime')
-          ..toThis = true))
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = '\$updatedAt'
-          ..type = refer('DateTime')
-          ..toThis = true))
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = '\$permissions'
-          ..type = refer('List<String>')
-          ..toThis = true)))
+        ..constant = true
+        ..optionalParameters.addAll([
+          Parameter((b) => b
+            ..name = '\$id'
+            ..named = true
+            ..required = true
+            ..toThis = true),
+          Parameter((b) => b
+            ..name = '\$collectionId'
+            ..named = true
+            ..required = true
+            ..toThis = true),
+          Parameter((b) => b
+            ..name = '\$databaseId'
+            ..named = true
+            ..required = true
+            ..toThis = true),
+          Parameter((b) => b
+            ..name = '\$createdAt'
+            ..named = true
+            ..required = true
+            ..toThis = true),
+          Parameter((b) => b
+            ..name = '\$updatedAt'
+            ..named = true
+            ..required = true
+            ..toThis = true),
+          Parameter((b) => b
+            ..name = '\$permissions'
+            ..named = true
+            ..required = true
+            ..toThis = true),
+        ]))
     ];
 
 Method toJsonMethod() => Method((b) => b
@@ -115,35 +111,45 @@ Method toJsonMethod() => Method((b) => b
 Method copyWithMethod() => Method((b) => b
   ..name = 'copyWith'
   ..returns = refer('T')
-  ..requiredParameters.add(Parameter((b) => b
-    ..name = '\$id'
-    ..type = refer('String')))
-  ..requiredParameters.add(Parameter((b) => b
-    ..name = '\$collectionId'
-    ..type = refer('String')))
-  ..requiredParameters.add(Parameter((b) => b
-    ..name = '\$databaseId'
-    ..type = refer('String')))
-  ..requiredParameters.add(Parameter((b) => b
-    ..name = '\$createdAt'
-    ..type = refer('DateTime')))
-  ..requiredParameters.add(Parameter((b) => b
-    ..name = '\$updatedAt'
-    ..type = refer('DateTime')))
-  ..requiredParameters.add(Parameter((b) => b
-    ..name = '\$permissions'
-    ..type = refer('List<String>'))));
+  ..optionalParameters.addAll([
+    Parameter((b) => b
+      ..name = '\$id'
+      ..named = true
+      ..type = refer('String?')),
+    Parameter((b) => b
+      ..name = '\$collectionId'
+      ..named = true
+      ..type = refer('String?')),
+    Parameter((b) => b
+      ..name = '\$databaseId'
+      ..named = true
+      ..type = refer('String?')),
+    Parameter((b) => b
+      ..name = '\$createdAt'
+      ..named = true
+      ..type = refer('DateTime?')),
+    Parameter((b) => b
+      ..name = '\$updatedAt'
+      ..named = true
+      ..type = refer('DateTime?')),
+    Parameter((b) => b
+      ..name = '\$permissions'
+      ..named = true
+      ..type = refer('List<String>?')),
+  ]));
 
 Method toStringMethod() => Method((b) => b
   ..name = 'toString'
+  ..annotations.add(refer('override'))
   ..returns = refer('String')
   ..lambda = true
-  ..body = Code('toJson().toString();'));
+  ..body = Code('toJson().toString()'));
 
 Method toAppwriteMethod() => Method((b) => b
   ..name = 'toAppwrite'
   ..optionalParameters.add(Parameter((b) => b
-    ..name = 'includeRelations'
-    ..type = refer('bool')
-    ..defaultTo = Code('false')))
+    ..name = 'relationLevels'
+    ..named = true
+    ..type = refer('List<bool>')
+    ..defaultTo = Code('const []')))
   ..returns = refer('Map<String, dynamic>'));

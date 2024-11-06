@@ -1,4 +1,5 @@
 {
+  "@@locale": "en",
   "actionLogin": "Login",
   "appName": "Stibu",
   "constraintsRequired": "This field is required",

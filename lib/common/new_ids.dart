@@ -7,7 +7,7 @@ Future<Result<int, String>> newCustomerId() async {
   final appwrite = getIt<AppwriteClient>();
   try {
     final doc = await appwrite.databases.listDocuments(
-      databaseId: Customers.databaseId,
+      databaseId: Customers.collectionInfo.databaseId,
       collectionId: Customers.collectionInfo.$id,
       queries: [
         Query.orderDesc('id'),
@@ -53,7 +53,7 @@ Future<Result<String, String>> newExpenseNumber([DateTime? date]) async {
   final appwrite = getIt<AppwriteClient>();
   try {
     final latestExpense = await appwrite.databases.listDocuments(
-      databaseId: Expenses.databaseId,
+      databaseId: Expenses.collectionInfo.databaseId,
       collectionId: Expenses.collectionInfo.$id,
       queries: [
         Query.orderDesc('expenseNumber'),
@@ -90,7 +90,7 @@ Future<Result<String, String>> newInvoiceNumber([DateTime? date]) async {
   final appwrite = getIt<AppwriteClient>();
   try {
     final latestInvoices = await appwrite.databases.listDocuments(
-      databaseId: Invoices.databaseId,
+      databaseId: Invoices.collectionInfo.databaseId,
       collectionId: Invoices.collectionInfo.$id,
       queries: [
         Query.orderDesc('invoiceNumber'),

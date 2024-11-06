@@ -51,12 +51,12 @@ class _CustomerInputDialogState extends State<CustomerInputDialog> {
 
                 if (widget.customer != null) {
                   final customer = widget.customer!.copyWith(
-                    name: _name,
-                    email: _email?.isNotEmpty == true ? _email : null,
-                    phone: _phone?.isNotEmpty == true ? _phone : null,
-                    street: _street?.isNotEmpty == true ? _street : null,
-                    zip: _zip,
-                    city: _city?.isNotEmpty == true ? _city : null,
+                    name: () => _name!,
+                    email: () => _email?.isNotEmpty == true ? _email : null,
+                    phone: () => _phone?.isNotEmpty == true ? _phone : null,
+                    street: () => _street?.isNotEmpty == true ? _street : null,
+                    zip: () => _zip,
+                    city: () => _city?.isNotEmpty == true ? _city : null,
                   );
 
                   Navigator.of(context).pop(customer);

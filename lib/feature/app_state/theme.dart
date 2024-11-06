@@ -34,8 +34,8 @@ class ThemeProvider with ChangeNotifier {
     final appwrite = getIt<AppwriteClient>();
     unawaited(
       appwrite.account.getPrefs().then((preferences) {
-      preferences.data['accentColor'] = color.value;
-      appwrite.account.updatePrefs(prefs: preferences.data);
+        preferences.data['accentColor'] = color.value;
+        appwrite.account.updatePrefs(prefs: preferences.data);
       }),
     );
   }
@@ -46,8 +46,8 @@ class ThemeProvider with ChangeNotifier {
     final appwrite = getIt<AppwriteClient>();
     unawaited(
       appwrite.account.getPrefs().then((preferences) {
-      preferences.data['themeMode'] = mode.index;
-      appwrite.account.updatePrefs(prefs: preferences.data);
+        preferences.data['themeMode'] = mode.index;
+        appwrite.account.updatePrefs(prefs: preferences.data);
       }),
     );
   }

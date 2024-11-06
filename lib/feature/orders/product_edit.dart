@@ -125,10 +125,10 @@ class _ProductEditDialogState extends State<ProductEditDialog> {
                 _formKey.currentState!.save();
                 widget.onEdited(
                   widget.product.copyWith(
-                    id: _id,
-                    title: _title,
-                    quantity: _quantity,
-                    price: _price,
+                    id: () => _id,
+                    title: () => _title,
+                    quantity: () => _quantity,
+                    price: () => _price,
                   ),
                 );
                 Navigator.of(context).pop();

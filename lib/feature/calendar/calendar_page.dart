@@ -41,34 +41,34 @@ class _CalendarPageState extends State<CalendarPage> {
 
       unawaited(
         appwrite.databases.listDocuments(
-        databaseId: CalendarEvents.databaseId,
-        collectionId: CalendarEvents.collectionInfo.$id,
-        queries: [
-          Query.between(
-            'start',
-            day.toIso8601String(),
-            day
-                .add(
-                  const Duration(
-                    hours: 23,
-                    minutes: 59,
-                    seconds: 59,
-                    milliseconds: 999,
-                  ),
-                )
-                .toIso8601String(),
-          ),
-        ],
-      ).then((response) {
-        final List<CalendarEvents> events = response.documents
+          databaseId: CalendarEvents.collectionInfo.databaseId,
+          collectionId: CalendarEvents.collectionInfo.$id,
+          queries: [
+            Query.between(
+              'start',
+              day.toIso8601String(),
+              day
+                  .add(
+                    const Duration(
+                      hours: 23,
+                      minutes: 59,
+                      seconds: 59,
+                      milliseconds: 999,
+                    ),
+                  )
+                  .toIso8601String(),
+            ),
+          ],
+        ).then((response) {
+          final List<CalendarEvents> events = response.documents
               .map<CalendarEvents>(CalendarEvents.fromAppwrite)
-            .toList();
+              .toList();
 
-        if (mounted) {
-          setState(() {
-            _events[day] = events;
-          });
-        }
+          if (mounted) {
+            setState(() {
+              _events[day] = events;
+            });
+          }
         }),
       );
     }
@@ -155,7 +155,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                 Container(
                                   margin: const EdgeInsets.only(right: 4),
                                   decoration: BoxDecoration(
-                                    color: event.type == Type.plain
+                                    color: event.type == CalendarEventsType.plain
                                         ? Colors.blue
                                         : Colors.red,
                                     borderRadius: BorderRadius.circular(4),

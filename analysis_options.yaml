@@ -14,7 +14,6 @@ analyzer:
     - lib/**.g.dart
     - lib/**.freezed.dart
     - lib/l10n/generated/**
-    - lib/appwrite.models.dart
   errors:
     todo: ignore
 linter:

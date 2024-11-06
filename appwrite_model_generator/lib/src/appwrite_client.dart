@@ -1,27 +1,17 @@
 import 'package:code_builder/code_builder.dart';
-import 'package:dart_style/dart_style.dart';
-
-final _dartfmt = DartFormatter();
-
-Future<void> generateAppwriteClient() async {
-  final emitter = DartEmitter(allocator: Allocator(), orderDirectives: true);
-  final output = getLibary();
-
-  final formatted = _dartfmt.format('${output.accept(emitter)}');
-
-  print(formatted);
-}
-
-Library getLibary() => Library((lib) => lib
-  ..directives.add(Directive.import('package:appwrite/appwrite.dart'))
-  ..directives.add(Directive.import('package:appwrite/models.dart'))
-  ..directives.add(Directive.import('package:result_type/result_type.dart'))
-  ..body.add(getClass()));
 
 Class getClass() => Class((b) => b
   ..name = 'AppwriteClient'
   ..fields.addAll(getFields())
-  ..constructors.addAll(getConstructors()));
+  ..constructors.addAll(getConstructors())
+  ..methods.addAll([
+    pageMethod(),
+    listMethod(),
+    getMethod(),
+    createMethod(),
+    updateMethod(),
+    deleteMethod(),
+  ]));
 
 List<Field> getFields() => [
       Field((b) => b
@@ -30,48 +20,43 @@ List<Field> getFields() => [
         ..modifier = FieldModifier.final$),
       Field((b) => b
         ..name = 'account'
-        ..type = refer('Account')
         ..modifier = FieldModifier.final$
-        ..late = true
-        ..assignment = Code('Account(client)')),
+        ..type = refer('Account')),
       Field((b) => b
         ..name = 'databases'
-        ..type = refer('Databases')
         ..modifier = FieldModifier.final$
-        ..late = true
-        ..assignment = Code('Databases(client)')),
+        ..type = refer('Databases')),
       Field((b) => b
         ..name = 'realtime'
-        ..type = refer('Realtime')
         ..modifier = FieldModifier.final$
-        ..late = true
-        ..assignment = Code('Realtime(client)')),
+        ..type = refer('Realtime')),
       Field((b) => b
         ..name = 'functions'
-        ..type = refer('Functions')
         ..modifier = FieldModifier.final$
-        ..late = true
-        ..assignment = Code('Functions(client)')),
+        ..type = refer('Functions')),
       Field((b) => b
         ..name = 'avatars'
-        ..type = refer('Avatars')
         ..modifier = FieldModifier.final$
-        ..late = true
-        ..assignment = Code('Avatars(client)')),
+        ..type = refer('Avatars')),
       Field((b) => b
         ..name = 'storage'
-        ..type = refer('Storage')
         ..modifier = FieldModifier.final$
-        ..late = true
-        ..assignment = Code('Storage(client)')),
+        ..type = refer('Storage')),
     ];
 
 List<Constructor> getConstructors() => [
       Constructor((b) => b
         ..requiredParameters.add(Parameter((b) => b
           ..name = 'client'
-          ..type = refer('Client')
-          ..toThis = true)))
+          ..toThis = true))
+        ..initializers.addAll([
+          Code('account = Account(client)'),
+          Code('databases = Databases(client)'),
+          Code('realtime = Realtime(client)'),
+          Code('functions = Functions(client)'),
+          Code('avatars = Avatars(client)'),
+          Code('storage = Storage(client)'),
+        ])),
     ];
 
 Method pageMethod() => Method((b) => b
@@ -79,35 +64,43 @@ Method pageMethod() => Method((b) => b
   ..types.add(refer('T extends AppwriteModel<T>'))
   ..modifier = MethodModifier.async
   ..returns = refer('Future<Result<(int, List<T>), String>>')
-  ..requiredParameters.addAll([
+  ..optionalParameters.addAll([
     Parameter((b) => b
       ..name = 'databaseId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'collectionId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'fromAppwrite'
+      ..named = true
+      ..required = true
       ..type = refer('T Function(Document doc)')),
-  ])
-  ..optionalParameters.addAll([
     Parameter((b) => b
       ..name = 'limit'
+      ..named = true
       ..type = refer('int')
       ..defaultTo = Code('25')),
     Parameter((b) => b
       ..name = 'offset'
+      ..named = true
       ..type = refer('int?')),
     Parameter((b) => b
       ..name = 'last'
+      ..named = true
       ..type = refer('T?')),
     Parameter((b) => b
       ..name = 'queries'
-      ..type = refer('List<Query>?')),
+      ..named = true
+      ..type = refer('List<String>?')),
   ])
   ..body = Code('''
-    assert(limit > 0);
-    assert(offset != null && offset >= 0 || last != null);
+    assert(limit > 0, 'Limit must be greater than 0');
+    assert(offset != null && offset >= 0 || last != null, 'Either offset or last must be provided');
     try {
       final response = await databases.listDocuments(
         databaseId: databaseId,
@@ -119,12 +112,12 @@ Method pageMethod() => Method((b) => b
           ...?queries,
         ],
       );
-      return Success(
+      return Success((
         response.total,
         response.documents.map((e) => fromAppwrite(e)).toList(),
-      );
-    } catch (e) {
-      return Failure(e.message ?? "Unable to list documents");
+      ));
+    } on AppwriteException catch (e) {
+      return Failure(e.message ?? 'Unable to list documents');
     }
   '''));
 
@@ -132,31 +125,41 @@ Method listMethod() => Method((b) => b
   ..name = 'list'
   ..types.add(refer('T extends AppwriteModel<T>'))
   ..modifier = MethodModifier.async
-  ..returns = refer('Future<Result<List<T>, String>>')
-  ..requiredParameters.addAll([
+  ..returns = refer('Future<Result<(int, List<T>), String>>')
+  ..optionalParameters.addAll([
     Parameter((b) => b
       ..name = 'databaseId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'collectionId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'fromAppwrite'
+      ..named = true
+      ..required = true
       ..type = refer('T Function(Document doc)')),
     Parameter((b) => b
       ..name = 'queries'
-      ..type = refer('List<Query>')),
+      ..named = true
+      ..type = refer('List<String>?')),
   ])
   ..body = Code('''
     try {
       final response = await databases.listDocuments(
         databaseId: databaseId,
         collectionId: collectionId,
-        queries: queries,
+        queries: queries ?? [],
       );
-      return Success(response.documents.map((e) => fromAppwrite(e)).toList());
-    } catch (e) {
-      return Failure(e.message ?? "Unable to list documents");
+      return Success((
+        response.total,
+        response.documents.map((e) => fromAppwrite(e)).toList(),
+      ));
+    } on AppwriteException catch (e) {
+      return Failure(e.message ?? 'Unable to list documents');
     }
   '''));
 
@@ -165,24 +168,31 @@ Method getMethod() => Method((b) => b
   ..types.add(refer('T extends AppwriteModel<T>'))
   ..modifier = MethodModifier.async
   ..returns = refer('Future<Result<T, String>>')
-  ..requiredParameters.addAll([
+  ..optionalParameters.addAll([
     Parameter((b) => b
       ..name = 'databaseId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'collectionId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'documentId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'fromAppwrite'
+      ..named = true
+      ..required = true
       ..type = refer('T Function(Document doc)')),
-  ])
-  ..optionalParameters.addAll([
     Parameter((b) => b
       ..name = 'queries'
-      ..type = refer('List<Query>?'))
+      ..named = true
+      ..type = refer('List<String>?'))
   ])
   ..body = Code('''
     try {
@@ -193,8 +203,8 @@ Method getMethod() => Method((b) => b
         queries: queries,
       );
       return Success(fromAppwrite(response));
-    } catch (e) {
-      return Failure(e.message ?? "Unable to get document");
+    } on AppwriteException catch (e) {
+      return Failure(e.message ?? 'Unable to get document');
     }
   '''));
 
@@ -203,24 +213,32 @@ Method createMethod() => Method((b) => b
   ..types.add(refer('T extends AppwriteModel<T>'))
   ..modifier = MethodModifier.async
   ..returns = refer('Future<Result<T, String>>')
-  ..requiredParameters.addAll([
+  ..optionalParameters.addAll([
     Parameter((b) => b
       ..name = 'databaseId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'collectionId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'fromAppwrite'
+      ..named = true
+      ..required = true
       ..type = refer('T Function(Document doc)')),
     Parameter((b) => b
       ..name = 'model'
+      ..named = true
+      ..required = true
       ..type = refer('T')),
-  ])
-  ..optionalParameters.addAll([
     Parameter((b) => b
-      ..name = 'permissions'
-      ..type = refer('List<String>?'))
+      ..name = 'relationLevels'
+      ..named = true
+      ..type = refer('List<bool>')
+      ..defaultTo = Code('const []')),
   ])
   ..body = Code('''
     try {
@@ -228,12 +246,12 @@ Method createMethod() => Method((b) => b
         databaseId: databaseId,
         collectionId: collectionId,
         documentId: model.\$id,
-        data: model.toAppwrite(),
-        permissions: permissions,
+        data: model.toAppwrite(relationLevels: relationLevels),
+        permissions: model.\$permissions,
       );
       return Success(fromAppwrite(response));
-    } catch (e) {
-      return Failure(e.message ?? "Unable to create document");
+    } on AppwriteException catch (e) {
+      return Failure(e.message ?? 'Unable to create document');
     }
   '''));
 
@@ -242,28 +260,32 @@ Method updateMethod() => Method((b) => b
   ..types.add(refer('T extends AppwriteModel<T>'))
   ..modifier = MethodModifier.async
   ..returns = refer('Future<Result<T, String>>')
-  ..requiredParameters.addAll([
+  ..optionalParameters.addAll([
     Parameter((b) => b
       ..name = 'databaseId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'collectionId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'fromAppwrite'
+      ..named = true
+      ..required = true
       ..type = refer('T Function(Document doc)')),
     Parameter((b) => b
       ..name = 'model'
+      ..named = true
+      ..required = true
       ..type = refer('T')),
-  ])
-  ..optionalParameters.addAll([
     Parameter((b) => b
-      ..name = 'permissions'
-      ..type = refer('List<String>?')),
-    Parameter((b) => b
-      ..name = 'includeRelations'
-      ..type = refer('bool')
-      ..defaultTo = Code('false')),
+      ..name = 'relationLevels'
+      ..named = true
+      ..type = refer('List<bool>')
+      ..defaultTo = Code('const []')),
   ])
   ..body = Code('''
     try {
@@ -271,12 +293,12 @@ Method updateMethod() => Method((b) => b
         databaseId: databaseId,
         collectionId: collectionId,
         documentId: model.\$id,
-        data: model.toAppwrite(),
-        permissions: permissions,
+        data: model.toAppwrite(relationLevels: relationLevels),
+        permissions: model.\$permissions,
       );
       return Success(fromAppwrite(response));
-    } catch (e) {
-      return Failure(e.message ?? "Unable to update document");
+    } on AppwriteException catch (e) {
+      return Failure(e.message ?? 'Unable to update document');
     }
   '''));
 
@@ -284,15 +306,21 @@ Method deleteMethod() => Method((b) => b
   ..name = 'delete'
   ..modifier = MethodModifier.async
   ..returns = refer('Future<Result<void, String>>')
-  ..requiredParameters.addAll([
+  ..optionalParameters.addAll([
     Parameter((b) => b
       ..name = 'databaseId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'collectionId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
     Parameter((b) => b
       ..name = 'documentId'
+      ..named = true
+      ..required = true
       ..type = refer('String')),
   ])
   ..body = Code('''
@@ -303,7 +331,7 @@ Method deleteMethod() => Method((b) => b
         documentId: documentId,
       );
       return Success(null);
-    } catch (e) {
-      return Failure(e.message ?? "Unable to delete document");
+    } on AppwriteException catch (e) {
+      return Failure(e.message ?? 'Unable to delete document');
     }
   '''));

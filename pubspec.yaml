@@ -22,7 +22,7 @@ dependencies:
   app_links: ^6.2.0
   fluent_ui: ^4.9.1
   system_theme: ^3.0.0
-  appwrite: ^12.0.1
+  appwrite: ^13.0.0
   result_type: ^0.2.0
   bitsdojo_window: ^0.1.6
   get_it: ^7.7.0
@@ -31,7 +31,6 @@ dependencies:
   html_unescape: ^2.0.0
   http: ^1.2.2
   table_calendar: ^3.1.2
-  build: ^2.4.1
   pdf: ^3.11.1
   printing: ^5.13.2
   path_provider: ^2.1.4
@@ -39,6 +38,8 @@ dependencies:
   sanitize_filename: ^1.0.5
   dart_helper_utils: ^2.7.0
   flutter_helper_utils: ^6.6.0
+  appwrite_model_generator:
+    path: ./appwrite_model_generator
 
 
 dev_dependencies:

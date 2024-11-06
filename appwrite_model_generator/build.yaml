@@ -1,0 +1,15 @@
+builders:
+  modelBuilder:
+    import: 'package:appwrite_model_generator/appwrite_model_generator.dart'
+    builder_factories: [ 'modelBuilder' ]
+    build_extensions:
+      '.json': ['appwrite.models.dart']
+    build_to: source
+    auto_apply: root_package
+  exampleJsonBuilder:
+    import: 'package:appwrite_model_generator/appwrite_model_generator.dart'
+    builder_factories: [ 'exampleJsonBuilder' ]
+    build_extensions:
+      '.json': ['appwrite.example.json']
+    build_to: source
+    auto_apply: root_package

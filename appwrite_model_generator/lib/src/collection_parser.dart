@@ -81,27 +81,27 @@ class AttributeInfo {
 
     fields.add(Field((b) => b
       ..name = name
-      ..type = required ? typeReference : typeReference.nullable
+      ..type = required ? reference : reference.nullable
       ..modifier = FieldModifier.final$));
 
-    if (this is AttributeInfoRelationship) {
-      final info = this as AttributeInfoRelationship;
+    if (this is AttributeInfoRelation) {
+      final info = this as AttributeInfoRelation;
 
       fields.add(Field((b) => b
-        ..name = '${name}Relationship'
-        ..type = refer('Relationship')
-        ..assignment = Code('''Relationship(
+        ..name = '${name}Relation'
+        ..type = refer('Relation')
+        ..assignment = Code('''const Relation(
           required: $required,
           array: $array,
           relatedCollection: '$name',
-          relationshipType: RelationshipType.${info.relationshipType},
+          relationType: ${info.relationType},
           twoWay: ${info.twoWay},
-          twoWayKey: ${info.twoWayKey},
-          onDelete: RelationshipOnDelete.${info.onDelete},
-          side: RelationshipSide.${info.side},
+          twoWayKey: '${info.twoWayKey}',
+          onDelete: ${info.onDelete},
+          side: ${info.side},
         )''')
         ..static = true
-        ..modifier = FieldModifier.final$));
+        ..modifier = FieldModifier.constant));
     }
 
     return fields;
@@ -109,13 +109,16 @@ class AttributeInfo {
 
   Parameter getConstructorParameter() => Parameter((b) => b
     ..name = name
+    ..named = true
     ..toThis = true
     ..required = required);
 
   Parameter getDefaultFactoryParameter() => Parameter((b) => b
     ..name = name
-    ..type = required ? typeReference : typeReference.nullable
-    ..defaultTo = required ? defaultTo : null);
+    ..named = true
+    ..type = required ? reference : reference.nullable
+    ..required = required
+    ..defaultTo = required && raw.defaultValue != null ? defaultTo : null);
 
   Code getToJsonField() => Code("'$name': $name");
 
@@ -123,16 +126,19 @@ class AttributeInfo {
 
   Parameter getCopyWithParameter() => Parameter((b) => b
     ..name = name
-    ..type = refer('${reference.symbol}? Function()?'));
+    ..named = true
+    ..type = refer('${reference.symbol}${required ? '' : '?'} Function()?'));
 
-  Code getCopyWithField() => Code('$name: $name?.call()');
+  Code getCopyWithField() => Code('$name: $name?.call() ?? this.$name');
 
   Code getEqualCheck() =>
-      array ? Code('eq($name, other.$name)') : Code('$name == other.$name');
+      array ? Code('_eq($name, other.$name)') : Code('$name == other.$name');
 
   Code getFromAppwriteField() => array
       ? Code('$name: List<$type>.unmodifiable(doc.data[\'$name\'] ?? [])')
       : Code('$name: doc.data[\'$name\']');
+
+  Code getDefaultFactoryField() => Code('$name: $name');
 }
 
 class AttributeInfoString extends AttributeInfo {
@@ -150,23 +156,28 @@ class AttributeInfoString extends AttributeInfo {
 
     if (required) {
       if (array) {
-        asserts.add(Code('assert(all($name, (e) => e.isNotBlank));'));
-        asserts.add(Code('assert(all($name, (e) => e.length <= $size));'));
+        asserts.add(Code(
+            'assert($name.every((e) => e.isNotBlank), \'$name is blank\')'));
+        asserts.add(Code(
+            'assert($name.every((e) => e.length <= $size), \'$name is greater than $size\')'));
       } else {
-        asserts.add(Code('assert($name.isNotBlank);'));
-        asserts.add(Code('assert($name.length <= $size);'));
+        asserts.add(Code('assert($name.isNotBlank, \'$name is blank\')'));
+        asserts.add(Code(
+            'assert($name.length <= $size, \'$name is greater than $size\')'));
       }
     } else {
       if (array) {
         asserts.add(Code(
-          'assert($name == null || all($name, (e) => e.isNotBlank));',
+          'assert($name == null || $name.every((e) => e.isNotBlank), \'$name is blank\')',
         ));
         asserts.add(Code(
-          'assert($name == null || all($name, (e) => e.length <= $size));',
+          'assert($name == null || $name.every((e) => e.length <= $size), \'$name is greater than $size\')',
         ));
       } else {
-        asserts.add(Code('assert($name == null || $name.isNotBlank);'));
-        asserts.add(Code('assert($name == null || $name.length <= $size);'));
+        asserts.add(Code(
+            'assert($name == null || $name.isNotBlank, \'$name is blank\')'));
+        asserts.add(Code(
+            'assert($name == null || $name.length <= $size, \'$name is greater than $size\')'));
       }
     }
 
@@ -190,23 +201,28 @@ class AttributeInfoInt extends AttributeInfo {
 
     if (required) {
       if (array) {
-        asserts.add(Code('assert(all($name, (e) => e >= $min));'));
-        asserts.add(Code('assert(all($name, (e) => e <= $max));'));
+        asserts.add(Code(
+            'assert($name.every((e) => e >= $min), \'$name is less than $min\')'));
+        asserts.add(Code(
+            'assert($name.every((e) => e <= $max), \'$name is greater than $max\')'));
       } else {
-        asserts.add(Code('assert($name >= $min);'));
-        asserts.add(Code('assert($name <= $max);'));
+        asserts.add(Code('assert($name >= $min, \'$name is less than $min\')'));
+        asserts
+            .add(Code('assert($name <= $max, \'$name is greater than $max\')'));
       }
     } else {
       if (array) {
         asserts.add(Code(
-          'assert($name == null || all($name, (e) => e >= $min));',
+          'assert($name == null || $name.every((e) => e >= $min), \'$name is less than $min\')',
         ));
         asserts.add(Code(
-          'assert($name == null || all($name, (e) => e <= $max));',
+          'assert($name == null || $name.every((e) => e <= $max), \'$name is greater than $max\')',
         ));
       } else {
-        asserts.add(Code('assert($name == null || $name >= $min);'));
-        asserts.add(Code('assert($name == null || $name <= $max);'));
+        asserts.add(Code(
+            'assert($name == null || $name >= $min, \'$name is less than $min\')'));
+        asserts.add(Code(
+            'assert($name == null || $name <= $max, \'$name is greater than $max\')'));
       }
     }
 
@@ -234,23 +250,28 @@ class AttributeInfoDouble extends AttributeInfo {
 
     if (required) {
       if (array) {
-        asserts.add(Code('assert(all($name, (e) => e >= $min));'));
-        asserts.add(Code('assert(all($name, (e) => e <= $max));'));
+        asserts.add(Code(
+            'assert($name.every((e) => e >= $min), \'$name is less than $min\')'));
+        asserts.add(Code(
+            'assert($name.every((e) => e <= $max), \'$name is greater than $max\')'));
       } else {
-        asserts.add(Code('assert($name >= $min);'));
-        asserts.add(Code('assert($name <= $max);'));
+        asserts.add(Code('assert($name >= $min, \'$name is less than $min\')'));
+        asserts
+            .add(Code('assert($name <= $max, \'$name is greater than $max\')'));
       }
     } else {
       if (array) {
         asserts.add(Code(
-          'assert($name == null || all($name, (e) => e >= $min));',
+          'assert($name == null || $name.every((e) => e >= $min), \'$name is less than $min\')',
         ));
         asserts.add(Code(
-          'assert($name == null || all($name, (e) => e <= $max));',
+          'assert($name == null || $name.every((e) => e <= $max), \'$name is greater than $max\')',
         ));
       } else {
-        asserts.add(Code('assert($name == null || $name >= $min);'));
-        asserts.add(Code('assert($name == null || $name <= $max);'));
+        asserts.add(Code(
+            'assert($name == null || $name >= $min, \'$name is less than $min\')'));
+        asserts.add(Code(
+            'assert($name == null || $name <= $max, \'$name is greater than $max\')'));
       }
     }
 
@@ -273,17 +294,20 @@ class AttributeInfoEmail extends AttributeInfo {
 
     if (required) {
       if (array) {
-        asserts.add(Code('assert(all($name, (e) => e.isValidEmail));'));
+        asserts.add(Code(
+            'assert($name.every((e) => e.isValidEmail), \'$name is not a valid email\')'));
       } else {
-        asserts.add(Code('assert($name.isValidEmail);'));
+        asserts.add(
+            Code('assert($name.isValidEmail, \'$name is not a valid email\')'));
       }
     } else {
       if (array) {
         asserts.add(Code(
-          'assert($name == null || all($name, (e) => e.isValidEmail));',
+          'assert($name == null || $name.every((e) => e.isValidEmail), \'$name is not a valid email\')',
         ));
       } else {
-        asserts.add(Code('assert($name == null || $name.isValidEmail);'));
+        asserts.add(Code(
+            'assert($name == null || $name.isValidEmail, \'$name is not a valid email\')'));
       }
     }
 
@@ -293,25 +317,25 @@ class AttributeInfoEmail extends AttributeInfo {
 
 class Relationship {}
 
-enum RelationshipType { oneToOne, manyToOne, oneToMany, manyToMany }
+enum RelationType { oneToOne, manyToOne, oneToMany, manyToMany }
 
-enum RelationshipOnDelete { setNull, cascade, restrict }
+enum RelationOnDelete { setNull, cascade, restrict }
 
-enum RelationshipSide { parent, child }
+enum RelationSide { parent, child }
 
-class AttributeInfoRelationship extends AttributeInfo {
-  final RelationshipType relationshipType;
-  final RelationshipOnDelete onDelete;
-  final RelationshipSide side;
+class AttributeInfoRelation extends AttributeInfo {
+  final RelationType relationType;
+  final RelationOnDelete onDelete;
+  final RelationSide side;
   final String relatedCollection;
   final bool twoWay;
   final String? twoWayKey;
   final Reference relatedClassReference;
   final Reference _reference;
 
-  AttributeInfoRelationship({
+  AttributeInfoRelation({
     required super.raw,
-    required this.relationshipType,
+    required this.relationType,
     required this.onDelete,
     required this.side,
     required this.relatedCollection,
@@ -319,7 +343,7 @@ class AttributeInfoRelationship extends AttributeInfo {
     required this.twoWayKey,
     required this.relatedClassReference,
   }) : _reference = resolveRelationshipType(
-          relationshipType,
+          relationType,
           side,
           relatedClassReference,
         );
@@ -330,22 +354,22 @@ class AttributeInfoRelationship extends AttributeInfo {
   Reference get typeReference => _reference;
   @override
   Code getToJsonField() {
-    if (isTypeSingle(relationshipType, side)) {
+    if (isTypeSingle(relationType, side)) {
       return Code("'$name': $name?.toJson()");
     } else {
       return Code("'$name': $name?.map((e) => e.toJson()).toList()");
     }
   }
 
-  static bool isTypeSingle(RelationshipType type, RelationshipSide side) {
-    return type == RelationshipType.oneToOne ||
-        type == RelationshipType.oneToMany && side == RelationshipSide.child ||
-        type == RelationshipType.manyToOne && side == RelationshipSide.parent;
+  static bool isTypeSingle(RelationType type, RelationSide side) {
+    return type == RelationType.oneToOne ||
+        type == RelationType.oneToMany && side == RelationSide.child ||
+        type == RelationType.manyToOne && side == RelationSide.parent;
   }
 
   static Reference resolveRelationshipType(
-    RelationshipType type,
-    RelationshipSide side,
+    RelationType type,
+    RelationSide side,
     Reference relatedCollection,
   ) {
     if (isTypeSingle(type, side)) {
@@ -357,11 +381,19 @@ class AttributeInfoRelationship extends AttributeInfo {
 
   @override
   Code getFromAppwriteField() {
-    if (isTypeSingle(relationshipType, side)) {
-      return Code('$name: doc.data[\'$name\']');
+    if (isTypeSingle(relationType, side)) {
+      return required
+          ? Code(
+              '$name: ${relatedClassReference.symbol}.fromAppwrite(Document.fromMap(doc.data[\'$name\']))',
+            )
+          : Code('''
+          $name: doc.data['$name'] != null
+              ? ${relatedClassReference.symbol}.fromAppwrite(Document.fromMap(doc.data['$name']))
+              : null
+        ''');
     } else {
       return Code(
-        '$name: List<$type>.unmodifiable(doc.data[\'$name\']?.map((e) => $relatedClassReference.fromAppwrite(Document.fromMap(e)))) ?? [])',
+        '$name: List<${relatedClassReference.symbol}>.unmodifiable(doc.data[\'$name\']?.map((e) => ${relatedClassReference.symbol}.fromAppwrite(Document.fromMap(e))) ?? [])',
       );
     }
   }
@@ -393,17 +425,19 @@ class AttributeInfoDateTime extends AttributeInfo {
 
     if (required) {
       if (array) {
-        asserts.add(Code('assert(all($name, (e) => e.isUtc));'));
+        asserts.add(
+            Code('assert($name.every((e) => e.isUtc), \'$name is not UTC\')'));
       } else {
-        asserts.add(Code('assert($name.isUtc);'));
+        asserts.add(Code('assert($name.isUtc, \'$name is not UTC\')'));
       }
     } else {
       if (array) {
         asserts.add(Code(
-          'assert($name == null || all($name, (e) => e.isUtc));',
+          'assert($name == null || $name.every((e) => e.isUtc), \'$name is not UTC\')',
         ));
       } else {
-        asserts.add(Code('assert($name == null || $name.isUtc);'));
+        asserts.add(
+            Code('assert($name == null || $name.isUtc, \'$name is not UTC\')'));
       }
     }
     return asserts;
@@ -412,12 +446,16 @@ class AttributeInfoDateTime extends AttributeInfo {
   @override
   Code getFromAppwriteField() => array
       ? Code(
-          '$name: List<$type>.unmodifiable(doc.data[\'$name\']?.map((e) => DateTime.parse(e)) ?? [])',
+          '$name: List<$type>.unmodifiable(doc.data[\'$name\']?.map((e) => $type.parse(e)) ?? [])',
         )
-      : Code('''
+      : required
+          ? Code('''
+          $name: $type.parse(doc.data['$name'])
+        ''')
+          : Code('''
           $name: doc.data['$name'] != null
-              ? DateTime.parse(doc.data['$name'])
-              : null,
+              ? $type.parse(doc.data['$name'])
+              : null
         ''');
 }
 
@@ -430,7 +468,7 @@ class AttributeInfoEnum extends AttributeInfo {
     required this.values,
     required Reference classReference,
   }) : _reference = refer(
-          '${classReference.symbol}.${raw.key.capitalizeFirstLetter}',
+          '${classReference.symbol}${raw.key.capitalizeFirstLetter}',
         );
 
   @override
@@ -444,11 +482,15 @@ class AttributeInfoEnum extends AttributeInfo {
   @override
   Code getFromAppwriteField() => array
       ? Code(
-          '$name: List<$type>.unmodifiable(doc.data[\'$name\']?.map((e) => $typeReference.values.byName(e)) ?? [])',
+          '$name: List<$type>.unmodifiable(doc.data[\'$name\']?.map((e) => ${typeReference.symbol}.values.byName(e)) ?? [])',
         )
-      : Code(
-          '$name: $typeReference.values.byName(doc.data[\'$name\']) ?? $typeReference.values.first',
-        );
+      : required
+          ? Code(
+              '$name: ${typeReference.symbol}.values.byName(doc.data[\'$name\'])',
+            )
+          : Code(
+              '$name: doc.data[\'$name\'] != null ? ${typeReference.symbol}.values.byName(doc.data[\'$name\']) : null',
+            );
 }
 
 AttributeInfo resolveAttributeInfo(
@@ -480,7 +522,7 @@ AttributeInfo resolveAttributeInfo(
         array: array,
         defaultValue: defaultValue,
       ),
-      values: (attribute['values'] as List<dynamic>).cast<String>(),
+      values: (attribute['elements'] as List<dynamic>).cast<String>(),
       classReference: classReference,
     );
   }
@@ -532,20 +574,20 @@ AttributeInfo resolveAttributeInfo(
         defaultValue: defaultValue,
       ));
     case 'relationship':
-      return AttributeInfoRelationship(
+      return AttributeInfoRelation(
         raw: AttributeInfoRaw(
           key: key,
           required: required,
           array: array,
           defaultValue: defaultValue,
         ),
-        relationshipType: RelationshipType.values.byName(
-          attribute['relationshipType'] as String,
+        relationType: RelationType.values.byName(
+          attribute['relationType'] as String,
         ),
-        onDelete: RelationshipOnDelete.values.byName(
+        onDelete: RelationOnDelete.values.byName(
           attribute['onDelete'] as String,
         ),
-        side: RelationshipSide.values.byName(attribute['side'] as String),
+        side: RelationSide.values.byName(attribute['side'] as String),
         relatedCollection: attribute['relatedCollection'] as String,
         twoWay: attribute['twoWay'] as bool,
         twoWayKey: attribute['twoWayKey'] as String?,

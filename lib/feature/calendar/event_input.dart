@@ -60,12 +60,12 @@ class _EventInputDialogState extends State<EventInputDialog> {
                 late final CalendarEvents event;
                 if (widget.event != null) {
                   event = widget.event!.copyWith(
-                    start: start.toUtc(),
-                    end: end.toUtc(),
-                    title: _title,
-                    description: _description,
-                    participants: _participants,
-                    amount: _participants.isNotEmpty
+                    start: start.toUtc,
+                    end: end.toUtc,
+                    title: () => _title!,
+                    description: () => _description,
+                    participants: () => _participants,
+                    amount: () => _participants.isNotEmpty
                         ? Currency.fromString(_amount!).asInt
                         : null,
                   );
@@ -76,8 +76,8 @@ class _EventInputDialogState extends State<EventInputDialog> {
                     end: end.toUtc(),
                     description: _description,
                     type: _participants.isNotEmpty
-                        ? Type.withParticipants
-                        : Type.plain,
+                        ? CalendarEventsType.withParticipants
+                        : CalendarEventsType.plain,
                     participants: _participants,
                     amount: _participants.isNotEmpty
                         ? Currency.fromString(_amount!).asInt
@@ -304,7 +304,7 @@ class _EventInputDialogState extends State<EventInputDialog> {
                       _participants.add(
                         CalendarEventParticipants(
                           customer: customer,
-                          status: Status.pending,
+                          status: CalendarEventParticipantsStatus.pending,
                         ),
                       );
                     });
@@ -314,9 +314,9 @@ class _EventInputDialogState extends State<EventInputDialog> {
               for (final participant in _participants)
                 ListTile(
                   title: Text(participant.customer?.name ?? 'Unknown'),
-                  trailing: ComboBox<Status>(
+                  trailing: ComboBox<CalendarEventParticipantsStatus>(
                     value: participant.status,
-                    items: Status.values
+                    items: CalendarEventParticipantsStatus.values
                         .map(
                           (e) => ComboBoxItem(
                             value: e,
@@ -325,10 +325,11 @@ class _EventInputDialogState extends State<EventInputDialog> {
                         )
                         .toList(),
                     onChanged: (value) {
+                      assert(value != null, 'Value cannot be null');
                       final index = _participants.indexOf(participant);
                       setState(() {
                         _participants[index] =
-                            participant.copyWith(status: value);
+                            participant.copyWith(status: () => value!);
                       });
                     },
                   ),
@@ -383,12 +384,12 @@ class _CustomerAutoSuggestState extends State<CustomerAutoSuggest> {
 
       unawaited(
         appwrite.databases.listDocuments(
-        databaseId: Customers.databaseId,
-        collectionId: Customers.collectionInfo.$id,
-        queries: [
-          Query.search('name', query),
-        ],
-      ).then((result) {
+          databaseId: Customers.collectionInfo.databaseId,
+          collectionId: Customers.collectionInfo.$id,
+          queries: [
+            Query.search('name', query),
+          ],
+        ).then((result) {
           final items = result.documents.map(Customers.fromAppwrite);
           final newItems = items.where(
             (element) =>
@@ -396,9 +397,9 @@ class _CustomerAutoSuggestState extends State<CustomerAutoSuggest> {
                 !_customers.any((e) => e.$id == element.$id),
           );
 
-        setState(() {
-          _customers.addAll(newItems);
-        });
+          setState(() {
+            _customers.addAll(newItems);
+          });
         }),
       );
     });
@@ -454,29 +455,36 @@ Future<void> displayNewEventDialog(BuildContext context) async {
       final appwrite = getIt<AppwriteClient>();
 
       try {
-        final data = value.toAppwrite(includeRelations: false);
+        // TODO: refactor to use relationLevels
+        final data = value.toAppwrite();
         data['participants'] = value.participants?.map((e) {
-              final item = e.toAppwrite(includeRelations: false, isChild: true);
+              final item = e.toAppwrite(relationLevels: [true]);
               item['customer'] = e.customer?.$id;
               return item;
             }).toList() ??
             [];
 
         await appwrite.databases.createDocument(
-          databaseId: CalendarEvents.databaseId,
+          databaseId: CalendarEvents.collectionInfo.databaseId,
           collectionId: CalendarEvents.collectionInfo.$id,
           documentId: value.$id,
           data: data,
         );
       } on AppwriteException catch (e) {
         if (!context.mounted) return;
-        await showResultInfo(context, Failure(e.message ?? 'Failed to create event'));
+        await showResultInfo(
+          context,
+          Failure(e.message ?? 'Failed to create event'),
+        );
       }
     }
   });
 }
 
-Future<void> displayEditEventDialog(BuildContext context, CalendarEvents event) async {
+Future<void> displayEditEventDialog(
+  BuildContext context,
+  CalendarEvents event,
+) async {
   await showDialog<CalendarEvents>(
     context: context,
     builder: (context) => EventInputDialog(

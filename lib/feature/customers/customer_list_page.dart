@@ -235,7 +235,8 @@ class _CustomerListPageState extends State<CustomerListPage> {
                   isSelected: selectedIndex == index,
                   onPressed: () async {
                     if (!largeScreen) {
-                      await context.navigateTo(CustomerDetailRoute(id: customer.$id));
+                      await context
+                          .navigateTo(CustomerDetailRoute(id: customer.$id));
                       return;
                     }
                     if (selectedIndex == index) return;

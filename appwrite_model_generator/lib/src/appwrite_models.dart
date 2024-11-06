@@ -1,52 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:appwrite_model_generator/src/collection_parser.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_helper_utils/dart_helper_utils.dart';
-import 'package:dart_style/dart_style.dart';
-
-final _dartfmt = DartFormatter();
-
-Future<void> generateAppwriteModels() async {
-  final emitter = DartEmitter(allocator: Allocator(), orderDirectives: true);
-  final output = getLibary();
-
-  final formatted = _dartfmt.format('${output.accept(emitter)}');
-
-  print(formatted);
-}
-
-Library getLibary() => Library((lib) {
-      lib.directives.add(Directive.import('package:flutter/foundation.dart'));
-      lib.directives.add(Directive.import(
-        'package:appwrite_model/appwrite_model.dart',
-      ));
-      lib.directives.add(Directive.import(
-        'package:dart_helper_utils/dart_helper_utils.dart',
-      ));
-      lib.directives
-          .add(Directive.import('package:collection/collection.dart'));
-
-      final inputFile = File('input.json');
-      final input = inputFile.readAsStringSync();
-      final jsonMap = json.decode(input);
-      final collections = jsonMap['collections'] as List<dynamic>;
-      final Map<String, String> collectionIdToName = collections.fold(
-        <String, String>{},
-        (
-          map,
-          collection,
-        ) =>
-            map..[collection['\$id'] as String] = collection['name'] as String,
-      );
-
-      lib.body.addAll(
-          collections.map((collection) => ClassFactory(CollectionInfo.fromMap(
-                collection,
-                collectionIdToName,
-              )).getClass()));
-    });
 
 class ClassFactory {
   final CollectionInfo collectionInfo;
@@ -56,8 +10,21 @@ class ClassFactory {
 
   ClassFactory(this.collectionInfo);
 
+  List<Spec> build() => [
+        for (final attribute in attributes) ...[
+          if (attribute is AttributeInfoEnum) ...[
+            Enum((b) => b
+              ..annotations.add(refer('immutable'))
+              ..name = attribute.typeReference.symbol
+              ..values.addAll(
+                  attribute.values.map((e) => EnumValue((b) => b..name = e))))
+          ],
+        ],
+        getClass(),
+      ];
+
   Class getClass() => Class((b) => b
-    ..annotations.add(refer('immutable', 'package:flutter/foundation.dart'))
+    ..annotations.add(refer('immutable'))
     ..name = className
     ..extend = refer('AppwriteModel<$className>')
     ..fields.addAll(getFields())
@@ -66,13 +33,39 @@ class ClassFactory {
     ..methods.add(toJsonMethod())
     ..methods.add(toAppwriteMethod())
     ..methods.add(copyWithMethod())
-    ..methods.add(toStringMethod())
+    // ..methods.add(toStringMethod())
     ..methods.add(operatorEqualMethod())
-    ..methods.add(hashCodeMethod())
-    ..constructors.add(fromAppwriteFactory()));
+    ..methods.add(hashCodeGetter())
+    ..constructors.add(fromAppwriteFactory())
+    ..methods.addAll([
+      pageMethod(),
+      listMethod(),
+      getMethod(),
+      createMethod(),
+      updateMethod(),
+      deleteMethod(),
+    ]));
 
   List<Field> getFields() {
-    final fields = <Field>[];
+    final fields = <Field>[
+      Field(
+        (b) => b
+          ..name = 'collectionInfo'
+          ..type = refer('CollectionInfo')
+          ..static = true
+          ..modifier = FieldModifier.constant
+          ..assignment = Code('''
+CollectionInfo(
+  \$id: '${collectionInfo.$id}',
+  \$permissions: ${collectionInfo.$permissions.map((e) => "'$e'").toList()},
+  databaseId: '${collectionInfo.databaseId}',
+  name: '${collectionInfo.name}',
+  enabled: ${collectionInfo.enabled},
+  documentSecurity: ${collectionInfo.documentSecurity},
+)
+'''),
+      ),
+    ];
 
     for (final attribute in attributes) {
       fields.addAll(attribute.getFields());
@@ -81,81 +74,157 @@ class ClassFactory {
     return fields;
   }
 
-  Constructor getPrivateConstructor() => Constructor((b) => b
-    ..requiredParameters
-        .addAll(attributes.map((e) => e.getConstructorParameter()))
-    ..requiredParameters.add(Parameter((b) => b
-      ..name = '\$id'
-      ..required = true
-      ..toSuper = true))
-    ..requiredParameters.add(Parameter((b) => b
-      ..name = '\$collectionId'
-      ..required = true
-      ..toSuper = true))
-    ..requiredParameters.add(Parameter((b) => b
-      ..name = '\$databaseId'
-      ..required = true
-      ..toSuper = true))
-    ..requiredParameters.add(Parameter((b) => b
-      ..name = '\$createdAt'
-      ..required = true
-      ..toSuper = true))
-    ..requiredParameters.add(Parameter((b) => b
-      ..name = '\$updatedAt'
-      ..required = true
-      ..toSuper = true))
-    ..requiredParameters.add(Parameter((b) => b
-      ..name = '\$permissions'
-      ..required = true
-      ..toSuper = true))
-    ..initializers.addAll(attributes.expand((e) => e.getConstructorAsserts())));
+  Constructor getPrivateConstructor() => Constructor((b) {
+        b
+          ..name = '_'
+          ..optionalParameters
+              .addAll(attributes.map((e) => e.getConstructorParameter()))
+          ..optionalParameters.add(Parameter((b) => b
+            ..name = '\$id'
+            ..named = true
+            ..required = true
+            ..toSuper = true))
+          ..optionalParameters.add(Parameter((b) => b
+            ..name = '\$collectionId'
+            ..named = true
+            ..required = true
+            ..toSuper = true))
+          ..optionalParameters.add(Parameter((b) => b
+            ..name = '\$databaseId'
+            ..named = true
+            ..required = true
+            ..toSuper = true))
+          ..optionalParameters.add(Parameter((b) => b
+            ..name = '\$createdAt'
+            ..named = true
+            ..required = true
+            ..toSuper = true))
+          ..optionalParameters.add(Parameter((b) => b
+            ..name = '\$updatedAt'
+            ..named = true
+            ..required = true
+            ..toSuper = true))
+          ..optionalParameters.add(Parameter((b) => b
+            ..name = '\$permissions'
+            ..named = true
+            ..required = true
+            ..toSuper = true));
+
+        final asserts = attributes.expand((e) => e.getConstructorAsserts());
+        if (asserts.isNotEmpty) {
+          b.initializers.addAll(asserts);
+        } else {
+          b.constant = true;
+        }
+      });
 
   Constructor getDefaultFactory() => Constructor((b) => b
     ..factory = true
-    ..requiredParameters
-        .addAll(attributes.map((e) => e.getDefaultFactoryParameter())));
+    ..optionalParameters
+        .addAll(attributes.map((e) => e.getDefaultFactoryParameter()))
+    ..lambda = true
+    ..body = Code('''
+        $className._(
+          ${attributes.map((e) => e.getDefaultFactoryField()).join(',\n')},
+          \$id: ID.unique(),
+          \$collectionId: collectionInfo.\$id,
+          \$databaseId: collectionInfo.databaseId,
+          \$createdAt: DateTime.now().toUtc(),
+          \$updatedAt: DateTime.now().toUtc(),
+          \$permissions: collectionInfo.\$permissions,
+        )
+'''));
 
   Method toJsonMethod() => Method((b) => b
     ..name = 'toJson'
     ..returns = refer('Map<String, dynamic>')
     ..annotations.add(refer('override'))
-    ..body = Code('''return {
+    ..lambda = true
+    ..body = Code('''{
       ${attributes.map((e) => e.getToJsonField()).join(',\n')}
-    };'''));
+    }'''));
 
   Method toAppwriteMethod() => Method((b) => b
     ..name = 'toAppwrite'
     ..annotations.add(refer('override'))
     ..returns = refer('Map<String, dynamic>')
-    ..requiredParameters.add(Parameter((b) => b
+    ..optionalParameters.add(Parameter((b) => b
       ..name = 'relationLevels'
+      ..named = true
       ..type = refer('List<bool>')
-      ..defaultTo = Code('[]')))
-    ..body = Code('''return
-      {${attributes.map((e) {
-      if (e is AttributeInfoRelationship) {
-        return "if (relationLevels.isNotEmpty) '${e.name}': ${e.name}?.toAppwrite(relationLevels: relationLevels..removeAt(0)),";
+      ..defaultTo = Code('const []')))
+    ..body = Block((body) {
+      String getAttributeCode(AttributeInfo e) {
+        if (e is AttributeInfoRelation) {
+          if (AttributeInfoRelation.isTypeSingle(e.relationType, e.side)) {
+            return "if (hasChildren) '${e.name}': ${e.name}?.toAppwrite(relationLevels: children)";
+          } else {
+            return "if (hasChildren) '${e.name}': ${e.name}?.map((e) => e.toAppwrite(relationLevels: children))";
+          }
+        }
+        return "'${e.name}': ${e.name}";
       }
-      return "'${e.name}': ${e.name},";
-    }).join(',\n')}
-      if (relationLevels.isNotEmpty && relationLevels.first == true) '\$id': \$id,
-    };'''));
+
+      if (attributes.any((e) => e is AttributeInfoRelation)) {
+        body.statements.addAll([
+          Code(
+              'final children = relationLevels.isNotEmpty ? relationLevels.sublist(1) : null;'),
+          Code('final hasChildren = children != null && children.isNotEmpty;'),
+          Code('''
+          return {
+            ${attributes.map(getAttributeCode).join(',\n')},
+            if (relationLevels.isNotEmpty) '\\\$permissions': collectionInfo.\$permissions,
+          };
+      ''')
+        ]);
+      } else {
+        b.lambda = true;
+        body.statements.add(Code('''
+        {
+          ${attributes.map(getAttributeCode).join(',\n')},
+          if (relationLevels.isNotEmpty) '\\\$permissions': collectionInfo.\$permissions,
+        }
+      '''));
+      }
+    }));
 
   Method copyWithMethod() => Method((b) => b
     ..name = 'copyWith'
     ..annotations.add(refer('override'))
     ..returns = refer(className)
-    ..requiredParameters.addAll(attributes.map((e) => e.getCopyWithParameter()))
+    ..optionalParameters.addAll(attributes.map((e) => e.getCopyWithParameter()))
+    ..optionalParameters.addAll([
+      Parameter((b) => b
+        ..name = '\$id'
+        ..named = true
+        ..type = refer('String?')),
+      Parameter((b) => b
+        ..name = '\$collectionId'
+        ..type = refer('String?')),
+      Parameter((b) => b
+        ..name = '\$databaseId'
+        ..type = refer('String?')),
+      Parameter((b) => b
+        ..name = '\$createdAt'
+        ..type = refer('DateTime?')),
+      Parameter((b) => b
+        ..name = '\$updatedAt'
+        ..type = refer('DateTime?')),
+      Parameter((b) => b
+        ..name = '\$permissions'
+        ..type = refer('List<String>?')),
+    ])
+    ..lambda = true
     ..body = Code('''
-        return $className._(
-          ${attributes.map((e) => e.getCopyWithField()).join(',\n')}
-          \$id: \$id,
-          \$collectionId: \$collectionId,
-          \$databaseId: \$databaseId,
-          \$createdAt: \$createdAt,
-          \$updatedAt: \$updatedAt,
-          \$permissions: \$permissions,
-        );
+        $className._(
+          ${attributes.map((e) => e.getCopyWithField()).join(',\n')},
+          \$id: \$id ?? this.\$id,
+          \$collectionId: \$collectionId ?? this.\$collectionId,
+          \$databaseId: \$databaseId ?? this.\$databaseId,
+          \$createdAt: \$createdAt ?? this.\$createdAt,
+          \$updatedAt: \$updatedAt ?? this.\$updatedAt,
+          \$permissions: \$permissions ?? this.\$permissions,
+        )
       '''));
 
   Method toStringMethod() => Method((b) => b
@@ -163,50 +232,193 @@ class ClassFactory {
     ..annotations.add(refer('override'))
     ..returns = refer('String')
     ..lambda = true
-    ..body = Code('toJson().toString();'));
+    ..body = Code('toJson().toString()'));
 
   Method operatorEqualMethod() => Method((b) => b
-    ..name = '=='
+    ..name = 'operator =='
     ..annotations.add(refer('override'))
     ..returns = refer('bool')
     ..requiredParameters.add(Parameter((b) => b
       ..name = 'other'
       ..type = refer('Object')))
+    ..lambda = true
     ..body = Code('''
-        final eq = const ListEquality().equals;
-        return other is $className &&
+        other is $className &&
           other.\$id == \$id &&
-          ${attributes.map((e) => e.getEqualCheck()).join(' &&\n')};
+          ${attributes.map((e) => e.getEqualCheck()).join(' &&\n')}
       '''));
 
-  Method hashCodeMethod() => Method((b) => b
+  Method hashCodeGetter() => Method((b) => b
     ..name = 'hashCode'
+    ..type = MethodType.getter
     ..annotations.add(refer('override'))
     ..returns = refer('int')
+    ..lambda = true
     ..body = Code('''
-        final hash = const ListEquality().hash;
-        return hash([
+        _hash([
           \$id,
-          ${attributes.map((e) => e.array ? '...(${e.name} ??)' : e.name).join(
+          ${attributes.map((e) => e.array ? '...(${e.name}${e.required ? '' : ' ?? []'})' : e.name).join(
               ',\n',
             )}
-        ]);
+        ])
       '''));
 
   Constructor fromAppwriteFactory() => Constructor((b) => b
     ..factory = true
+    ..name = 'fromAppwrite'
     ..requiredParameters.add(Parameter((b) => b
       ..name = 'doc'
       ..type = refer('Document')))
+    ..lambda = true
     ..body = Code('''
-            return $className._(
-              ${attributes.map((e) => e.getFromAppwriteField()).join(',\n')}
-              \$id: doc.id,
-              \$collectionId: doc.collection,
-              \$databaseId: doc.database,
-              \$createdAt: doc.createdAt,
-              \$updatedAt: doc.updatedAt,
-              \$permissions: doc.permissions,
-            );
-          '''));
+        $className._(
+          ${attributes.map((e) => e.getFromAppwriteField()).join(',\n')},
+          \$id: doc.\$id,
+          \$collectionId: doc.\$collectionId,
+          \$databaseId: doc.\$databaseId,
+          \$createdAt: DateTime.parse(doc.\$createdAt),
+          \$updatedAt: DateTime.parse(doc.\$updatedAt),
+          \$permissions: toList(doc.\$permissions),
+        )
+'''));
+
+  Method pageMethod() => Method((b) => b
+    ..name = 'page'
+    ..static = true
+    ..modifier = MethodModifier.async
+    ..returns = refer('Future<Result<(int, List<$className>), String>>')
+    ..optionalParameters.addAll([
+      Parameter((b) => b
+        ..name = 'limit'
+        ..named = true
+        ..type = refer('int')
+        ..defaultTo = Code('25')),
+      Parameter((b) => b
+        ..name = 'offset'
+        ..named = true
+        ..type = refer('int?')),
+      Parameter((b) => b
+        ..name = 'last'
+        ..named = true
+        ..type = refer('$className?')),
+      Parameter((b) => b
+        ..name = 'queries'
+        ..named = true
+        ..type = refer('List<String>?')),
+    ])
+    ..lambda = true
+    ..body = Code('''
+    _client.page<$className>(
+        databaseId: collectionInfo.databaseId,
+        collectionId: collectionInfo.\$id,
+        fromAppwrite: $className.fromAppwrite,
+        limit: limit,
+        offset: offset,
+        last: last,
+        queries: queries,
+      )
+  '''));
+
+  Method listMethod() => Method((b) => b
+    ..name = 'list'
+    ..modifier = MethodModifier.async
+    ..returns = refer('Future<Result<(int, List<$className>), String>>')
+    ..optionalParameters.addAll([
+      Parameter((b) => b
+        ..name = 'queries'
+        ..type = refer('List<String>?')),
+    ])
+    ..lambda = true
+    ..body = Code('''
+    _client.list<$className>(
+        databaseId: collectionInfo.databaseId,
+        collectionId: collectionInfo.\$id,
+        fromAppwrite: $className.fromAppwrite,
+        queries: queries,
+      )
+  '''));
+
+  Method getMethod() => Method((b) => b
+    ..name = 'get'
+    ..static = true
+    ..modifier = MethodModifier.async
+    ..returns = refer('Future<Result<$className, String>>')
+    ..requiredParameters.addAll([
+      Parameter((b) => b
+        ..name = 'documentId'
+        ..type = refer('String')),
+    ])
+    ..optionalParameters.addAll([
+      Parameter((b) => b
+        ..name = 'queries'
+        ..named = true
+        ..type = refer('List<String>?'))
+    ])
+    ..lambda = true
+    ..body = Code('''
+    _client.get<$className>(
+        databaseId: collectionInfo.databaseId,
+        collectionId: collectionInfo.\$id,
+        fromAppwrite: $className.fromAppwrite,
+        documentId: documentId,
+        queries: queries,
+      )
+  '''));
+
+  Method createMethod() => Method((b) => b
+    ..name = 'create'
+    ..modifier = MethodModifier.async
+    ..returns = refer('Future<Result<$className, String>>')
+    ..optionalParameters.addAll([
+      Parameter((b) => b
+        ..name = 'relationLevels'
+        ..named = true
+        ..type = refer('List<bool>')
+        ..defaultTo = Code('const []')),
+    ])
+    ..lambda = true
+    ..body = Code('''
+    _client.create<$className>(
+        databaseId: collectionInfo.databaseId,
+        collectionId: collectionInfo.\$id,
+        fromAppwrite: $className.fromAppwrite,
+        model: this,
+        relationLevels: relationLevels,
+      )
+  '''));
+
+  Method updateMethod() => Method((b) => b
+    ..name = 'update'
+    ..modifier = MethodModifier.async
+    ..returns = refer('Future<Result<$className, String>>')
+    ..optionalParameters.addAll([
+      Parameter((b) => b
+        ..name = 'relationLevels'
+        ..type = refer('List<bool>')
+        ..named = true
+        ..defaultTo = Code('const []')),
+    ])
+    ..lambda = true
+    ..body = Code('''
+    _client.update<$className>(
+        databaseId: collectionInfo.databaseId,
+        collectionId: collectionInfo.\$id,
+        fromAppwrite: $className.fromAppwrite,
+        model: this,
+        relationLevels: relationLevels,
+      )
+  '''));
+
+  Method deleteMethod() => Method((b) => b
+    ..name = 'delete'
+    ..modifier = MethodModifier.async
+    ..returns = refer('Future<Result<void, String>>')
+    ..lambda = true
+    ..body = Code('''
+    _client.delete(
+        databaseId: collectionInfo.databaseId,
+        collectionId: collectionInfo.\$id,
+        documentId: \$id,
+      )
+  '''));
 }

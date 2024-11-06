@@ -35,7 +35,7 @@ Future<Expenses?> _showExpenseCreateDialog(BuildContext context) async {
 
     final result = await expense
         .copyWith(
-          expenseNumber: expenseNumber.success,
+          expenseNumber: () => expenseNumber.success,
         )
         .create();
     if (!context.mounted) return null;

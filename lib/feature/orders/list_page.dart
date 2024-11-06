@@ -204,18 +204,18 @@ class _NewOrderDialogState extends State<NewOrderDialog> {
 
       unawaited(
         appwrite.databases.listDocuments(
-        databaseId: Customers.databaseId,
-        collectionId: Customers.collectionInfo.$id,
-        queries: [
-          Query.search('name', query),
-        ],
-      ).then((result) {
+          databaseId: Customers.collectionInfo.$id,
+          collectionId: Customers.collectionInfo.$id,
+          queries: [
+            Query.search('name', query),
+          ],
+        ).then((result) {
           final items = result.documents.map(Customers.fromAppwrite);
-        final newItems =
-            items.where((e) => !_customers.any((c) => c.$id == e.$id));
-        setState(() {
-          _customers.addAll(newItems);
-        });
+          final newItems =
+              items.where((e) => !_customers.any((c) => c.$id == e.$id));
+          setState(() {
+            _customers.addAll(newItems);
+          });
         }),
       );
     });

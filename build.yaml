@@ -6,15 +6,9 @@ targets:
       - $package$
       - pubspec.yaml
     builders:
-      stibu|modelBuilder:
+      appwrite_model_generator:modelBuilder:
         generate_for:
           - appwrite.json
-
-builders:
-  modelBuilder:
-    import: 'package:stibu/code_generation.dart'
-    builder_factories: [ 'modelBuilder' ]
-    build_extensions:
-      '.json': ['lib/{{}}.models.dart']
-    build_to: source
-    auto_apply: dependents
+      appwrite_model_generator:exampleJsonBuilder:
+        generate_for:
+          - appwrite.json

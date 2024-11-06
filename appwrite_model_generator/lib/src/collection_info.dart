@@ -1,21 +1,10 @@
 import 'package:code_builder/code_builder.dart';
-import 'package:dart_style/dart_style.dart';
 
-final _dartfmt = DartFormatter();
 
-Future<void> generateCollectionInfo() async {
-  final emitter = DartEmitter(allocator: Allocator(), orderDirectives: true);
-  final output = getLibary();
-
-  final formatted = _dartfmt.format('${output.accept(emitter)}');
-
-  print(formatted);
-}
-
-Library getLibary() => Library((lib) => lib..body.add(getClass()));
 
 Class getClass() => Class((b) => b
   ..name = 'CollectionInfo'
+  ..annotations.add(refer('immutable'))
   ..fields.addAll(getFields())
   ..constructors.addAll(getConstructors()));
 
@@ -48,22 +37,38 @@ List<Field> getFields() => [
 
 List<Constructor> getConstructors() => [
       Constructor((b) => b
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = '\$id'
-          ..toThis = true))
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = '\$permissions'
-          ..toThis = true))
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = 'databaseId'
-          ..toThis = true))
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = 'name'
-          ..toThis = true))
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = 'enabled'
-          ..toThis = true))
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = 'documentSecurity'
-          ..toThis = true)))
+        ..constant = true
+        ..optionalParameters.addAll([
+          Parameter((b) => b
+            ..name = '\$id'
+            ..named = true
+            ..required = true
+            ..toThis = true),
+          Parameter((b) => b
+            ..name = '\$permissions'
+            ..named = true
+            ..required = true
+            ..toThis = true),
+          Parameter((b) => b
+            ..name = 'databaseId'
+            ..named = true
+            ..required = true
+            ..toThis = true),
+          Parameter((b) => b
+            ..name = 'name'
+            ..named = true
+            ..required = true
+            ..toThis = true),
+          Parameter((b) => b
+            ..name = 'enabled'
+            ..named = true
+            ..required = true
+            ..toThis = true),
+          Parameter((b) => b
+            ..name = 'documentSecurity'
+            ..named = true
+            ..required = true
+            ..toThis = true)
+        ])),
+
     ];

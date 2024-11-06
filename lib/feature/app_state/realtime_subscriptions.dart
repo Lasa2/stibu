@@ -105,21 +105,21 @@ class RealtimeSubscriptions {
 
   late final Map<String, void Function(RealtimeMessage message)>
       _realtimeListeners = {
-    'databases.${Customers.databaseId}.collections.${Customers.collectionInfo.$id}.documents':
+    'databases.${Customers.collectionInfo.databaseId}.collections.${Customers.collectionInfo.$id}.documents':
         (message) => _customerUpdates.add(
               _realtimeUpdateFromMessage<Customers>(
                 message,
                 Customers.fromAppwrite,
               ),
             ),
-    'databases.${Invoices.databaseId}.collections.${Invoices.collectionInfo.$id}.documents':
+    'databases.${Invoices.collectionInfo.databaseId}.collections.${Invoices.collectionInfo.$id}.documents':
         (message) => _invoicesUpdates.add(
               _realtimeUpdateFromMessage<Invoices>(
                 message,
                 Invoices.fromAppwrite,
               ),
             ),
-    'databases.${Orders.databaseId}.collections.${Orders.collectionInfo.$id}.documents':
+    'databases.${Orders.collectionInfo.databaseId}.collections.${Orders.collectionInfo.$id}.documents':
         (message) async => _ordersUpdates.add(
               await _realtimeUpdateFromMessageWithFetch<Orders>(
                 message,
@@ -127,14 +127,14 @@ class RealtimeSubscriptions {
                 Orders.get,
               ),
             ),
-    'databases.${Expenses.databaseId}.collections.${Expenses.collectionInfo.$id}.documents':
+    'databases.${Expenses.collectionInfo.databaseId}.collections.${Expenses.collectionInfo.$id}.documents':
         (message) => _expensesUpdates.add(
               _realtimeUpdateFromMessage<Expenses>(
                 message,
                 Expenses.fromAppwrite,
               ),
             ),
-    'databases.${CalendarEvents.databaseId}.collections.${CalendarEvents.collectionInfo.$id}.documents':
+    'databases.${CalendarEvents.collectionInfo.databaseId}.collections.${CalendarEvents.collectionInfo.$id}.documents':
         (message) => _calendarEventsUpdates.add(
               _realtimeUpdateFromMessage<CalendarEvents>(
                 message,

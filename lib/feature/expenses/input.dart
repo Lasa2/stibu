@@ -35,10 +35,10 @@ class _ExpenseInputDialogState extends State<ExpenseInputDialog> {
                 late final Expenses expense;
                 if (widget.expense != null) {
                   expense = widget.expense!.copyWith(
-                    date: _date.toUtc(),
-                    name: _name,
-                    notes: _notes,
-                    amount: _amount,
+                    date: () => _date.toUtc(),
+                    name: () => _name!,
+                    notes: () => _notes,
+                    amount: () => _amount!,
                   );
                 } else {
                   final expenseNumber = await newExpenseNumber(_date.toUtc());

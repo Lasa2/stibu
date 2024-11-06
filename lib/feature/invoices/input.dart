@@ -35,10 +35,10 @@ class _InvoiceInputDialogState extends State<InvoiceInputDialog> {
                 late final Invoices invoice;
                 if (widget.invoice != null) {
                   invoice = widget.invoice!.copyWith(
-                    date: _date.toUtc(),
-                    name: _name,
-                    notes: _notes,
-                    amount: _amount,
+                    date: () => _date.toUtc(),
+                    name: () => _name!,
+                    notes: () => _notes,
+                    amount: () => _amount!,
                   );
                 } else {
                   final invoiceNumber = await newInvoiceNumber(

@@ -31,7 +31,7 @@ class _AddProductsDialogState extends State<AddProductsDialog> {
       if (index != -1) {
         setState(() {
           selectedProducts[index] = selectedProducts[index]
-              .copyWith(quantity: selectedProducts[index].quantity + qty);
+              .copyWith(quantity: () => selectedProducts[index].quantity + qty);
         });
       } else {
         setState(() {
@@ -247,7 +247,8 @@ Future<void> showAddProductsDialog(BuildContext context, Orders order) async {
     for (final newProduct in result) {
       if (productsMap.containsKey(newProduct.id)) {
         productsMap[newProduct.id] = productsMap[newProduct.id]!.copyWith(
-          quantity: productsMap[newProduct.id]!.quantity + newProduct.quantity,
+          quantity: () =>
+              productsMap[newProduct.id]!.quantity + newProduct.quantity,
         );
       } else {
         productsMap[newProduct.id] = newProduct;
@@ -255,7 +256,7 @@ Future<void> showAddProductsDialog(BuildContext context, Orders order) async {
     }
 
     final newOrder = order.copyWith(
-      products: productsMap.values.toList(),
+      products: () => productsMap.values.toList(),
     );
 
     await newOrder.update().then(

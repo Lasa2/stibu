@@ -56,7 +56,7 @@ extension OrdersExtensions on Orders {
       ];
 
       final doc = await appwrite.databases.createDocument(
-        databaseId: Invoices.databaseId,
+        databaseId: Invoices.collectionInfo.databaseId,
         collectionId: Invoices.collectionInfo.$id,
         documentId: ID.unique(),
         data: {
@@ -72,7 +72,7 @@ extension OrdersExtensions on Orders {
 
       // Set order, orderProducts and orderCoupons permissions to read-only
       await appwrite.databases.updateDocument(
-        databaseId: Orders.databaseId,
+        databaseId: Orders.collectionInfo.databaseId,
         collectionId: Orders.collectionInfo.$id,
         documentId: $id,
         permissions: permissions,
@@ -104,7 +104,7 @@ extension OrdersExtensions on Orders {
 
   Future<Result<Orders, String>> addCoupon(OrderCoupons coupon) async {
     final newCoupons = <OrderCoupons>[...(coupons ?? []), coupon];
-    final result = await copyWith(coupons: newCoupons).update();
+    final result = await copyWith(coupons: () => newCoupons).update();
     if (result.isFailure) return Failure(result.failure);
 
     return Success(result.success);
@@ -112,9 +112,11 @@ extension OrdersExtensions on Orders {
 
   Future<Result<Orders, String>> deleteCoupon(OrderCoupons coupon) async {
     final newCoupons =
-        copyWith(coupons: coupons?.where((c) => c.$id != coupon.$id).toList());
+        copyWith(
+      coupons: () => coupons?.where((c) => c.$id != coupon.$id).toList(),
+    );
 
-    final order = await copyWith(coupons: newCoupons.coupons).update();
+    final order = await copyWith(coupons: () => newCoupons.coupons).update();
     if (order.isFailure) return Failure(order.failure);
 
     final result = await coupon.delete();
@@ -129,7 +131,7 @@ extension OrdersExtensions on Orders {
       return c;
     }).toList();
 
-    final result = await copyWith(coupons: newCoupons).update();
+    final result = await copyWith(coupons: () => newCoupons).update();
     if (result.isFailure) return Failure(result.failure);
 
     return Success(result.success);
@@ -137,7 +139,7 @@ extension OrdersExtensions on Orders {
 
   Future<Result<Orders, String>> addProduct(OrderProducts product) async {
     final newProducts = <OrderProducts>[...(products ?? []), product];
-    final result = await copyWith(products: newProducts).update();
+    final result = await copyWith(products: () => newProducts).update();
     if (result.isFailure) return Failure(result.failure);
 
     return Success(result.success);
@@ -145,10 +147,10 @@ extension OrdersExtensions on Orders {
 
   Future<Result<Orders, String>> deleteProduct(OrderProducts product) async {
     final newProducts = copyWith(
-      products: products?.where((p) => p.$id != product.$id).toList(),
+      products: () => products?.where((p) => p.$id != product.$id).toList(),
     );
 
-    final order = await copyWith(products: newProducts.products).update();
+    final order = await copyWith(products: () => newProducts.products).update();
     if (order.isFailure) return Failure(order.failure);
 
     final result = await product.delete();
@@ -163,7 +165,7 @@ extension OrdersExtensions on Orders {
       return p;
     }).toList();
 
-    final result = await copyWith(products: newProducts).update();
+    final result = await copyWith(products: () => newProducts).update();
     if (result.isFailure) return Failure(result.failure);
 
     return Success(result.success);

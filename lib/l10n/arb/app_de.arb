@@ -1,5 +1,10 @@
 {
   "actionLogin": "Einloggen",
+  "@actionLogin": {
+    "description": "Button zum Einloggen",
+    "type": "text",
+    "placeholders": {}
+  },
   "constraintsRequired": "Dieses Feld ist erforderlich",
   "helloWorld": "Hallo Welt!",
   "labelsEmail": "Email",

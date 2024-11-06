@@ -3,6 +3,8 @@
 /// More dartdocs go here.
 library;
 
-export 'src/appwrite_model_generator_base.dart';
+import 'package:appwrite_model_generator/src/builder.dart';
+import 'package:build/build.dart';
 
-// TODO: Export any libraries intended for clients of this package.
+Builder modelBuilder(BuilderOptions options) => ModelBuilder();
+Builder exampleJsonBuilder(BuilderOptions options) => ExampleJsonBuilder();

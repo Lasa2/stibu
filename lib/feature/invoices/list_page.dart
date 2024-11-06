@@ -39,7 +39,7 @@ Future<Invoices?> _showInvoiceCreateDialog(BuildContext context) async {
     }
     final user = await getIt<AppwriteClient>().account.get();
     final result = await invoice.copyWith(
-      invoiceNumber: newInvoiceId.success,
+      invoiceNumber: () => newInvoiceId.success,
       $permissions: [
         Permission.read(Role.user(user.$id)),
         Permission.update(Role.user(user.$id)),

@@ -796,6 +796,13 @@
                     "array": false,
                     "size": 128,
                     "default": null
+                },
+                {
+                    "key": "isValid",
+                    "type": "boolean",
+                    "required": true,
+                    "array": false,
+                    "default": null
                 }
             ],
             "indexes": [

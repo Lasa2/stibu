@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:appwrite/appwrite.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:stibu/appwrite.models.dart';
@@ -33,9 +34,15 @@ Future<Expenses?> _showExpenseCreateDialog(BuildContext context) async {
       return null;
     }
 
+    final user = await getIt<AppwriteClient>().account.get();
+
     final result = await expense
         .copyWith(
           expenseNumber: () => expenseNumber.success,
+      $permissions: [
+        Permission.read(Role.user(user.$id)),
+        Permission.write(Role.user(user.$id)),
+      ],
         )
         .create();
     if (!context.mounted) return null;

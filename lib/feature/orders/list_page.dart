@@ -204,7 +204,7 @@ class _NewOrderDialogState extends State<NewOrderDialog> {
 
       unawaited(
         appwrite.databases.listDocuments(
-          databaseId: Customers.collectionInfo.$id,
+          databaseId: Customers.collectionInfo.databaseId,
           collectionId: Customers.collectionInfo.$id,
           queries: [
             Query.search('name', query),
@@ -236,7 +236,14 @@ class _NewOrderDialogState extends State<NewOrderDialog> {
                   date: selectedDate.toUtc(),
                 );
 
-                final result = await order.create();
+                final user = await getIt<AppwriteClient>().account.get();
+
+                final result = await order.copyWith(
+                  $permissions: [
+                    Permission.read(Role.user(user.$id)),
+                    Permission.write(Role.user(user.$id)),
+                  ],
+                ).create();
 
                 if (!context.mounted) return;
                 await showResultInfo(context, result);

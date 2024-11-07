@@ -40,6 +40,7 @@ dependencies:
   flutter_helper_utils: ^6.6.0
   appwrite_model_generator:
     path: ./appwrite_model_generator
+  data_table_2: ^2.5.15
 
 
 dev_dependencies:

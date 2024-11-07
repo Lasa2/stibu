@@ -60,6 +60,11 @@ var items = <Object>[
     icon: FluentIcons.money,
     route: ExpensesListRoute(),
   ),
+  RouteDestination(
+    title: 'Revenue & Expenses',
+    icon: FluentIcons.money,
+    route: RevenueAndExpensesTab(),
+  ),
   const RouteDestination(
     title: 'Calendar',
     icon: FluentIcons.calendar,

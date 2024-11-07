@@ -14,6 +14,7 @@ import 'package:stibu/feature/calendar/event_input.dart';
 import 'package:stibu/main.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+
 @RoutePage()
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -30,15 +31,32 @@ class _CalendarPageState extends State<CalendarPage> {
 
   StreamSubscription? _subscription;
 
-  List<CalendarEvents> _getEventsForDay(DateTime? day, {bool force = false}) {
-    if (day == null) return [];
+  List<CalendarEvents> _getEventsForMonth(
+    DateTime? month, {
+    bool force = false,
+  }) {
+    if (month == null) return [];
 
-    final events = _events[day];
+    final events = _events[month];
 
     if (events == null || force) {
-      // load events for day
+      // load events for month
       final appwrite = getIt<AppwriteClient>();
 
+      final start = DateTime(
+        month.year,
+        month.month,
+        1,
+      );
+
+      final end = DateTime(
+        month.year,
+        month.month + 1,
+        1,
+      );
+
+      // TODO: refactor to not use a hardcoded limit
+      // instead use pagination
       unawaited(
         appwrite.databases.listDocuments(
           databaseId: CalendarEvents.collectionInfo.databaseId,
@@ -46,32 +64,78 @@ class _CalendarPageState extends State<CalendarPage> {
           queries: [
             Query.between(
               'start',
-              day.toIso8601String(),
-              day
-                  .add(
-                    const Duration(
-                      hours: 23,
-                      minutes: 59,
-                      seconds: 59,
-                      milliseconds: 999,
-                    ),
-                  )
-                  .toIso8601String(),
+              start.toIso8601String(),
+              end.toIso8601String(),
             ),
+            Query.limit(100),
           ],
         ).then((response) {
           final List<CalendarEvents> events = response.documents
               .map<CalendarEvents>(CalendarEvents.fromAppwrite)
               .toList();
 
+          final Map<DateTime, List<CalendarEvents>> eventsMap = {};
+          for (final event in events) {
+            final day = event.start.stripTime();
+            if (eventsMap[day] == null) {
+              eventsMap[day] = [];
+            }
+            eventsMap[day]!.add(event);
+          }
+
           if (mounted) {
             setState(() {
-              _events[day] = events;
+              _events.addAll(eventsMap);
             });
           }
         }),
       );
     }
+    return events ?? [];
+  }
+
+  List<CalendarEvents> _getEventsForDay(DateTime? day, {bool force = false}) {
+    if (day == null) return [];
+
+    final events = _events[day];
+
+    // if (events == null || force) {
+    //   // load events for day
+    //   final appwrite = getIt<AppwriteClient>();
+
+    //   unawaited(
+    //     appwrite.databases.listDocuments(
+    //       databaseId: CalendarEvents.collectionInfo.databaseId,
+    //       collectionId: CalendarEvents.collectionInfo.$id,
+    //       queries: [
+    //         Query.between(
+    //           'start',
+    //           day.toIso8601String(),
+    //           day
+    //               .add(
+    //                 const Duration(
+    //                   hours: 23,
+    //                   minutes: 59,
+    //                   seconds: 59,
+    //                   milliseconds: 999,
+    //                 ),
+    //               )
+    //               .toIso8601String(),
+    //         ),
+    //       ],
+    //     ).then((response) {
+    //       final List<CalendarEvents> events = response.documents
+    //           .map<CalendarEvents>(CalendarEvents.fromAppwrite)
+    //           .toList();
+
+    //       if (mounted) {
+    //         setState(() {
+    //           _events[day] = events;
+    //         });
+    //       }
+    //     }),
+    //   );
+    // }
     return events ?? [];
   }
 
@@ -84,6 +148,7 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void initState() {
     super.initState();
+    _getEventsForMonth(_focusedDay, force: true);
     _subscription =
         getIt<RealtimeSubscriptions>().calendarEventsUpdates.listen((event) {
       final day = event.item.start.stripTime();
@@ -135,6 +200,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 },
                 onPageChanged: (DateTime focusedDay) {
                   _focusedDay = focusedDay;
+                  _getEventsForMonth(focusedDay, force: true);
                 },
                 availableCalendarFormats: const {
                   CalendarFormat.month: 'Month',
@@ -247,8 +313,8 @@ class EventListEntry extends StatelessWidget {
       ),
       trailing: event.invoice == null
           ? DropDownButton(
-        leading: const Icon(FluentIcons.more),
-        items: [
+              leading: const Icon(FluentIcons.more),
+              items: [
                 if (event.type == CalendarEventsType.withParticipants &&
                     event.invoice == null)
                   MenuFlyoutItem(

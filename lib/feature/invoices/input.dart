@@ -1,6 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:stibu/appwrite.models.dart';
+import 'package:stibu/common/currency.dart';
 import 'package:stibu/common/new_ids.dart';
+import 'package:stibu/widgets/currency_input.dart';
 
 class InvoiceInputDialog extends StatefulWidget {
   final String title;
@@ -116,14 +118,10 @@ class _InvoiceInputDialogState extends State<InvoiceInputDialog> {
               ),
               InfoLabel(
                 label: 'Amount',
-                child: NumberFormBox(
-                  initialValue: _amount?.toString(),
-                  placeholder: 'Amount',
-                  showCursor: false,
-                  clearButton: false,
-                  mode: SpinButtonPlacementMode.none,
-                  onChanged: (_) {}, // required to show as enabled
-                  onSaved: (value) => _amount = double.parse(value!).toInt(),
+                child: CurrencyInput(
+                  amount: _amount != null ? Currency(_amount!) : null,
+                  onSaved: (newValue) => _amount = newValue?.asInt,
+                  textInputAction: TextInputAction.done,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter an amount';

@@ -1,8 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:stibu/appwrite.models.dart';
+import 'package:stibu/common/currency.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/show_result_info.dart';
+import 'package:stibu/widgets/currency_input.dart';
 
 class CouponInputDialog extends StatefulWidget {
   final String title;
@@ -48,13 +50,10 @@ class _CouponInputDialogState extends State<CouponInputDialog> {
                 },
               ),
               const SizedBox(height: 8),
-              TextFormBox(
-                initialValue: _amount?.toString(),
-                placeholder: 'Amount',
-                onSaved: (newValue) => _amount = int.parse(newValue!),
+              CurrencyInput(
+                amount: _amount != null ? Currency(_amount!) : null,
+                onSaved: (newValue) => _amount = newValue?.asInt,
                 textInputAction: TextInputAction.done,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter an amount';

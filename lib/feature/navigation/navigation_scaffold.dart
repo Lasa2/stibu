@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:appwrite/models.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/feature/app_state/account.dart';
 import 'package:stibu/feature/navigation/windows_appbar.dart';
 import 'package:stibu/feature/router/router.dart';
@@ -147,33 +150,40 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
 
   User? user;
   Image? avatar;
+  StreamSubscription? sessionSubscription;
 
   @override
   void initState() {
     super.initState();
-    // getIt<AccountsRepository>().sessionStream.listen((session) async {
-    //   if (session != null) {
-    //     final user = await getIt<AccountsRepository>().user;
-    //     if (user.isSuccess) {
-    //       final avatar = await getIt<AvatarsRepository>().getAvatar(
-    //         name: user.success.name,
-    //         width: 32,
-    //         height: 32,
-    //       );
-    //       if (avatar.isSuccess) {
-    //         setState(() {
-    //           this.user = user.success;
-    //           this.avatar = avatar.success;
-    //         });
-    //       }
-    //     }
-    //   } else {
-    //     setState(() {
-    //       user = null;
-    //       avatar = null;
-    //     });
-    //   }
-    // });
+    sessionSubscription =
+        getIt<Authentication>().isAuthenticated.listen((isAuthenticated) async {
+      if (isAuthenticated) {
+        await getIt<AppwriteClient>().account.get().then((account) async {
+          final newAvatar = Image.memory(
+            await getIt<AppwriteClient>().avatars.getInitials(
+                  name: account.name,
+                  width: 40,
+                  height: 40,
+                ),
+          );
+          setState(() {
+            user = account;
+            avatar = newAvatar;
+          });
+        });
+      } else {
+        setState(() {
+          user = null;
+          avatar = null;
+        });
+      }
+    });
+  }
+
+  @override
+  Future<void> dispose() async {
+    await sessionSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -189,7 +199,19 @@ class _NavigationScaffoldPageState extends State<NavigationScaffoldPage> {
             header: SizedBox(
               height: 78,
               child: ListTile(
-                leading: avatar,
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: avatar != null
+                        ? DecorationImage(
+                            image: avatar!.image,
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                ),
                 title: Text(user?.name ?? 'User'),
                 subtitle: Text(user?.email ?? ''),
               ),

@@ -71,8 +71,8 @@ class _OrderListPageState extends State<OrderListPage> {
 
   @override
   Future<void> dispose() async {
-    await _orderSubscription?.cancel();
     super.dispose();
+    await _orderSubscription?.cancel();
   }
 
   @override

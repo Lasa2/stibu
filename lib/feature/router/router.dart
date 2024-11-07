@@ -180,19 +180,16 @@ class AuthGuard extends AutoRouteGuard {
       resolver.next(true);
     } else {
       late final StreamSubscription sub;
-      sub = auth.isAuthenticated.listen((isAuthenticated) {
+      sub = auth.isAuthenticated.listen((isAuthenticated) async {
         if (isAuthenticated) {
+          await sub.cancel();
           resolver.next(true);
-          sub.cancel();
         }
       });
 
       await resolver.redirect(
         AuthenticationRoute(
-          onAuthenticated: () {
-            resolver.next(true);
-            sub.cancel();
-          },
+          onAuthenticated: () {},
         ),
       );
     }

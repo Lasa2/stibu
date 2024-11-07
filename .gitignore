@@ -53,3 +53,5 @@ app.*.map.json
 # appwrite related
 /functions
 appwrite.json
+appwrite.dev.json
+appwrite.prod.json

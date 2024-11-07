@@ -150,6 +150,6 @@ Method toAppwriteMethod() => Method((b) => b
   ..optionalParameters.add(Parameter((b) => b
     ..name = 'relationLevels'
     ..named = true
-    ..type = refer('List<bool>')
+    ..type = refer('List<RLevel>')
     ..defaultTo = Code('const []')))
-  ..returns = refer('Map<String, dynamic>'));
+  ..returns = refer('dynamic'));

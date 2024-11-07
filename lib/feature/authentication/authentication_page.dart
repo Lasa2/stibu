@@ -116,7 +116,10 @@ class _CreateAccountTabState extends State<CreateAccountTab> {
       await showResultInfo(context, result);
 
       if (result.isSuccess) {
-        widget.onAuthenticated();
+        final result = await getIt<Authentication>().login(email!, password!);
+
+        if (!context.mounted) return;
+        await showResultInfo(context, result);
       }
     }
   }

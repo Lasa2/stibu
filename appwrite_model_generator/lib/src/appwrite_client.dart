@@ -237,7 +237,7 @@ Method createMethod() => Method((b) => b
     Parameter((b) => b
       ..name = 'relationLevels'
       ..named = true
-      ..type = refer('List<bool>')
+      ..type = refer('List<RLevel>')
       ..defaultTo = Code('const []')),
   ])
   ..body = Code('''
@@ -284,7 +284,7 @@ Method updateMethod() => Method((b) => b
     Parameter((b) => b
       ..name = 'relationLevels'
       ..named = true
-      ..type = refer('List<bool>')
+      ..type = refer('List<RLevel>')
       ..defaultTo = Code('const []')),
   ])
   ..body = Code('''

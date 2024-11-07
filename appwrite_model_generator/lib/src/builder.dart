@@ -60,6 +60,49 @@ class ModelBuilder implements Builder {
         Code('final _eq = const ListEquality().equals;'),
         Code('final _hash = const ListEquality().hash;'),
         Code('final _client = GetIt.I<AppwriteClient>();'),
+        Class((b) => b
+          ..name = 'RLevel'
+          ..fields.addAll([
+            Field((b) => b
+              ..name = 'includeId'
+              ..type = refer('bool')
+              ..modifier = FieldModifier.final$),
+            Field((b) => b
+              ..name = 'includeData'
+              ..type = refer('bool')
+              ..modifier = FieldModifier.final$),
+            Field((b) => b
+              ..name = 'includePermissions'
+              ..type = refer('bool')
+              ..modifier = FieldModifier.final$),
+            Field((b) => b
+              ..name = 'permissions'
+              ..type = refer('List<String>')
+              ..modifier = FieldModifier.final$),
+          ])
+          ..constructors.add(Constructor((b) => b
+            ..optionalParameters.addAll([
+              Parameter((b) => b
+                ..name = 'includeId'
+                ..defaultTo = Code('true')
+                ..named = true
+                ..toThis = true),
+              Parameter((b) => b
+                ..name = 'includeData'
+                ..defaultTo = Code('true')
+                ..named = true
+                ..toThis = true),
+              Parameter((b) => b
+                ..name = 'includePermissions'
+                ..defaultTo = Code('false')
+                ..named = true
+                ..toThis = true),
+              Parameter((b) => b
+                ..name = 'permissions'
+                ..defaultTo = Code('const []')
+                ..named = true
+                ..toThis = true),
+            ])))),
         appwrite_base_model.getClass(),
         collection_info.getClass(),
         relation.getClass(),

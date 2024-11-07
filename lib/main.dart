@@ -37,8 +37,7 @@ Future<void> main(List<String> args) async {
     () => AppwriteClient(
       Client()
           .setEndpoint('https://appwrite.vee.icu/v1')
-          .setProject('66ba8a48000da48dd442')
-          .setEndPointRealtime('wss://appwrite.vee.icu/v1/realtime'),
+          .setProject('66ba8a48000da48dd442'),
     ),
   );
   GetIt.I.registerLazySingleton<Authentication>(Authentication.new);
@@ -56,6 +55,8 @@ Future<void> main(List<String> args) async {
       // ignore: avoid_print
       print('${record.level.name}: ${record.time}: ${record.message}');
     });
+
+    getIt<AppwriteClient>().client.setProject('672be8c200098f27fd3a');
   }
 
   runApp(const StibuApp());

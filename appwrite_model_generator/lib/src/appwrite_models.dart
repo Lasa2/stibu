@@ -147,11 +147,11 @@ CollectionInfo(
   Method toAppwriteMethod() => Method((b) => b
     ..name = 'toAppwrite'
     ..annotations.add(refer('override'))
-    ..returns = refer('Map<String, dynamic>')
+    ..returns = refer('dynamic')
     ..optionalParameters.add(Parameter((b) => b
       ..name = 'relationLevels'
       ..named = true
-      ..type = refer('List<bool>')
+      ..type = refer('List<RLevel>')
       ..defaultTo = Code('const []')))
     ..body = Block((body) {
       String getAttributeCode(AttributeInfo e) {
@@ -159,10 +159,10 @@ CollectionInfo(
           if (AttributeInfoRelation.isTypeSingle(e.relationType, e.side)) {
             return "if (hasChildren) '${e.name}': ${e.name}?.toAppwrite(relationLevels: children)";
           } else {
-            return "if (hasChildren) '${e.name}': ${e.name}?.map((e) => e.toAppwrite(relationLevels: children))";
+            return "if (hasChildren) '${e.name}': ${e.name}?.map((e) => e.toAppwrite(relationLevels: children)).toList()";
           }
         }
-        return "'${e.name}': ${e.name}";
+        return "${e.getToJsonField()}";
       }
 
       if (attributes.any((e) => e is AttributeInfoRelation)) {
@@ -170,22 +170,24 @@ CollectionInfo(
           Code(
               'final children = relationLevels.isNotEmpty ? relationLevels.sublist(1) : null;'),
           Code('final hasChildren = children != null && children.isNotEmpty;'),
-          Code('''
-          return {
-            ${attributes.map(getAttributeCode).join(',\n')},
-            if (relationLevels.isNotEmpty) '\\\$permissions': collectionInfo.\$permissions,
-          };
-      ''')
         ]);
-      } else {
-        b.lambda = true;
-        body.statements.add(Code('''
-        {
-          ${attributes.map(getAttributeCode).join(',\n')},
-          if (relationLevels.isNotEmpty) '\\\$permissions': collectionInfo.\$permissions,
-        }
-      '''));
       }
+
+      body.statements.addAll([
+        Code(
+            'final rInfo = relationLevels.isNotEmpty ? relationLevels.first : null;'),
+        Code('final hasRInfo = rInfo != null;'),
+        Code('var data = <String, dynamic>{};'),
+        Code('if (hasRInfo && rInfo.includeId) data[\'\\\$id\'] = \$id;'),
+        Code(
+            'if (hasRInfo && rInfo.includeData) {data = {...data, ...{ ${attributes.map(getAttributeCode).join(',\n')} }};}'),
+        Code(
+            'else if (!hasRInfo) {data = { ${attributes.map(getAttributeCode).join(',\n')} };}'),
+        Code(
+            'if (hasRInfo && rInfo.includePermissions) {data[\'\\\$permissions\'] = \$permissions;}'),
+        Code(
+            'if (hasRInfo && rInfo.includeId && !rInfo.includeData && !rInfo.includePermissions) {return \$id;} else {return data;}'),
+      ]);
     }));
 
   Method copyWithMethod() => Method((b) => b
@@ -373,7 +375,7 @@ CollectionInfo(
       Parameter((b) => b
         ..name = 'relationLevels'
         ..named = true
-        ..type = refer('List<bool>')
+        ..type = refer('List<RLevel>')
         ..defaultTo = Code('const []')),
     ])
     ..lambda = true
@@ -394,7 +396,7 @@ CollectionInfo(
     ..optionalParameters.addAll([
       Parameter((b) => b
         ..name = 'relationLevels'
-        ..type = refer('List<bool>')
+        ..type = refer('List<RLevel>')
         ..named = true
         ..defaultTo = Code('const []')),
     ])

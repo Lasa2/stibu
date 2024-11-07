@@ -1,336 +1,6 @@
 {
     "collections": [
         {
-            "$id": "customers",
-            "$permissions": [
-                "create(\"label:validProductKey\")"
-            ],
-            "databaseId": "dev",
-            "name": "customers",
-            "enabled": true,
-            "documentSecurity": true,
-            "attributes": [
-                {
-                    "key": "id",
-                    "type": "integer",
-                    "required": true,
-                    "array": false,
-                    "min": -9223372036854775808,
-                    "max": 9223372036854775807,
-                    "default": null
-                },
-                {
-                    "key": "name",
-                    "type": "string",
-                    "required": true,
-                    "array": false,
-                    "size": 128,
-                    "default": null
-                },
-                {
-                    "key": "email",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "format": "email",
-                    "default": null
-                },
-                {
-                    "key": "phone",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 64,
-                    "default": null
-                },
-                {
-                    "key": "street",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 64,
-                    "default": null
-                },
-                {
-                    "key": "zip",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 64,
-                    "default": null
-                },
-                {
-                    "key": "city",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 64,
-                    "default": null
-                },
-                {
-                    "key": "calendarEvents",
-                    "type": "relationship",
-                    "required": false,
-                    "array": false,
-                    "relatedCollection": "calendarEventParticipants",
-                    "relationType": "manyToOne",
-                    "twoWay": true,
-                    "twoWayKey": "customer",
-                    "onDelete": "setNull",
-                    "side": "child"
-                }
-            ],
-            "indexes": [
-                {
-                    "key": "name",
-                    "type": "fulltext",
-                    "status": "available",
-                    "attributes": [
-                        "name"
-                    ],
-                    "orders": [
-                        "ASC"
-                    ]
-                }
-            ]
-        },
-        {
-            "$id": "invoices",
-            "$permissions": [
-                "create(\"label:validProductKey\")"
-            ],
-            "databaseId": "dev",
-            "name": "invoices",
-            "enabled": true,
-            "documentSecurity": true,
-            "attributes": [
-                {
-                    "key": "date",
-                    "type": "datetime",
-                    "required": true,
-                    "array": false,
-                    "format": "",
-                    "default": null
-                },
-                {
-                    "key": "name",
-                    "type": "string",
-                    "required": true,
-                    "array": false,
-                    "size": 64,
-                    "default": null
-                },
-                {
-                    "key": "notes",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 256,
-                    "default": null
-                },
-                {
-                    "key": "amount",
-                    "type": "integer",
-                    "required": true,
-                    "array": false,
-                    "min": -9223372036854775808,
-                    "max": 9223372036854775807,
-                    "default": null
-                },
-                {
-                    "key": "order",
-                    "type": "relationship",
-                    "required": false,
-                    "array": false,
-                    "relatedCollection": "orders",
-                    "relationType": "oneToOne",
-                    "twoWay": true,
-                    "twoWayKey": "invoice",
-                    "onDelete": "restrict",
-                    "side": "parent"
-                },
-                {
-                    "key": "invoiceNumber",
-                    "type": "string",
-                    "required": true,
-                    "array": false,
-                    "size": 9,
-                    "default": null
-                }
-            ],
-            "indexes": [
-                {
-                    "key": "invoiceNumber",
-                    "type": "unique",
-                    "status": "available",
-                    "attributes": [
-                        "invoiceNumber"
-                    ],
-                    "orders": [
-                        "ASC"
-                    ]
-                }
-            ]
-        },
-        {
-            "$id": "orders",
-            "$permissions": [
-                "create(\"label:validProductKey\")"
-            ],
-            "databaseId": "dev",
-            "name": "orders",
-            "enabled": true,
-            "documentSecurity": true,
-            "attributes": [
-                {
-                    "key": "date",
-                    "type": "datetime",
-                    "required": true,
-                    "array": false,
-                    "format": "",
-                    "default": null
-                },
-                {
-                    "key": "customerId",
-                    "type": "integer",
-                    "required": true,
-                    "array": false,
-                    "min": -9223372036854775808,
-                    "max": 9223372036854775807,
-                    "default": null
-                },
-                {
-                    "key": "customerName",
-                    "type": "string",
-                    "required": true,
-                    "array": false,
-                    "size": 128,
-                    "default": null
-                },
-                {
-                    "key": "street",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 64,
-                    "default": null
-                },
-                {
-                    "key": "zip",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 64,
-                    "default": null
-                },
-                {
-                    "key": "city",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 64,
-                    "default": null
-                },
-                {
-                    "key": "invoice",
-                    "type": "relationship",
-                    "required": false,
-                    "array": false,
-                    "relatedCollection": "invoices",
-                    "relationType": "oneToOne",
-                    "twoWay": true,
-                    "twoWayKey": "order",
-                    "onDelete": "restrict",
-                    "side": "child"
-                },
-                {
-                    "key": "products",
-                    "type": "relationship",
-                    "required": false,
-                    "array": false,
-                    "relatedCollection": "orderProducts",
-                    "relationType": "oneToMany",
-                    "twoWay": true,
-                    "twoWayKey": "order",
-                    "onDelete": "cascade",
-                    "side": "parent"
-                },
-                {
-                    "key": "coupons",
-                    "type": "relationship",
-                    "required": false,
-                    "array": false,
-                    "relatedCollection": "66e4419d003d969599f2",
-                    "relationType": "oneToMany",
-                    "twoWay": true,
-                    "twoWayKey": "order",
-                    "onDelete": "cascade",
-                    "side": "parent"
-                }
-            ],
-            "indexes": []
-        },
-        {
-            "$id": "orderProducts",
-            "$permissions": [
-                "create(\"label:validProductKey\")"
-            ],
-            "databaseId": "dev",
-            "name": "orderProducts",
-            "enabled": true,
-            "documentSecurity": true,
-            "attributes": [
-                {
-                    "key": "id",
-                    "type": "integer",
-                    "required": true,
-                    "array": false,
-                    "min": -9223372036854775808,
-                    "max": 9223372036854775807,
-                    "default": null
-                },
-                {
-                    "key": "title",
-                    "type": "string",
-                    "required": true,
-                    "array": false,
-                    "size": 64,
-                    "default": null
-                },
-                {
-                    "key": "price",
-                    "type": "integer",
-                    "required": true,
-                    "array": false,
-                    "min": -9223372036854775808,
-                    "max": 9223372036854775807,
-                    "default": null
-                },
-                {
-                    "key": "quantity",
-                    "type": "integer",
-                    "required": true,
-                    "array": false,
-                    "min": 1,
-                    "max": 9223372036854775807,
-                    "default": null
-                },
-                {
-                    "key": "order",
-                    "type": "relationship",
-                    "required": false,
-                    "array": false,
-                    "relatedCollection": "orders",
-                    "relationType": "oneToMany",
-                    "twoWay": true,
-                    "twoWayKey": "products",
-                    "onDelete": "cascade",
-                    "side": "child"
-                }
-            ],
-            "indexes": []
-        },
-        {
             "$id": "products",
             "$permissions": [],
             "databaseId": "public",
@@ -592,11 +262,399 @@
             "indexes": []
         },
         {
-            "$id": "expenses",
+            "$id": "productKeys",
+            "$permissions": [],
+            "databaseId": "internal",
+            "name": "productKeys",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "productKey",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "isValid",
+                    "type": "boolean",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "productKey",
+                    "type": "unique",
+                    "status": "available",
+                    "attributes": [
+                        "productKey"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "672bcb600030f54c04f0",
             "$permissions": [
                 "create(\"label:validProductKey\")"
             ],
-            "databaseId": "dev",
+            "databaseId": "672bcb590033b5b2780a",
+            "name": "customers",
+            "enabled": true,
+            "documentSecurity": true,
+            "attributes": [
+                {
+                    "key": "id",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807,
+                    "default": null
+                },
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "email",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "format": "email",
+                    "default": null
+                },
+                {
+                    "key": "phone",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 64,
+                    "default": null
+                },
+                {
+                    "key": "street",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 64,
+                    "default": null
+                },
+                {
+                    "key": "zip",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 64,
+                    "default": null
+                },
+                {
+                    "key": "city",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 64,
+                    "default": null
+                },
+                {
+                    "key": "calendarEventParticipations",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "672bcebb0002c448aa73",
+                    "relationType": "manyToOne",
+                    "twoWay": true,
+                    "twoWayKey": "customer",
+                    "onDelete": "setNull",
+                    "side": "child"
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "name",
+                    "type": "fulltext",
+                    "status": "available",
+                    "attributes": [
+                        "name"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "672bcbe40035299f5750",
+            "$permissions": [
+                "create(\"label:validProductKey\")"
+            ],
+            "databaseId": "672bcb590033b5b2780a",
+            "name": "invoices",
+            "enabled": true,
+            "documentSecurity": true,
+            "attributes": [
+                {
+                    "key": "date",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "format": "",
+                    "default": null
+                },
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 64,
+                    "default": null
+                },
+                {
+                    "key": "notes",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 256,
+                    "default": null
+                },
+                {
+                    "key": "amount",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 0,
+                    "max": 9223372036854775807,
+                    "default": null
+                },
+                {
+                    "key": "invoiceNumber",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 9,
+                    "default": null
+                },
+                {
+                    "key": "order",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "672bcca5001880d288b0",
+                    "relationType": "oneToOne",
+                    "twoWay": true,
+                    "twoWayKey": "invoice",
+                    "onDelete": "restrict",
+                    "side": "child"
+                },
+                {
+                    "key": "calendarEvent",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "672bce09001905da8109",
+                    "relationType": "oneToOne",
+                    "twoWay": true,
+                    "twoWayKey": "invoice",
+                    "onDelete": "restrict",
+                    "side": "child"
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "invoiceNumber",
+                    "type": "unique",
+                    "status": "available",
+                    "attributes": [
+                        "invoiceNumber"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "672bcca5001880d288b0",
+            "$permissions": [
+                "create(\"label:validProductKey\")"
+            ],
+            "databaseId": "672bcb590033b5b2780a",
+            "name": "orders",
+            "enabled": true,
+            "documentSecurity": true,
+            "attributes": [
+                {
+                    "key": "date",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "format": "",
+                    "default": null
+                },
+                {
+                    "key": "customerId",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 9223372036854775807,
+                    "default": null
+                },
+                {
+                    "key": "customerName",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "street",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 64,
+                    "default": null
+                },
+                {
+                    "key": "zip",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 64,
+                    "default": null
+                },
+                {
+                    "key": "city",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 64,
+                    "default": null
+                },
+                {
+                    "key": "invoice",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "672bcbe40035299f5750",
+                    "relationType": "oneToOne",
+                    "twoWay": true,
+                    "twoWayKey": "order",
+                    "onDelete": "restrict",
+                    "side": "parent"
+                },
+                {
+                    "key": "products",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "672bcd4b002428afc3cb",
+                    "relationType": "oneToMany",
+                    "twoWay": true,
+                    "twoWayKey": "order",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "coupons",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "672bcf00000075632fd4",
+                    "relationType": "oneToMany",
+                    "twoWay": true,
+                    "twoWayKey": "order",
+                    "onDelete": "cascade",
+                    "side": "parent"
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "672bcd4b002428afc3cb",
+            "$permissions": [
+                "create(\"label:validProductKey\")"
+            ],
+            "databaseId": "672bcb590033b5b2780a",
+            "name": "orderProducts",
+            "enabled": true,
+            "documentSecurity": true,
+            "attributes": [
+                {
+                    "key": "order",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "672bcca5001880d288b0",
+                    "relationType": "oneToMany",
+                    "twoWay": true,
+                    "twoWayKey": "products",
+                    "onDelete": "cascade",
+                    "side": "child"
+                },
+                {
+                    "key": "id",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807,
+                    "default": null
+                },
+                {
+                    "key": "title",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 64,
+                    "default": null
+                },
+                {
+                    "key": "price",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807,
+                    "default": null
+                },
+                {
+                    "key": "quantity",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 9223372036854775807,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "672bcd940039b63e4d29",
+            "$permissions": [
+                "create(\"label:validProductKey\")"
+            ],
+            "databaseId": "672bcb590033b5b2780a",
             "name": "expenses",
             "enabled": true,
             "documentSecurity": true,
@@ -646,11 +704,11 @@
             "indexes": []
         },
         {
-            "$id": "calendarEvents",
+            "$id": "672bce09001905da8109",
             "$permissions": [
                 "create(\"label:validProductKey\")"
             ],
-            "databaseId": "dev",
+            "databaseId": "672bcb590033b5b2780a",
             "name": "calendarEvents",
             "enabled": true,
             "documentSecurity": true,
@@ -713,26 +771,50 @@
                     "type": "relationship",
                     "required": false,
                     "array": false,
-                    "relatedCollection": "calendarEventParticipants",
+                    "relatedCollection": "672bcebb0002c448aa73",
                     "relationType": "oneToMany",
                     "twoWay": true,
                     "twoWayKey": "event",
                     "onDelete": "cascade",
+                    "side": "parent"
+                },
+                {
+                    "key": "invoice",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "672bcbe40035299f5750",
+                    "relationType": "oneToOne",
+                    "twoWay": true,
+                    "twoWayKey": "calendarEvent",
+                    "onDelete": "restrict",
                     "side": "parent"
                 }
             ],
             "indexes": []
         },
         {
-            "$id": "calendarEventParticipants",
+            "$id": "672bcebb0002c448aa73",
             "$permissions": [
                 "create(\"label:validProductKey\")"
             ],
-            "databaseId": "dev",
-            "name": "calendarEventParticipants",
+            "databaseId": "672bcb590033b5b2780a",
+            "name": "calendarEventsParticipants",
             "enabled": true,
             "documentSecurity": true,
             "attributes": [
+                {
+                    "key": "event",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "672bce09001905da8109",
+                    "relationType": "oneToMany",
+                    "twoWay": true,
+                    "twoWayKey": "participants",
+                    "onDelete": "cascade",
+                    "side": "child"
+                },
                 {
                     "key": "status",
                     "type": "string",
@@ -751,84 +833,38 @@
                     "type": "relationship",
                     "required": false,
                     "array": false,
-                    "relatedCollection": "customers",
+                    "relatedCollection": "672bcb600030f54c04f0",
                     "relationType": "manyToOne",
                     "twoWay": true,
-                    "twoWayKey": "calendarEvents",
+                    "twoWayKey": "calendarEventParticipations",
                     "onDelete": "setNull",
                     "side": "parent"
-                },
-                {
-                    "key": "event",
-                    "type": "relationship",
-                    "required": false,
-                    "array": false,
-                    "relatedCollection": "calendarEvents",
-                    "relationType": "oneToMany",
-                    "twoWay": true,
-                    "twoWayKey": "participants",
-                    "onDelete": "cascade",
-                    "side": "child"
                 }
             ],
             "indexes": []
         },
         {
-            "$id": "productKeys",
-            "$permissions": [],
-            "databaseId": "internal",
-            "name": "productKeys",
-            "enabled": true,
-            "documentSecurity": false,
-            "attributes": [
-                {
-                    "key": "productKey",
-                    "type": "string",
-                    "required": true,
-                    "array": false,
-                    "size": 128,
-                    "default": null
-                },
-                {
-                    "key": "userId",
-                    "type": "string",
-                    "required": false,
-                    "array": false,
-                    "size": 128,
-                    "default": null
-                },
-                {
-                    "key": "isValid",
-                    "type": "boolean",
-                    "required": true,
-                    "array": false,
-                    "default": null
-                }
-            ],
-            "indexes": [
-                {
-                    "key": "productKey",
-                    "type": "unique",
-                    "status": "available",
-                    "attributes": [
-                        "productKey"
-                    ],
-                    "orders": [
-                        "ASC"
-                    ]
-                }
-            ]
-        },
-        {
-            "$id": "66e4419d003d969599f2",
+            "$id": "672bcf00000075632fd4",
             "$permissions": [
                 "create(\"label:validProductKey\")"
             ],
-            "databaseId": "dev",
+            "databaseId": "672bcb590033b5b2780a",
             "name": "orderCoupons",
             "enabled": true,
             "documentSecurity": true,
             "attributes": [
+                {
+                    "key": "order",
+                    "type": "relationship",
+                    "required": false,
+                    "array": false,
+                    "relatedCollection": "672bcca5001880d288b0",
+                    "relationType": "oneToMany",
+                    "twoWay": true,
+                    "twoWayKey": "coupons",
+                    "onDelete": "cascade",
+                    "side": "child"
+                },
                 {
                     "key": "name",
                     "type": "string",
@@ -845,58 +881,12 @@
                     "min": -9223372036854775808,
                     "max": 9223372036854775807,
                     "default": null
-                },
-                {
-                    "key": "order",
-                    "type": "relationship",
-                    "required": false,
-                    "array": false,
-                    "relatedCollection": "orders",
-                    "relationType": "oneToMany",
-                    "twoWay": true,
-                    "twoWayKey": "coupons",
-                    "onDelete": "cascade",
-                    "side": "child"
-                }
-            ],
-            "indexes": []
-        },
-        {
-            "$id": "66ec10e100342209605d",
-            "$permissions": [
-                "create(\"label:validProductKey\")"
-            ],
-            "databaseId": "dev",
-            "name": "pdfTemplates",
-            "enabled": true,
-            "documentSecurity": true,
-            "attributes": [
-                {
-                    "key": "template",
-                    "type": "string",
-                    "required": true,
-                    "array": false,
-                    "size": 128000,
-                    "default": null
-                },
-                {
-                    "key": "title",
-                    "type": "string",
-                    "required": true,
-                    "array": false,
-                    "size": 128,
-                    "default": null
                 }
             ],
             "indexes": []
         }
     ],
     "databases": [
-        {
-            "$id": "dev",
-            "name": "dev",
-            "enabled": true
-        },
         {
             "$id": "public",
             "name": "public",
@@ -905,6 +895,11 @@
         {
             "$id": "internal",
             "name": "internal",
+            "enabled": true
+        },
+        {
+            "$id": "672bcb590033b5b2780a",
+            "name": "default",
             "enabled": true
         }
     ]

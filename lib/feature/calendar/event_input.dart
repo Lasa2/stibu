@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:result_type/result_type.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/currency.dart';
 import 'package:stibu/common/datetime_formatter.dart';
@@ -32,7 +31,7 @@ class _EventInputDialogState extends State<EventInputDialog> {
   late DateTime _startTime = widget.event?.start.toLocal() ?? DateTime.now();
   late DateTime _endTime = widget.event?.end.toLocal() ?? DateTime.now();
   late String? _amount = widget.event?.amount?.toString();
-  late final List<CalendarEventParticipants> _participants =
+  late final List<CalendarEventsParticipants> _participants =
       List.from(widget.event?.participants ?? []);
 
   @override
@@ -302,9 +301,9 @@ class _EventInputDialogState extends State<EventInputDialog> {
                   onSelected: (customer) {
                     setState(() {
                       _participants.add(
-                        CalendarEventParticipants(
+                        CalendarEventsParticipants(
                           customer: customer,
-                          status: CalendarEventParticipantsStatus.pending,
+                          status: CalendarEventsParticipantsStatus.pending,
                         ),
                       );
                     });
@@ -314,9 +313,9 @@ class _EventInputDialogState extends State<EventInputDialog> {
               for (final participant in _participants)
                 ListTile(
                   title: Text(participant.customer?.name ?? 'Unknown'),
-                  trailing: ComboBox<CalendarEventParticipantsStatus>(
+                  trailing: ComboBox<CalendarEventsParticipantsStatus>(
                     value: participant.status,
-                    items: CalendarEventParticipantsStatus.values
+                    items: CalendarEventsParticipantsStatus.values
                         .map(
                           (e) => ComboBoxItem(
                             value: e,
@@ -452,31 +451,25 @@ Future<void> displayNewEventDialog(BuildContext context) async {
   ).then((value) async {
     if (value != null) {
       // save event
-      final appwrite = getIt<AppwriteClient>();
 
-      try {
-        // TODO: refactor to use relationLevels
-        final data = value.toAppwrite();
-        data['participants'] = value.participants?.map((e) {
-              final item = e.toAppwrite(relationLevels: [true]);
-              item['customer'] = e.customer?.$id;
-              return item;
-            }).toList() ??
-            [];
+      final user = await getIt<AppwriteClient>().account.get();
 
-        await appwrite.databases.createDocument(
-          databaseId: CalendarEvents.collectionInfo.databaseId,
-          collectionId: CalendarEvents.collectionInfo.$id,
-          documentId: value.$id,
-          data: data,
-        );
-      } on AppwriteException catch (e) {
-        if (!context.mounted) return;
-        await showResultInfo(
-          context,
-          Failure(e.message ?? 'Failed to create event'),
-        );
-      }
+      final result = await value.copyWith(
+        // TODO: currently nessary because the default value is incorrect, should be fixed in the generator
+        $permissions: <String>[
+          Permission.read(Role.user(user.$id)),
+          Permission.write(Role.user(user.$id)),
+        ],
+      ).create(
+        relationLevels: [
+          RLevel(includeId: false),
+          RLevel(includeId: false),
+          RLevel(includeData: false),
+        ],
+      );
+
+      if (!context.mounted) return;
+      await showResultInfo(context, result);
     }
   });
 }

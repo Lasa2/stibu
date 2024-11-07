@@ -155,9 +155,10 @@ class _CalendarPageState extends State<CalendarPage> {
                                 Container(
                                   margin: const EdgeInsets.only(right: 4),
                                   decoration: BoxDecoration(
-                                    color: event.type == CalendarEventsType.plain
-                                        ? Colors.blue
-                                        : Colors.red,
+                                    color:
+                                        event.type == CalendarEventsType.plain
+                                            ? Colors.blue
+                                            : Colors.red,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   width: 4,
@@ -223,7 +224,7 @@ class EventListEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     final participants = <Widget>[];
     for (final participant
-        in event.participants ?? <CalendarEventParticipants>[]) {
+        in event.participants ?? <CalendarEventsParticipants>[]) {
       participants.add(
         ListTile(
           title: Text(participant.customer?.name ?? ''),
@@ -233,6 +234,7 @@ class EventListEntry extends StatelessWidget {
     }
 
     return Expander(
+      initiallyExpanded: true,
       header: Row(
         children: [
           Text(event.start.formatTime()),
@@ -243,22 +245,38 @@ class EventListEntry extends StatelessWidget {
           const Spacer(),
         ],
       ),
-      trailing: DropDownButton(
+      trailing: event.invoice == null
+          ? DropDownButton(
         leading: const Icon(FluentIcons.more),
         items: [
-          MenuFlyoutItem(
-            text: const Text('Edit'),
-            onPressed: () async => displayEditEventDialog(context, event),
-          ),
-          MenuFlyoutItem(
-            text: const Text('Delete'),
-            onPressed: () async => event.delete().then(
-                  (value) =>
-                      context.mounted ? showResultInfo(context, value) : null,
-                ),
-          ),
-        ],
-      ),
+                if (event.type == CalendarEventsType.withParticipants &&
+                    event.invoice == null)
+                  MenuFlyoutItem(
+                    text: const Text('Create Invoice'),
+                    onPressed: () async => event.createInvoice().then(
+                          (value) => context.mounted
+                              ? showResultInfo(context, value)
+                              : null,
+                        ),
+                  ),
+                if (event.invoice == null) ...[
+                  MenuFlyoutItem(
+                    text: const Text('Edit'),
+                    onPressed: () async =>
+                        displayEditEventDialog(context, event),
+                  ),
+                  MenuFlyoutItem(
+                    text: const Text('Delete'),
+                    onPressed: () async => event.delete().then(
+                          (value) => context.mounted
+                              ? showResultInfo(context, value)
+                              : null,
+                        ),
+                  ),
+                ],
+              ],
+            )
+          : null,
       contentPadding: const EdgeInsets.all(8),
       content: Column(
         children: [

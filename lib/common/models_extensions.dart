@@ -171,3 +171,67 @@ extension OrdersExtensions on Orders {
     return Success(result.success);
   }
 }
+
+extension CalendarEventsExtensions on CalendarEvents {
+  Future<Result<Invoices, String>> createInvoice() async {
+    final appwrite = getIt<AppwriteClient>();
+    try {
+      final invoiceId = await newInvoiceNumber(start);
+      if (invoiceId.isFailure) return Failure(invoiceId.failure);
+      final user = await appwrite.account.get();
+
+      final permissions = [
+        Permission.read(Role.user(user.$id)),
+      ];
+
+      final acceptedParticipants = participants
+          ?.where((p) => p.status == CalendarEventsParticipantsStatus.accepted)
+          .toList();
+
+      log.info('acceptedParticipants: $acceptedParticipants');
+
+      final total =
+          amount != null ? amount! * (acceptedParticipants?.length ?? 0) : 0;
+
+      log.info('amount: $total');
+
+      final doc = await appwrite.databases.createDocument(
+        databaseId: Invoices.collectionInfo.databaseId,
+        collectionId: Invoices.collectionInfo.$id,
+        documentId: ID.unique(),
+        data: {
+          'invoiceNumber': invoiceId.success,
+          'date': start.toIso8601String(),
+          'name': '$title - attendees: ${acceptedParticipants?.length}',
+          'amount': total,
+          'notes': description,
+          'calendarEvent': $id,
+        },
+        permissions: permissions,
+      );
+
+      // Set event permissions to read-only
+      await appwrite.databases.updateDocument(
+        databaseId: CalendarEvents.collectionInfo.databaseId,
+        collectionId: CalendarEvents.collectionInfo.$id,
+        documentId: $id,
+        permissions: permissions,
+      );
+
+      // set participants permissions to read-only
+      for (final participant
+          in participants ?? <CalendarEventsParticipants>[]) {
+        await appwrite.databases.updateDocument(
+          databaseId: CalendarEventsParticipants.collectionInfo.databaseId,
+          collectionId: CalendarEventsParticipants.collectionInfo.$id,
+          documentId: participant.$id,
+          permissions: permissions,
+        );
+      }
+
+      return Success(Invoices.fromAppwrite(doc));
+    } on AppwriteException catch (e) {
+      return Failure(e.message ?? 'Failed to create invoice');
+    }
+  }
+}

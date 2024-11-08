@@ -35,7 +35,7 @@ jobs:
 
       # Additional steps as needed
       - name: Build Flutter app
-        uses: antinna/fa@v1
+        uses: Antinna/fa@v1.0.0
         id: build
         with:
           release: true

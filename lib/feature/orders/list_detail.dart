@@ -6,6 +6,7 @@ import 'package:stibu/common/show_result_info.dart';
 import 'package:stibu/feature/orders/coupon_input.dart';
 import 'package:stibu/feature/orders/product_add.dart';
 import 'package:stibu/feature/orders/product_edit.dart';
+import 'package:dart_helper_utils/dart_helper_utils.dart';
 
 class OrderInfoCard extends StatelessWidget {
   final Orders order;
@@ -143,7 +144,7 @@ class _CreateOrderInvoiceDialogState extends State<CreateOrderInvoiceDialog> {
             onPressed: () async => widget.order
                 .createInvoice(
               date: selected,
-              note: controller.text,
+              note: controller.text.isNotBlank ? controller.text : null,
             )
                 .then((result) {
               if (!context.mounted) return;

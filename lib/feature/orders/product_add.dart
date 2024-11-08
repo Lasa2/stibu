@@ -7,6 +7,7 @@ import 'package:stibu/common/currency.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/products_helper.dart';
 import 'package:stibu/common/show_result_info.dart';
+import 'package:stibu/main.dart';
 
 class AddProductsDialog extends StatefulWidget {
   const AddProductsDialog({super.key});
@@ -259,7 +260,8 @@ Future<void> showAddProductsDialog(BuildContext context, Orders order) async {
       products: () => productsMap.values.toList(),
     );
 
-    await newOrder.update().then(
+    await newOrder
+        .update(relationLevels: [RLevel(includeId: false), RLevel()]).then(
           (value) => context.mounted
               ? showResultInfo(
                   context,

@@ -1,5 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:stibu/main.dart';
 
 Future<void> scrollToIndex(
   int index, {
@@ -14,7 +13,6 @@ Future<void> scrollToIndex(
   if (itemOffset >= scrollOffset &&
       itemOffset + itemExtent <=
           scrollOffset + controller.position.viewportDimension) {
-    log.info('Item is already visible');
     return;
   }
 

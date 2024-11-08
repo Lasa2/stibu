@@ -104,7 +104,8 @@ extension OrdersExtensions on Orders {
 
   Future<Result<Orders, String>> addCoupon(OrderCoupons coupon) async {
     final newCoupons = <OrderCoupons>[...(coupons ?? []), coupon];
-    final result = await copyWith(coupons: () => newCoupons).update();
+    final result = await copyWith(coupons: () => newCoupons)
+        .update(relationLevels: [RLevel(includeId: false), RLevel()]);
     if (result.isFailure) return Failure(result.failure);
 
     return Success(result.success);
@@ -116,7 +117,8 @@ extension OrdersExtensions on Orders {
       coupons: () => coupons?.where((c) => c.$id != coupon.$id).toList(),
     );
 
-    final order = await copyWith(coupons: () => newCoupons.coupons).update();
+    final order = await copyWith(coupons: () => newCoupons.coupons)
+        .update(relationLevels: [RLevel(includeId: false), RLevel()]);
     if (order.isFailure) return Failure(order.failure);
 
     final result = await coupon.delete();
@@ -131,7 +133,8 @@ extension OrdersExtensions on Orders {
       return c;
     }).toList();
 
-    final result = await copyWith(coupons: () => newCoupons).update();
+    final result = await copyWith(coupons: () => newCoupons)
+        .update(relationLevels: [RLevel(includeId: false), RLevel()]);
     if (result.isFailure) return Failure(result.failure);
 
     return Success(result.success);
@@ -139,7 +142,8 @@ extension OrdersExtensions on Orders {
 
   Future<Result<Orders, String>> addProduct(OrderProducts product) async {
     final newProducts = <OrderProducts>[...(products ?? []), product];
-    final result = await copyWith(products: () => newProducts).update();
+    final result = await copyWith(products: () => newProducts)
+        .update(relationLevels: [RLevel(includeId: false), RLevel()]);
     if (result.isFailure) return Failure(result.failure);
 
     return Success(result.success);
@@ -150,7 +154,8 @@ extension OrdersExtensions on Orders {
       products: () => products?.where((p) => p.$id != product.$id).toList(),
     );
 
-    final order = await copyWith(products: () => newProducts.products).update();
+    final order = await copyWith(products: () => newProducts.products)
+        .update(relationLevels: [RLevel(includeId: false), RLevel()]);
     if (order.isFailure) return Failure(order.failure);
 
     final result = await product.delete();
@@ -165,7 +170,8 @@ extension OrdersExtensions on Orders {
       return p;
     }).toList();
 
-    final result = await copyWith(products: () => newProducts).update();
+    final result = await copyWith(products: () => newProducts)
+        .update(relationLevels: [RLevel(includeId: false), RLevel()]);
     if (result.isFailure) return Failure(result.failure);
 
     return Success(result.success);

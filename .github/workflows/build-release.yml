@@ -27,6 +27,9 @@ jobs:
           distribution: 'temurin' # Recommended OpenJDK distribution
           java-version: '11'      # Java version required by Android
 
+      - name: Run dart buildrunner
+        run: dart run build_runner build --delete-conflicting-outputs
+
       - name: Build APK
         run: flutter build apk --release
         env:
@@ -51,6 +54,9 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Run dart buildrunner
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build Windows App
         run: flutter build windows --release

@@ -6,17 +6,9 @@ Future<void> scrollToIndex(
   required ScrollController controller,
   double itemExtent = 58,
 }) async {
-  final maxScrollExtent = controller.position.maxScrollExtent;
   final scrollOffset = controller.offset;
 
   final itemOffset = index * itemExtent;
-
-  log
-    ..info('maxScrollExtent: $maxScrollExtent')
-    ..info('scrollOffset: $scrollOffset')
-    ..info('itemOffset: $itemOffset')
-    ..info('itemExtent: $itemExtent')
-    ..info('viewportDimension: ${controller.position.viewportDimension}');
 
   // If the item is already visible, do nothing
   if (itemOffset >= scrollOffset &&
@@ -37,10 +29,6 @@ Future<void> scrollToIndex(
   }
 
   // If the item is below the current view, scroll down
-
-  log.info(
-    'offset: ${itemOffset - controller.position.viewportDimension + itemExtent}',
-  );
   if (itemOffset + itemExtent >
       scrollOffset + controller.position.viewportDimension) {
     await controller.animateTo(

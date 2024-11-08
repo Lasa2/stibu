@@ -186,13 +186,11 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
     selectedIndex = largeScreen ? selectedIndex : null;
 
     if (selectInvoice != null) {
-      log.info('Selecting invoice ${selectInvoice!.$id}');
       final index = _invoices.indexWhere((e) => e.$id == selectInvoice!.$id);
       if (index != -1) {
         selectedIndex = index;
         selectInvoice = null;
       }
-      log.info('Selected index $selectedIndex');
     }
 
     // validate the selected index

@@ -5,6 +5,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/is_large_screen.dart';
+import 'package:stibu/common/scroll_to_index.dart';
 import 'package:stibu/common/show_result_info.dart';
 import 'package:stibu/feature/app_state/realtime_subscriptions.dart';
 import 'package:stibu/feature/orders/list_detail.dart';
@@ -27,6 +28,7 @@ class _OrderListPageState extends State<OrderListPage> {
   final _orders = <Orders>[];
   int _totalOders = 0;
   StreamSubscription? _orderSubscription;
+  final _scrollController = ScrollController();
 
   Future<void> _loadOrders() async {
     late final (int, List<Orders>) result;
@@ -80,6 +82,22 @@ class _OrderListPageState extends State<OrderListPage> {
     final largeScreen = isLargeScreen(context);
     selectedIndex = largeScreen ? selectedIndex : null;
 
+    if (selectOrder != null) {
+      final index = _orders.indexWhere((e) => e.$id == selectOrder!.$id);
+      if (index != -1) {
+        selectedIndex = index;
+        selectOrder = null;
+      }
+    }
+
+    if (selectedIndex != null && _orders.length <= selectedIndex!) {
+      selectedIndex = null;
+    }
+
+    if (selectedIndex != null) {
+      unawaited(scrollToIndex(selectedIndex!, controller: _scrollController));
+    }
+
     return ScaffoldPage(
       header: PageHeader(
         title: const Text('Orders'),
@@ -129,6 +147,8 @@ class _OrderListPageState extends State<OrderListPage> {
         children: [
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
+              itemExtent: 58,
               itemCount: _totalOders > _orders.length
                   ? _orders.length + 1
                   : _orders.length,

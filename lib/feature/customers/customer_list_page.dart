@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:stibu/appwrite.models.dart';
 import 'package:stibu/common/is_large_screen.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/new_ids.dart';
+import 'package:stibu/common/scroll_to_index.dart';
 import 'package:stibu/common/show_result_info.dart';
 import 'package:stibu/feature/app_state/realtime_subscriptions.dart';
 import 'package:stibu/feature/customers/customer_info_card.dart';
@@ -94,6 +94,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
   final _customers = <Customers>[];
   int _totalcustomers = 0;
   StreamSubscription? _subscription;
+  final _scrollController = ScrollController();
 
   Future<void> _loadCustomers() async {
     // TODO: cleanup
@@ -152,14 +153,19 @@ class _CustomerListPageState extends State<CustomerListPage> {
     selectedIndex = largeScreen ? selectedIndex : null;
 
     if (selectCustomer != null) {
-      final index =
-          _customers.firstWhereOrNull((e) => e.id == selectCustomer!.id);
-
-      selectedIndex = index != null ? _customers.indexOf(index) : null;
+      final index = _customers.indexWhere((e) => e.id == selectCustomer!.id);
+      if (index != -1) {
+        selectedIndex = index;
+        selectCustomer = null;
+      }
     }
 
     if (selectedIndex != null && selectedIndex! >= _customers.length) {
       selectedIndex = null;
+    }
+
+    if (selectedIndex != null) {
+      unawaited(scrollToIndex(selectedIndex!, controller: _scrollController));
     }
 
     return ScaffoldPage(
@@ -218,6 +224,8 @@ class _CustomerListPageState extends State<CustomerListPage> {
         children: [
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
+              itemExtent: 58,
               itemCount: _totalcustomers > _customers.length
                   ? _customers.length + 1
                   : _customers.length,

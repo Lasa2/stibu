@@ -9,6 +9,7 @@ import 'package:stibu/common/datetime_formatter.dart';
 import 'package:stibu/common/is_large_screen.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/new_ids.dart';
+import 'package:stibu/common/scroll_to_index.dart';
 import 'package:stibu/common/show_result_info.dart';
 import 'package:stibu/feature/app_state/realtime_subscriptions.dart';
 import 'package:stibu/feature/invoices/info_card.dart';
@@ -127,6 +128,7 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
   final _invoices = <Invoices>[];
   int _totalInvoices = 0;
   StreamSubscription? _subscription;
+  final _scrollController = ScrollController();
 
   Future<void> _loadInvoices() async {
     late final (int, List<Invoices>) result;
@@ -183,14 +185,30 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
     final largeScreen = isLargeScreen(context);
     selectedIndex = largeScreen ? selectedIndex : null;
 
-    // If there is a selected invoice, show the detail view
-    final selectIndex =
-        _invoices.indexWhere((e) => e.$id == selectInvoice?.$id);
-    selectedIndex = selectIndex != -1 ? selectIndex : selectedIndex;
+    if (selectInvoice != null) {
+      log.info('Selecting invoice ${selectInvoice!.$id}');
+      final index = _invoices.indexWhere((e) => e.$id == selectInvoice!.$id);
+      if (index != -1) {
+        selectedIndex = index;
+        selectInvoice = null;
+      }
+      log.info('Selected index $selectedIndex');
+    }
 
     // validate the selected index
     if (selectedIndex != null && selectedIndex! >= _invoices.length) {
       selectedIndex = null;
+    }
+
+    // Check if we need to scroll to the selected index
+    if (selectedIndex != null) {
+      unawaited(
+        scrollToIndex(
+          selectedIndex!,
+          controller: _scrollController,
+          itemExtent: 58,
+        ),
+      );
     }
 
     return ScaffoldPage(
@@ -266,6 +284,8 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
         children: [
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
+              itemExtent: 58,
               itemCount: _totalInvoices > _invoices.length
                   ? _invoices.length + 1
                   : _invoices.length,

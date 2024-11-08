@@ -8,6 +8,7 @@ import 'package:stibu/common/datetime_formatter.dart';
 import 'package:stibu/common/is_large_screen.dart';
 import 'package:stibu/common/models_extensions.dart';
 import 'package:stibu/common/new_ids.dart';
+import 'package:stibu/common/scroll_to_index.dart';
 import 'package:stibu/feature/app_state/realtime_subscriptions.dart';
 import 'package:stibu/feature/expenses/input.dart';
 import 'package:stibu/main.dart';
@@ -113,6 +114,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
   final _expenses = <Expenses>[];
   int _totalExpenses = 0;
   StreamSubscription? _expensesSubscription;
+  final _scrollController = ScrollController();
 
   Future<void> _loadExpenses() async {
     late final (int, List<Expenses>) result;
@@ -168,13 +170,20 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
     final largeScreen = isLargeScreen(context);
     _selectedIndex = largeScreen ? _selectedIndex : null;
 
-    final selectExpenseIndex =
-        _expenses.indexWhere((e) => e.$id == _selectedExpense?.$id);
-    _selectedIndex =
-        selectExpenseIndex != -1 ? selectExpenseIndex : _selectedIndex;
+    if (_selectedExpense != null) {
+      final index = _expenses.indexWhere((e) => e.$id == _selectedExpense!.$id);
+      if (index != -1) {
+        _selectedIndex = index;
+        _selectedExpense = null;
+      }
+    }
 
     if (_selectedIndex != null && _selectedIndex! >= _expenses.length) {
       _selectedIndex = null;
+    }
+
+    if (_selectedIndex != null) {
+      unawaited(scrollToIndex(_selectedIndex!, controller: _scrollController));
     }
 
     return ScaffoldPage(
@@ -203,6 +212,8 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
         children: [
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
+              itemExtent: 58,
               itemCount: _totalExpenses > _expenses.length
                   ? _expenses.length + 1
                   : _expenses.length,

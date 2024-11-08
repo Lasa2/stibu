@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -52,7 +52,7 @@ jobs:
   #   runs-on: macos-latest
   #   steps:
   #     - name: Checkout repository
-  #       uses: actions/checkout@v2
+  #       uses: actions/checkout@v4
 
   #     - name: Set up Flutter
   #       uses: subosito/flutter-action@v2
@@ -76,7 +76,7 @@ jobs:
   #   runs-on: macos-latest
   #   steps:
   #     - name: Checkout repository
-  #       uses: actions/checkout@v2
+  #       uses: actions/checkout@v4
 
   #     - name: Set up Flutter
   #       uses: subosito/flutter-action@v2
@@ -100,7 +100,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -124,7 +124,7 @@ jobs:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - name: Checkout repository
-  #       uses: actions/checkout@v2
+  #       uses: actions/checkout@v4
 
   #     - name: Set up Flutter
   #       uses: subosito/flutter-action@v2
@@ -149,30 +149,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Download Android APK Artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: android-apk
 
       # - name: Download iOS IPA Artifact
-      #   uses: actions/download-artifact@v2
+      #   uses: actions/download-artifact@v4
       #   with:
       #     name: ios-ipa
 
       # - name: Download macOS App Artifact
-      #   uses: actions/download-artifact@v2
+      #   uses: actions/download-artifact@v4
       #   with:
       #     name: macos-app
 
       - name: Download Windows App Artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: windows-app
 
       # - name: Download Linux App Artifact
-      #   uses: actions/download-artifact@v2
+      #   uses: actions/download-artifact@v4
       #   with:
       #     name: linux-app
 
@@ -188,7 +188,7 @@ jobs:
           prerelease: false
 
       - name: Upload Android APK to Release
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@v4
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: build/app/outputs/flutter-apk/app-release.apk
@@ -196,7 +196,7 @@ jobs:
           asset_content_type: application/vnd.android.package-archive
 
       # - name: Upload iOS IPA to Release
-      #   uses: actions/upload-release-asset@v1
+      #   uses: actions/upload-release-asset@v4
       #   with:
       #     upload_url: ${{ steps.create_release.outputs.upload_url }}
       #     asset_path: build/ios/ipa/*.ipa
@@ -204,7 +204,7 @@ jobs:
       #     asset_content_type: application/octet-stream
 
       # - name: Upload macOS App to Release
-      #   uses: actions/upload-release-asset@v1
+      #   uses: actions/upload-release-asset@v4
       #   with:
       #     upload_url: ${{ steps.create_release.outputs.upload_url }}
       #     asset_path: build/macos/Build/Products/Release/*.app
@@ -212,7 +212,7 @@ jobs:
       #     asset_content_type: application/zip
 
       - name: Upload Windows App to Release
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@v4
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: build/windows/runner/Release/*.exe
@@ -220,7 +220,7 @@ jobs:
           asset_content_type: application/octet-stream
 
       # - name: Upload Linux App to Release
-      #   uses: actions/upload-release-asset@v1
+      #   uses: actions/upload-release-asset@v4
       #   with:
       #     upload_url: ${{ steps.create_release.outputs.upload_url }}
       #     asset_path: build/linux/x64/release/bundle/*

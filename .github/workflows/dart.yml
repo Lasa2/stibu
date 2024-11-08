@@ -1,0 +1,53 @@
+name: Build Flutter App (APK/AAB/EXE)
+
+on:
+  push:
+    tags:
+      - 'v*'    # Only trigger on version tags like v1.0, v1.1, etc.
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and Deploy
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest] # No NEED OF Matrix Choose any SIngle But remember Choose as per BUILD
+        include:
+          - os: macos-latest
+            runner: macos-latest
+          - os: ubuntu-latest
+            runner: ubuntu-latest
+          - os: windows-latest
+            runner: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        # with:
+        #   flutter-version: '2.x' # any version
+      
+      # Additional steps as needed
+      - name: Build Flutter app
+        uses: antinna/fa@v1
+        id: build
+        with:
+          release: true
+          aab_generation: true
+          apk_generation: true
+          exe_generation: true
+      - name: Archive APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: release-apk
+          path: ${{ steps.build.outputs.apk-path }}
+      - name: Archive AAB
+        uses: actions/upload-artifact@v2
+        with:
+          name: release-aab
+          path: ${{ steps.build.outputs.aab-path }}

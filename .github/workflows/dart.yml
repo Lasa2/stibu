@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build and Deploy
+    name: Build and Create Release APK/AAB/EXE
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -24,14 +24,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Set up Java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: '12.x'
+          distribution: 'temurin' # Recommended OpenJDK distribution
+          java-version: '11'      # Java version required by Android
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         # with:
         #   flutter-version: '2.x' # any version
-      
+
       # Additional steps as needed
       - name: Build Flutter app
         uses: antinna/fa@v1
@@ -42,12 +43,32 @@ jobs:
           apk_generation: true
           exe_generation: true
       - name: Archive APK
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: release-apk
           path: ${{ steps.build.outputs.apk-path }}
       - name: Archive AAB
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: release-aab
           path: ${{ steps.build.outputs.aab-path }}
+      - name: Archive EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-exe
+
+  release:
+    name: Release APK/AAB/EXE
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ steps.build.outputs.apk-path }}
+            ${{ steps.build.outputs.aab-path }}
+            ${{ steps.build.outputs.exe-path }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false

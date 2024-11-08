@@ -14,8 +14,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest] # No NEED OF Matrix Choose any SIngle But remember Choose as per BUILD
         include:
-          - os: macos-latest
-            runner: macos-latest
+          # - os: macos-latest
+          #   runner: macos-latest
           - os: ubuntu-latest
             runner: ubuntu-latest
           - os: windows-latest

@@ -7,20 +7,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup-flutter:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.3'
-
-      - name: Install dependencies
-        run: flutter pub get
-
   android:
     needs: setup-flutter
     runs-on: ubuntu-latest
@@ -36,6 +22,12 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Set up Java for Android
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin' # Recommended OpenJDK distribution
+          java-version: '11'      # Java version required by Android
+
       - name: Build APK
         run: flutter build apk --release
         env:
@@ -47,56 +39,7 @@ jobs:
           name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
-  # ios:
-  #   needs: setup-flutter
-  #   runs-on: macos-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-
-  #     - name: Set up Flutter
-  #       uses: subosito/flutter-action@v2
-  #       with:
-  #         flutter-version: '3.24.3'
-
-  #     - name: Install dependencies
-  #       run: flutter pub get
-
-  #     - name: Build iOS
-  #       run: flutter build ipa --release
-
-  #     - name: Upload iOS IPA as Artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: ios-ipa
-  #         path: build/ios/ipa/*.ipa
-
-  # macos:
-  #   needs: setup-flutter
-  #   runs-on: macos-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-
-  #     - name: Set up Flutter
-  #       uses: subosito/flutter-action@v2
-  #       with:
-  #         flutter-version: '3.24.3'
-
-  #     - name: Install dependencies
-  #       run: flutter pub get
-
-  #     - name: Build macOS App
-  #       run: flutter build macos --release
-
-  #     - name: Upload macOS App as Artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: macos-app
-  #         path: build/macos/Build/Products/Release/*.app
-
   windows:
-    needs: setup-flutter
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -119,32 +62,7 @@ jobs:
           name: windows-app
           path: build/windows/runner/Release/*.exe
 
-  # linux:
-  #   needs: setup-flutter
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-
-  #     - name: Set up Flutter
-  #       uses: subosito/flutter-action@v2
-  #       with:
-  #         flutter-version: '3.24.3'
-
-  #     - name: Install dependencies
-  #       run: flutter pub get
-
-  #     - name: Build Linux App
-  #       run: flutter build linux --release
-
-  #     - name: Upload Linux App as Artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: linux-app
-  #         path: build/linux/x64/release/bundle/*
-
   release:
-    # needs: [android, ios, macos, windows, linux]
     needs: [android, windows]
     runs-on: ubuntu-latest
     steps:
@@ -156,73 +74,17 @@ jobs:
         with:
           name: android-apk
 
-      # - name: Download iOS IPA Artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: ios-ipa
-
-      # - name: Download macOS App Artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: macos-app
-
       - name: Download Windows App Artifact
         uses: actions/download-artifact@v4
         with:
           name: windows-app
 
-      # - name: Download Linux App Artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: linux-app
-
-
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          release_name: ${{ github.ref }}
           draft: false
           prerelease: false
-
-      - name: Upload Android APK to Release
-        uses: actions/upload-release-asset@v4
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/app/outputs/flutter-apk/app-release.apk
-          asset_name: app-release.apk
-          asset_content_type: application/vnd.android.package-archive
-
-      # - name: Upload iOS IPA to Release
-      #   uses: actions/upload-release-asset@v4
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: build/ios/ipa/*.ipa
-      #     asset_name: app-release.ipa
-      #     asset_content_type: application/octet-stream
-
-      # - name: Upload macOS App to Release
-      #   uses: actions/upload-release-asset@v4
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: build/macos/Build/Products/Release/*.app
-      #     asset_name: macOS-App.zip
-      #     asset_content_type: application/zip
-
-      - name: Upload Windows App to Release
-        uses: actions/upload-release-asset@v4
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/windows/runner/Release/*.exe
-          asset_name: Windows-App.exe
-          asset_content_type: application/octet-stream
-
-      # - name: Upload Linux App to Release
-      #   uses: actions/upload-release-asset@v4
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: build/linux/x64/release/bundle/*
-      #     asset_name: Linux-App.tar.gz
-      #     asset_content_type: application/gzip
+          files: |
+            ${{ github.workspace }}/android-apk/build/app/outputs/flutter-apk/app-release.apk
+            ${{ github.workspace }}/windows-app/build/windows/runner/Release/*.exe

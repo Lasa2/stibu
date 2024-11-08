@@ -8,7 +8,6 @@ on:
 
 jobs:
   android:
-    needs: setup-flutter
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

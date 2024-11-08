@@ -30,7 +30,7 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
         env:
-          JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+          JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/11.0.25-9/x64
 
       - name: Upload Android APK as Artifact
         uses: actions/upload-artifact@v4

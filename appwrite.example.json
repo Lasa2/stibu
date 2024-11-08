@@ -625,7 +625,7 @@
                     "type": "string",
                     "required": true,
                     "array": false,
-                    "size": 64,
+                    "size": 1024,
                     "default": null
                 },
                 {
@@ -701,7 +701,19 @@
                     "default": null
                 }
             ],
-            "indexes": []
+            "indexes": [
+                {
+                    "key": "expenseNumber",
+                    "type": "unique",
+                    "status": "available",
+                    "attributes": [
+                        "expenseNumber"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
         },
         {
             "$id": "672bce09001905da8109",
